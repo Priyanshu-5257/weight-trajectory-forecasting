@@ -1,0 +1,16 @@
+{
+  "phase1_descent": {
+    "step_frozen": 0.4152263402938843,
+    "ground_truth_adam": 0.3563193380832672,
+    "linear_momentum": 1.1482638120651245,
+    "timesfm_alone": 0.6941432356834412,
+    "timesfm_covariate": 0.4443013370037079
+  },
+  "phase2_saturation": {
+    "step_frozen": 0.3169885575771332,
+    "ground_truth_adam": 0.2960166037082672,
+    "swa_plateau": 0.31419530510902405,
+    "timesfm_alone": 0.3099292516708374,
+    "timesfm_covariate": 0.30818477272987366
+  }
+}
