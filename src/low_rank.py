@@ -99,10 +99,12 @@ class LowRankTrajectoryEngine:
         inputs_t = torch.tensor(Cr_norm, dtype=torch.float32).to(device)
 
         with torch.no_grad():
-            outputs = tfm_model(inputs_t, horizon_len=horizon)
-            mean_preds = outputs.mean_predictions.cpu().numpy() # (r, horizon)
+            outputs = tfm_model(inputs_t)
+            mean_preds = outputs.mean_predictions.cpu().numpy() # (r, 128)
 
-        c_pred_norm = mean_preds[:, -1] # (r,)
+        # Index at requested horizon (1-indexed horizon h -> 0-indexed column h-1)
+        h_idx = min(max(0, horizon - 1), mean_preds.shape[1] - 1)
+        c_pred_norm = mean_preds[:, h_idx] # (r,)
         c_pred = c_pred_norm * stds.squeeze(-1) + means.squeeze(-1)
 
         t_forecast = time.perf_counter() - t0
@@ -114,6 +116,16 @@ class LowRankTrajectoryEngine:
 
         return torch.from_numpy(w_pred).float(), c_pred, t_forecast, t_reconstruct
 
+    def forecast_weight_decay(self, horizon, eta=1e-3, weight_decay=1.0, interval=25):
+        t0 = time.perf_counter()
+        total_steps = horizon * interval
+        decay_factor = (1.0 - eta * weight_decay) ** total_steps
+        w_pred = self.w_ref * decay_factor
+        delta_w = w_pred - self.w_ref
+        c_pred = self.U.T @ delta_w
+        elapsed = time.perf_counter() - t0
+        return torch.from_numpy(w_pred).float(), c_pred, elapsed
+
     def compute_mechanism_metrics(self, r, c_pred, w_pred, w_swa, w_actual_continuation):
         Cr = self.get_latent_coefficients(r)
         c_mean = np.mean(Cr, axis=1)
@@ -121,7 +133,9 @@ class LowRankTrajectoryEngine:
 
         w_pred_np = w_pred.numpy() if isinstance(w_pred, torch.Tensor) else w_pred
         w_swa_np = w_swa.numpy() if isinstance(w_swa, torch.Tensor) else w_swa
+        w_act_np = w_actual_continuation.numpy() if isinstance(w_actual_continuation, torch.Tensor) else w_actual_continuation
 
+        # SWA L2 distance & Cosine similarity (Full Parameter Space)
         l2_dist_swa = float(np.linalg.norm(w_pred_np - w_swa_np))
         rel_l2_swa = float(l2_dist_swa / (np.linalg.norm(w_swa_np) + 1e-8))
 
@@ -134,26 +148,43 @@ class LowRankTrajectoryEngine:
         else:
             cos_sim_swa = 1.0
 
-        w_act_np = w_actual_continuation.numpy() if isinstance(w_actual_continuation, torch.Tensor) else w_actual_continuation
+        # FULL-PARAMETER SPACE ALIGNMENT TO ACTUAL CONTINUATION
         delta_act = w_act_np - self.w_ref
-        c_act = self.U[:, :r].T @ delta_act
+        norm_act = np.linalg.norm(delta_act)
+        if norm_pred > 1e-8 and norm_act > 1e-8:
+            cos_sim_full = float(np.dot(delta_pred, delta_act) / (norm_pred * norm_act))
+        else:
+            cos_sim_full = 0.0
 
+        rel_l2_full = float(np.linalg.norm(w_pred_np - w_act_np) / (norm_act + 1e-8))
+
+        # LATENT SUBSPACE ALIGNMENT
+        c_act = self.U[:, :r].T @ delta_act
         norm_c_pred = np.linalg.norm(c_pred)
         norm_c_act = np.linalg.norm(c_act)
         if norm_c_pred > 1e-8 and norm_c_act > 1e-8:
-            cos_sim_continuation = float(np.dot(c_pred, c_act) / (norm_c_pred * norm_c_act))
+            cos_sim_latent = float(np.dot(c_pred, c_act) / (norm_c_pred * norm_c_act))
         else:
-            cos_sim_continuation = 0.0
+            cos_sim_latent = 0.0
 
-        rel_error_continuation = float(np.linalg.norm(c_pred - c_act) / (norm_c_act + 1e-8))
+        rel_l2_latent = float(np.linalg.norm(c_pred - c_act) / (norm_c_act + 1e-8))
+
+        # RADIAL WEIGHT DECAY ALIGNMENT
+        v_radial = -self.w_ref / (np.linalg.norm(self.w_ref) + 1e-8)
+        radial_alignment_act = float(np.dot(delta_act, v_radial) / (norm_act + 1e-8))
+        radial_alignment_pred = float(np.dot(delta_pred, v_radial) / (norm_pred + 1e-8))
 
         return {
             "mean_deviation": mean_dev,
             "l2_dist_to_swa": l2_dist_swa,
             "rel_l2_to_swa": rel_l2_swa,
             "cos_sim_to_swa": cos_sim_swa,
-            "cos_sim_to_continuation": cos_sim_continuation,
-            "rel_error_to_continuation": rel_error_continuation
+            "cos_sim_to_continuation": cos_sim_full, # FULL PARAMETER (replaces coordinate-only cos)
+            "rel_error_to_continuation": rel_l2_full, # FULL PARAMETER
+            "cos_sim_latent": cos_sim_latent,
+            "rel_l2_latent": rel_l2_latent,
+            "radial_alignment_act": radial_alignment_act,
+            "radial_alignment_pred": radial_alignment_pred
         }
 
 # Alias for backwards compatibility

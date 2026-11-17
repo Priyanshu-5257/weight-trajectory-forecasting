@@ -9,19 +9,19 @@ RESULTS_DIR = os.path.join(ROOT_DIR, "results")
 FIGURES_DIR = os.path.join(ROOT_DIR, "figures")
 os.makedirs(FIGURES_DIR, exist_ok=True)
 
-# Set high-quality styling
+# High-quality academic styling
 plt.style.use("seaborn-v0_8-whitegrid" if "seaborn-v0_8-whitegrid" in plt.style.available else "default")
 plt.rcParams.update({
     "font.family": "sans-serif",
     "font.size": 11,
-    "axes.labelsize": 13,
-    "axes.titlesize": 14,
+    "axes.labelsize": 12,
+    "axes.titlesize": 13,
     "xtick.labelsize": 10,
     "ytick.labelsize": 10,
-    "legend.fontsize": 10,
-    "figure.titlesize": 16,
-    "lines.linewidth": 2.2,
-    "lines.markersize": 7,
+    "legend.fontsize": 9.5,
+    "figure.titlesize": 15,
+    "lines.linewidth": 2.0,
+    "lines.markersize": 6,
     "figure.dpi": 300
 })
 
@@ -38,90 +38,149 @@ def generate_grokking_figures():
     with open(summary_path) as f:
         summary = json.load(f)
 
-    # --------------------------------------------------------------------------
-    # Figure 1: Subspace Explained Variance & Trajectory Collapse
-    # --------------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(8, 5))
     ranks = summary["ranks"]
-    exp_vars = [summary["explained_variance"][str(r)]["mean"] * 100 for r in ranks]
-    exp_ci = [summary["explained_variance"][str(r)]["ci95"] * 100 for r in ranks]
+    horizons = summary["horizons"]
+    checkpoint_interval = summary["checkpoint_interval"]
+    delta_steps = [h * checkpoint_interval for h in horizons]
 
-    bars = ax.bar([f"Rank {r}" for r in ranks], exp_vars, yerr=exp_ci, capsize=5, color="#1a73e8", alpha=0.85, edgecolor="#1557b0", width=0.5)
-    ax.set_ylabel("Cumulative Explained Variance (%)")
-    ax.set_title("Grokking Subspace Dimensionality (SVD of 32 Checkpoint Displacements)")
-    ax.set_ylim(80, 102)
+    # --------------------------------------------------------------------------
+    # Figure 1: Non-Symmetric Generalization vs Horizon (Pre-Grokking Cutoff = 1500)
+    # --------------------------------------------------------------------------
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.5))
 
-    for bar, val in zip(bars, exp_vars):
-        yval = bar.get_height()
-        ax.text(bar.get_x() + bar.get_width()/2.0, yval + 0.8, f"{val:.1f}%", ha='center', va='bottom', fontweight='bold', color="#1557b0")
+    # Panel 1: Pure Non-Symmetric Generalization
+    cont_acc_ns = [summary["baselines"]["continued_adam"][f"h_{h}"]["acc_nonsym"]["mean"] for h in horizons]
+    cont_ci_ns = [summary["baselines"]["continued_adam"][f"h_{h}"]["acc_nonsym"]["ci95"] for h in horizons]
 
-    ax.axhline(100, color="gray", linestyle="--", alpha=0.6)
+    lin_acc_ns = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["mean"] for h in horizons]
+    lin_ci_ns = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["ci95"] for h in horizons]
+
+    dmp_acc_ns = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["mean"] for h in horizons]
+    dmp_ci_ns = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["ci95"] for h in horizons]
+
+    tfm_acc_ns = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["mean"] for h in horizons]
+    tfm_ci_ns = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["acc_nonsym"]["ci95"] for h in horizons]
+
+    dec_acc_ns = [summary["baselines"]["weight_decay_only"][f"h_{h}"]["acc_nonsym"]["mean"] for h in horizons]
+    dec_ci_ns = [summary["baselines"]["weight_decay_only"][f"h_{h}"]["acc_nonsym"]["ci95"] for h in horizons]
+
+    frozen_ns = summary["baselines"]["frozen_acc_nonsym"]["mean"]
+    swa_ns = summary["baselines"]["swa_acc_nonsym"]["mean"]
+
+    ax1.axhline(frozen_ns, color="#5f6368", linestyle="--", label=f"Frozen Checkpoint @ 1500 ({frozen_ns:.2f}%)")
+    ax1.axhline(swa_ns, color="#9c27b0", linestyle=":", label=f"Matched SWA ({swa_ns:.2f}%)")
+
+    ax1.errorbar(delta_steps, cont_acc_ns, yerr=cont_ci_ns, label="Continued AdamW (Ground Truth)", color="#34a853", marker="o", capsize=3)
+    ax1.errorbar(delta_steps, lin_acc_ns, yerr=lin_ci_ns, label="Low-Rank Linear (Rank 2)", color="#ff6d01", marker="s", capsize=3)
+    ax1.errorbar(delta_steps, dmp_acc_ns, yerr=dmp_ci_ns, label="Low-Rank Damped (Rank 2, γ=0.95)", color="#e91e63", marker="^", capsize=3)
+    ax1.errorbar(delta_steps, tfm_acc_ns, yerr=tfm_ci_ns, label="Low-Rank TimesFM (Rank 2, Fixed Index)", color="#1a73e8", marker="D", capsize=3)
+    ax1.errorbar(delta_steps, dec_acc_ns, yerr=dec_ci_ns, label="Weight Decay Only Control", color="#795548", linestyle="--", marker="x", capsize=3)
+
+    ax1.set_xlabel("Forecast Horizon (+Steps beyond Cutoff 1500)")
+    ax1.set_ylabel("Non-Symmetric Test Accuracy (%) [Pure Generalization]")
+    ax1.set_title("Strict Generalization (Excluding Commutative Pairs)")
+    ax1.set_ylim(-2, 102)
+    ax1.legend(loc="upper left", frameon=True)
+
+    # Panel 2: All Test Pairs vs Non-Symmetric Pairs (Illustrating the Memorization Artifact)
+    cont_acc_all = [summary["baselines"]["continued_adam"][f"h_{h}"]["acc_all"]["mean"] for h in horizons]
+    tfm_acc_all = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["acc_all"]["mean"] for h in horizons]
+    frozen_all = summary["baselines"]["frozen_acc_all"]["mean"]
+
+    ax2.plot(delta_steps, cont_acc_all, color="#34a853", marker="o", label="Continued AdamW (All Test Pairs)")
+    ax2.plot(delta_steps, cont_acc_ns, color="#34a853", linestyle="--", marker="o", alpha=0.6, label="Continued AdamW (Non-Symmetric Only)")
+    ax2.plot(delta_steps, tfm_acc_all, color="#1a73e8", marker="D", label="TimesFM Rank 2 (All Test Pairs)")
+    ax2.plot(delta_steps, tfm_acc_ns, color="#1a73e8", linestyle="--", marker="D", alpha=0.6, label="TimesFM Rank 2 (Non-Symmetric Only)")
+    ax2.axhline(50.0, color="#d32f2f", linestyle=":", label="Commutative Memorization Baseline (~50%)")
+    ax2.axhline(frozen_all, color="#5f6368", linestyle="--", label=f"Frozen All Pairs ({frozen_all:.1f}%)")
+
+    ax2.set_xlabel("Forecast Horizon (+Steps beyond Cutoff 1500)")
+    ax2.set_ylabel("Test Accuracy (%)")
+    ax2.set_title("Commutativity Artifact: All Pairs vs Non-Symmetric Pairs")
+    ax2.set_ylim(-2, 102)
+    ax2.legend(loc="upper left", frameon=True)
+
     plt.tight_layout()
-    f1_path = os.path.join(FIGURES_DIR, "grokking_subspace_explained_variance.png")
+    f1_path = os.path.join(FIGURES_DIR, "grokking_accuracy_vs_horizon.png")
     plt.savefig(f1_path, dpi=300)
     plt.close()
     print(f"[Saved] {f1_path}")
 
     # --------------------------------------------------------------------------
-    # Figure 2: Test Accuracy vs Horizon Across Methods (Rank 2)
+    # Figure 2: Subspace Dimensionality & Radial Shrinkage Variance
     # --------------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(9, 5.5))
-    horizons = summary["horizons"]
-    delta_steps = [h * summary["checkpoint_interval"] for h in horizons]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
-    cont_acc = [summary["baselines"]["continued_adam"][f"h_{h}"]["acc"]["mean"] for h in horizons]
-    cont_ci = [summary["baselines"]["continued_adam"][f"h_{h}"]["acc"]["ci95"] for h in horizons]
+    # Panel 1: SVD Explained Variance
+    exp_vars = [summary["explained_variance"][str(r)]["mean"] * 100 for r in ranks]
+    exp_ci = [summary["explained_variance"][str(r)]["ci95"] * 100 for r in ranks]
 
-    lin_acc = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["acc"]["mean"] for h in horizons]
-    lin_ci = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["acc"]["ci95"] for h in horizons]
+    bars = ax1.bar([f"Rank {r}" for r in ranks], exp_vars, yerr=exp_ci, capsize=5, color="#1a73e8", alpha=0.85, edgecolor="#1557b0", width=0.45)
+    ax1.set_ylabel("Cumulative Explained Variance (%)")
+    ax1.set_title("Pre-Grokking Checkpoint SVD Explained Variance (Cutoff=1500)")
+    ax1.set_ylim(85, 102)
 
-    dmp_acc = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["acc"]["mean"] for h in horizons]
-    dmp_ci = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["acc"]["ci95"] for h in horizons]
+    for bar, val in zip(bars, exp_vars):
+        yval = bar.get_height()
+        ax1.text(bar.get_x() + bar.get_width()/2.0, yval + 0.6, f"{val:.2f}%", ha='center', va='bottom', fontweight='bold', color="#1557b0")
+    ax1.axhline(100, color="gray", linestyle="--", alpha=0.6)
 
-    tfm_acc = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["acc"]["mean"] for h in horizons]
-    tfm_ci = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["acc"]["ci95"] for h in horizons]
+    # Panel 2: Radial Alignment of Predictions (Projection along -W_ref)
+    lin_rad = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["radial_alignment_pred"]["mean"] for h in horizons]
+    tfm_rad = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["radial_alignment_pred"]["mean"] for h in horizons]
+    dmp_rad = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["radial_alignment_pred"]["mean"] for h in horizons]
 
-    frozen_val = summary["baselines"]["frozen_acc"]["mean"]
-    swa_val = summary["baselines"]["swa_acc"]["mean"]
+    ax2.plot(delta_steps, lin_rad, label="Linear Extrapolation (Rank 2)", color="#ff6d01", marker="s")
+    ax2.plot(delta_steps, dmp_rad, label="Damped Extrapolation (Rank 2)", color="#e91e63", marker="^")
+    ax2.plot(delta_steps, tfm_rad, label="TimesFM (Rank 2)", color="#1a73e8", marker="D")
+    ax2.axhline(1.0, color="#795548", linestyle="--", label="Pure Radial Shrinkage (-W_ref)")
 
-    ax.axhline(frozen_val, color="#5f6368", linestyle="--", label=f"Frozen Checkpoint ({frozen_val:.1f}%)")
-    ax.axhline(swa_val, color="#ea4335", linestyle=":", label=f"Matched SWA ({swa_val:.1f}%)")
+    ax2.set_xlabel("Forecast Horizon (+Steps beyond Cutoff 1500)")
+    ax2.set_ylabel("Radial Alignment Ratio cos(ΔW, -W_ref)")
+    ax2.set_title("Pre-Grokking Trajectory Direction: Radial Weight Decay")
+    ax2.set_ylim(-0.2, 1.1)
+    ax2.legend(loc="lower left", frameon=True)
 
-    ax.errorbar(delta_steps, cont_acc, yerr=cont_ci, label="Continued AdamW (Ground Truth)", color="#34a853", marker="o", capsize=4)
-    ax.errorbar(delta_steps, lin_acc, yerr=lin_ci, label="Low-Rank Linear (Rank 2)", color="#ff6d01", marker="s", capsize=4)
-    ax.errorbar(delta_steps, dmp_acc, yerr=dmp_ci, label="Low-Rank Damped (Rank 2, γ=0.95)", color="#9334e6", marker="^", capsize=4)
-    ax.errorbar(delta_steps, tfm_acc, yerr=tfm_ci, label="Low-Rank TimesFM (Rank 2)", color="#1a73e8", marker="D", capsize=4)
-
-    ax.set_xlabel("Forecast Horizon (+Steps beyond Cutoff)")
-    ax.set_ylabel("Test Accuracy on Modular Addition (%)")
-    ax.set_title("Grokking Trajectory Forecasting vs Continued Optimization")
-    ax.set_ylim(0, 105)
-    ax.legend(loc="upper left", frameon=True)
     plt.tight_layout()
-    f2_path = os.path.join(FIGURES_DIR, "grokking_accuracy_vs_horizon.png")
+    f2_path = os.path.join(FIGURES_DIR, "grokking_subspace_explained_variance.png")
     plt.savefig(f2_path, dpi=300)
     plt.close()
     print(f"[Saved] {f2_path}")
 
     # --------------------------------------------------------------------------
-    # Figure 3: Continuation Cosine Alignment vs Horizon
+    # Figure 3: Full-Parameter Space Alignment in R^P (P = 227,200)
     # --------------------------------------------------------------------------
-    fig, ax = plt.subplots(figsize=(9, 5.5))
-    lin_cos = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["cos_sim_to_continuation"]["mean"] for h in horizons]
-    dmp_cos = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["cos_sim_to_continuation"]["mean"] for h in horizons]
-    tfm_cos = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["cos_sim_to_continuation"]["mean"] for h in horizons]
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13, 5))
 
-    ax.plot(delta_steps, lin_cos, label="Low-Rank Linear (Rank 2)", color="#ff6d01", marker="s")
-    ax.plot(delta_steps, dmp_cos, label="Low-Rank Damped (Rank 2)", color="#9334e6", marker="^")
-    ax.plot(delta_steps, tfm_cos, label="Low-Rank TimesFM (Rank 2)", color="#1a73e8", marker="D")
+    lin_cos_full = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["cos_sim_full"]["mean"] for h in horizons]
+    dmp_cos_full = [summary["methods"]["damped"]["rank_2"][f"horizon_{h}"]["cos_sim_full"]["mean"] for h in horizons]
+    tfm_cos_full = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["cos_sim_full"]["mean"] for h in horizons]
 
-    ax.axhline(0, color="gray", linestyle="--", alpha=0.6)
-    ax.axhline(1.0, color="#34a853", linestyle=":", alpha=0.8, label="Perfect Alignment (+1.0)")
-    ax.set_xlabel("Forecast Horizon (+Steps beyond Cutoff)")
-    ax.set_ylabel("Cosine Similarity to Actual Optimization Trajectory")
-    ax.set_title("Mechanistic Directional Alignment with Continued AdamW")
-    ax.set_ylim(-1.1, 1.15)
-    ax.legend(loc="lower left", frameon=True)
+    lin_cos_lat = [summary["methods"]["linear"]["rank_2"][f"horizon_{h}"]["cos_sim_latent"]["mean"] for h in horizons]
+    tfm_cos_lat = [summary["methods"]["timesfm"]["rank_2"][f"horizon_{h}"]["cos_sim_latent"]["mean"] for h in horizons]
+
+    ax1.plot(delta_steps, lin_cos_full, label="Linear (Full R^P)", color="#ff6d01", marker="s")
+    ax1.plot(delta_steps, dmp_cos_full, label="Damped (Full R^P)", color="#e91e63", marker="^")
+    ax1.plot(delta_steps, tfm_cos_full, label="TimesFM (Full R^P)", color="#1a73e8", marker="D")
+    ax1.axhline(0, color="gray", linestyle="--", alpha=0.5)
+    ax1.set_xlabel("Forecast Horizon (+Steps beyond Cutoff)")
+    ax1.set_ylabel("Full Cosine Similarity cos_sim(ΔW_pred, ΔW_actual)")
+    ax1.set_title("Full-Parameter Alignment in R^227,200")
+    ax1.set_ylim(-0.2, 1.05)
+    ax1.legend(loc="lower left", frameon=True)
+
+    # Latent vs Full parameter comparison
+    ax2.plot(delta_steps, tfm_cos_lat, label="TimesFM Latent Alignment (in R^r)", color="#1a73e8", linestyle="--", marker="o")
+    ax2.plot(delta_steps, tfm_cos_full, label="TimesFM Parameter Alignment (in R^P)", color="#1a73e8", marker="D")
+    ax2.plot(delta_steps, lin_cos_lat, label="Linear Latent Alignment (in R^r)", color="#ff6d01", linestyle="--", marker="o")
+    ax2.plot(delta_steps, lin_cos_full, label="Linear Parameter Alignment (in R^P)", color="#ff6d01", marker="s")
+    ax2.axhline(0, color="gray", linestyle="--", alpha=0.5)
+    ax2.set_xlabel("Forecast Horizon (+Steps beyond Cutoff)")
+    ax2.set_ylabel("Cosine Similarity")
+    ax2.set_title("Latent Subspace vs Full Parameter Alignment")
+    ax2.set_ylim(-0.2, 1.05)
+    ax2.legend(loc="lower left", frameon=True)
+
     plt.tight_layout()
     f3_path = os.path.join(FIGURES_DIR, "grokking_cosine_alignment.png")
     plt.savefig(f3_path, dpi=300)
@@ -129,32 +188,21 @@ def generate_grokking_figures():
     print(f"[Saved] {f3_path}")
 
     # --------------------------------------------------------------------------
-    # Figure 4: Performance Across Low-Rank Subspace (Ranks 1, 2, 4, 8)
+    # Figure 4: Fourier Circuit Saliency Emergence
     # --------------------------------------------------------------------------
     fig, ax = plt.subplots(figsize=(8.5, 5))
-    h_target = 16 # +400 steps
-    lin_rank_acc = [summary["methods"]["linear"][f"rank_{r}"][f"horizon_{h_target}"]["acc"]["mean"] for r in ranks]
-    dmp_rank_acc = [summary["methods"]["damped"][f"rank_{r}"][f"horizon_{h_target}"]["acc"]["mean"] for r in ranks]
-    tfm_rank_acc = [summary["methods"]["timesfm"][f"rank_{r}"][f"horizon_{h_target}"]["acc"]["mean"] for r in ranks]
+    fourier_saliency = [summary["baselines"]["continued_adam"][f"h_{h}"]["fourier_saliency"]["mean"] * 100 for h in horizons]
+    fourier_ci = [summary["baselines"]["continued_adam"][f"h_{h}"]["fourier_saliency"]["ci95"] * 100 for h in horizons]
 
-    x = np.arange(len(ranks))
-    width = 0.25
+    ax.errorbar(delta_steps, fourier_saliency, yerr=fourier_ci, label="Continued AdamW (Embeddings Fourier Saliency)", color="#673ab7", marker="o", capsize=4)
+    ax.axhline(summary["baselines"]["continued_adam"]["h_8"]["fourier_saliency"]["mean"] * 100, color="gray", linestyle=":", label="Initial Pre-Grokking Fourier Power")
+    ax.set_xlabel("Steps beyond Pre-Grokking Cutoff 1500")
+    ax.set_ylabel("Top-5 2D-DFT Power Ratio (%) on W_E[:p]")
+    ax.set_title("Fourier Modular Circuit Formation Across Grokking Transition")
+    ax.legend(loc="lower right", frameon=True)
 
-    ax.bar(x - width, lin_rank_acc, width, label="Linear Extrapolation", color="#ff6d01", alpha=0.9)
-    ax.bar(x, dmp_rank_acc, width, label="Damped Extrapolation", color="#9334e6", alpha=0.9)
-    ax.bar(x + width, tfm_rank_acc, width, label="TimesFM", color="#1a73e8", alpha=0.9)
-
-    ax.axhline(frozen_val, color="#5f6368", linestyle="--", label=f"Frozen Checkpoint ({frozen_val:.1f}%)")
-    ax.axhline(swa_val, color="#ea4335", linestyle=":", label=f"Matched SWA ({swa_val:.1f}%)")
-
-    ax.set_xticks(x)
-    ax.set_xticklabels([f"Rank {r}" for r in ranks])
-    ax.set_ylabel("Test Accuracy (%) at Horizon +400 Steps")
-    ax.set_title("Low-Rank Subspace Performance Comparison (+400 Steps)")
-    ax.set_ylim(45, 65)
-    ax.legend(loc="upper right", frameon=True)
     plt.tight_layout()
-    f4_path = os.path.join(FIGURES_DIR, "grokking_rank_comparison.png")
+    f4_path = os.path.join(FIGURES_DIR, "grokking_fourier_circuit_saliency.png")
     plt.savefig(f4_path, dpi=300)
     plt.close()
     print(f"[Saved] {f4_path}")

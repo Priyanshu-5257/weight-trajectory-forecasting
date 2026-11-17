@@ -163,37 +163,44 @@ We executed the pre-registered **Low-Rank Forecasting Feasibility Benchmark (v1.
 
 ---
 
-## 🌀 Grokking & Algorithmic Phase Transitions: Modular Arithmetic Transformer (5 Seeds, 95% CI)
+## 🌀 Grokking & Algorithmic Phase Transitions: Modular Arithmetic Transformer (v2.0 Benchmark)
 
-> **Detailed Report:** See [GROKKING_REPORT.md](docs/GROKKING_REPORT.md) for full theoretical framework, cosine alignment proofs, and non-linear bifurcation analysis.
+> **Detailed Report:** See [GROKKING_REPORT.md](docs/GROKKING_REPORT.md) for full theoretical derivations, Fourier circuit saliency plots, full-parameter cosine metrics, and non-linear bifurcation analysis.
 
-We tested whether weight trajectory forecasting can detect the **silent circuit formation** in an overparameterized 1-Layer Transformer ($227{,}200$ parameters) solving modular addition ($a + b \pmod{97}$), strictly reproducing **Nanda et al. (ICLR 2023)** and **Power et al. (OpenAI 2022)**.
+We tested whether low-rank weight trajectory forecasting can anticipate the **silent circuit formation** in an overparameterized 1-Layer Transformer ($227{,}200$ parameters) solving modular addition ($a + b \pmod{97}$), strictly reproducing **Nanda et al. (ICLR 2023)** and **Power et al. (OpenAI 2022)**.
+
+### Key Methodological Fixes in v2.0
+1. **Horizon Indexing Fix:** Fixed the `mean_predictions[:, min(horizon - 1, 127)]` indexing bug in TimesFM, ensuring proper horizon sensitivity.
+2. **Pre-Grokking Intervention Anchor:** Cutoff moved to **Step 1,500**, where train loss is 0.0000 and non-symmetric test accuracy is strictly at chance level (`0.67% ± 0.66%`, $1/97 \approx 1.03\%$).
+3. **Disentangled Test Sets:** Separated commutative inverse pairs $(b, a)$ (which are memorized by step 500) from strictly **non-symmetric test pairs** to measure true algorithmic generalization.
+4. **Full Parameter Space Cosine Similarity:** Replaced 1D latent coordinate metrics with full-parameter cosine similarity ($\in \mathbb{R}^{227,200}$).
+5. **Analytical Controls:** Evaluated an analytical **Weight-Decay-Only control baseline** $\hat{W}^{\text{decay}} = (1 - \eta \lambda)^{h \cdot \Delta t} W_{\text{ref}}$ alongside SWA, EMA, and Fourier circuit saliency tracking.
 
 ### Key Visualizations
 
-| Grokking Subspace Concentration | Test Accuracy vs Forecast Horizon |
+| Pre-Grokking Subspace & Radial Contraction | Non-Symmetric Generalization vs Horizon |
 | :---: | :---: |
 | ![Grokking Subspace](figures/grokking_subspace_explained_variance.png) | ![Grokking Accuracy](figures/grokking_accuracy_vs_horizon.png) |
 
-| Trajectory Cosine Alignment | Rank Subspace Comparison (+400 Steps) |
+| Full-Parameter Cosine Alignment in $\mathbb{R}^{227,200}$ | Fourier Modular Circuit Formation |
 | :---: | :---: |
-| ![Cosine Alignment](figures/grokking_cosine_alignment.png) | ![Rank Comparison](figures/grokking_rank_comparison.png) |
+| ![Cosine Alignment](figures/grokking_cosine_alignment.png) | ![Fourier Circuit Saliency](figures/grokking_fourier_circuit_saliency.png) |
 
-### 5-Seed Grokking Benchmark Results ($P=97$, 50% Train, Cutoff Step 2,500)
+### 5-Seed Grokking Benchmark Results ($P=97$, 50% Train, Cutoff Step 1,500, Strict Non-Symmetric Test Accuracy)
 
-| Method / Baseline | Horizon $h=8$ (+200s) | Horizon $h=16$ (+400s) | Horizon $h=25$ (+625s) | Horizon $h=32$ (+800s) | Horizon $h=44$ (+1100s) |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Frozen Checkpoint** | `53.59% ± 7.75%` | `53.59% ± 7.75%` | `53.59% ± 7.75%` | `53.59% ± 7.75%` | `53.59% ± 7.75%` |
-| **Matched SWA (Window 32)** | `50.21% ± 3.12%` | `50.21% ± 3.12%` | `50.21% ± 3.12%` | `50.21% ± 3.12%` | `50.21% ± 3.12%` |
-| **EMA ($\alpha=0.1$)** | `51.31% ± 4.45%` | `51.31% ± 4.45%` | `51.31% ± 4.45%` | `51.31% ± 4.45%` | `51.31% ± 4.45%` |
-| **Continued AdamW** | `58.09% ± 12.96%` | `64.48% ± 18.39%` | `73.67% ± 26.16%` | `79.38% ± 28.86%` | **`86.24% ± 27.23%`** 🏆 |
-| **Low-Rank Linear ($r=2$)** | **`56.09% ± 13.03%`** 🟢 | `51.95% ± 25.60%` | `42.47% ± 30.22%` | `32.14% ± 27.69%` | `13.18% ± 22.66%` |
-| **Low-Rank Damped ($r=2$)** | **`56.02% ± 11.43%`** 🟢 | **`55.29% ± 17.42%`** 🟢 | `53.53% ± 22.33%` | `52.50% ± 24.73%` | `51.09% ± 26.52%` |
-| **Low-Rank TimesFM ($r=2$)**| `44.06% ± 31.81%` | `44.06% ± 31.81%` | `44.06% ± 31.81%` | `44.06% ± 31.81%` | `44.06% ± 31.81%` |
+| Method / Baseline | Horizon $h=8$ (+200s) | Horizon $h=16$ (+400s) | Horizon $h=32$ (+800s) | Horizon $h=50$ (+1250s) | Horizon $h=64$ (+1600s) | Horizon $h=80$ (+2000s) | Horizon $h=100$ (+2500s) |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint (Step 1500)** | `0.67% ± 0.66%` | `0.67% ± 0.66%` | `0.67% ± 0.66%` | `0.67% ± 0.66%` | `0.67% ± 0.66%` | `0.67% ± 0.66%` | `0.67% ± 0.66%` |
+| **Matched SWA (Window 32)** | `0.25% ± 0.13%` | `0.25% ± 0.13%` | `0.25% ± 0.13%` | `0.25% ± 0.13%` | `0.25% ± 0.13%` | `0.25% ± 0.13%` | `0.25% ± 0.13%` |
+| **EMA ($\alpha=0.1$)** | `0.44% ± 0.26%` | `0.44% ± 0.26%` | `0.44% ± 0.26%` | `0.44% ± 0.26%` | `0.44% ± 0.26%` | `0.44% ± 0.26%` | `0.44% ± 0.26%` |
+| **Weight Decay Only Control** | `0.56% ± 0.65%` | `0.43% ± 0.45%` | `0.46% ± 0.38%` | `0.80% ± 0.47%` | `0.65% ± 0.41%` | `0.98% ± 0.17%` | `0.98% ± 0.17%` |
+| **Continued AdamW (Ground Truth)** | `1.00% ± 0.98%` | `1.58% ± 1.67%` | `5.17% ± 6.68%` | `21.21% ± 26.76%` | `46.95% ± 47.68%` | `69.23% ± 52.99%` | **`83.14% ± 45.12%`** 🏆 |
+| **Low-Rank Linear ($r=2$)** | `0.97% ± 1.00%` | `1.29% ± 1.37%` | `1.86% ± 1.95%` | `2.26% ± 1.83%` | `1.81% ± 1.25%` | `1.15% ± 0.56%` | `0.78% ± 0.35%` |
+| **Low-Rank Damped ($r=2$, $\gamma=0.95$)** | `0.97% ± 1.00%` | `1.28% ± 1.37%` | `1.69% ± 2.06%` | `1.81% ± 2.22%` | `1.87% ± 2.27%` | `1.93% ± 2.28%` | `1.97% ± 2.31%` |
+| **Low-Rank TimesFM ($r=2$, Fixed)**| `1.00% ± 1.01%` | `1.23% ± 1.22%` | `1.43% ± 1.29%` | `1.26% ± 1.13%` | `0.86% ± 0.84%` | `0.40% ± 0.47%` | `0.10% ± 0.08%` |
 
-* **2D Subspace Confirmation:** SVD on checkpoint displacements during the plateau confirms **Rank 1 explains 93.96% ± 4.37%** and **Rank 2 explains 99.39% ± 0.69%** of all parameter variance.
-* **Short-Horizon Advantage:** Low-Rank Linear and Damped extrapolation improve test accuracy by **+2.5%** over frozen checkpoints and **crush SWA / EMA** without any gradient computations.
-* **The Non-Linear Boundary:** Because grokking is an exponential, non-linear bifurcation driven by weight decay, linear extrapolation overshoots at long horizons ($13.18\%$), proving that zero-shot linear trajectory forecasting cannot replace gradient-driven phase transitions.
+* **2D Subspace Confirmation:** SVD on checkpoint displacements confirms **Rank 1 explains 97.47% ± 1.89%** and **Rank 2 explains 99.69% ± 0.47%** of parameter variance. However, this subspace is dominated by **radial $L_2$ contraction** driven by weight decay ($\lambda=1.0$), not circuit rotation.
+* **Why Trajectory Forecasting Cannot Predict Grokking:** Modular arithmetic generalization requires constructing orthogonal Fourier key-value rotations $\cos(\frac{2\pi k x}{p}), \sin(\frac{2\pi k x}{p})$ in token embeddings and attention heads. Because pre-grokking checkpoint displacements contain negligible Fourier circuit energy (saliency is flat at $\sim 19\%$), low-rank extrapolation and TimesFM project purely along the radial shrinkage vector and fail to cross the generalization threshold. Full generalization emerges only through continued gradient-driven optimization ($83.14\% \pm 45.12\%$, paired $t = 5.11, p = 0.0069$).
 
 ---
 
