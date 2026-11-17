@@ -1,0 +1,384 @@
+{
+  "summary_statistics": {
+    "plateau_metrics": {
+      "frozen": {
+        "mean": 0.20375107828915118,
+        "ci95": 0.014069485300934428
+      },
+      "gt_sgd": {
+        "mean": 0.20727687074899676,
+        "ci95": 0.01936719436875428
+      },
+      "swa_matched": {
+        "mean": 0.1826104699021578,
+        "ci95": 0.010773901112127948
+      },
+      "ema_matched": {
+        "mean": 0.18541589182138446,
+        "ci95": 0.01059874733129012
+      },
+      "tfm_ordered": {
+        "mean": 0.1841489764663577,
+        "ci95": 0.011267314450123462
+      },
+      "tfm_shuffled": {
+        "mean": 0.18271742534667254,
+        "ci95": 0.010779444688777973
+      }
+    },
+    "hypothesis_tests": {
+      "tfm_ordered_vs_shuffled": {
+        "t_stat": 0.839683727519951,
+        "p_val": 0.44834188547271964,
+        "significant_p05": false
+      },
+      "tfm_ordered_vs_swa": {
+        "t_stat": 0.9510430103258245,
+        "p_val": 0.3954371091159925,
+        "significant_p05": false
+      },
+      "tfm_ordered_vs_frozen": {
+        "t_stat": -6.118442848924152,
+        "p_val": 0.0036136797115830133,
+        "significant_p05": true
+      }
+    },
+    "efficiency": {
+      "avg_tfm_forecast_seconds": 45.903760242462155,
+      "avg_sgd_64steps_seconds": 0.6499639050292969,
+      "speed_ratio_sgd_vs_tfm": 70.62498280640716
+    }
+  },
+  "per_seed_runs": [
+    {
+      "seed": 42,
+      "loss_var_plateau": 0.010845292912737075,
+      "stage1_descent": {
+        "frozen": {
+          "loss": 0.3725720331192017,
+          "acc": 88.99
+        },
+        "gt_sgd": {
+          "loss": 0.3662045205116272,
+          "acc": 89.05
+        },
+        "tfm_alone": {
+          "loss": 0.36837227606773376,
+          "acc": 89.12
+        },
+        "tfm_covariate": {
+          "loss": 0.37561999492645265,
+          "acc": 88.74
+        }
+      },
+      "stage2_middle": {
+        "frozen": {
+          "loss": 0.26236436170637606,
+          "acc": 92.06
+        },
+        "gt_sgd": {
+          "loss": 0.26613585433959963,
+          "acc": 91.64
+        },
+        "swa_matched": {
+          "loss": 0.2318861179471016,
+          "acc": 93.03
+        },
+        "tfm_alone": {
+          "loss": 0.2495649199396372,
+          "acc": 92.73
+        }
+      },
+      "stage3_plateau": {
+        "frozen": {
+          "loss": 0.20578078602552413,
+          "acc": 93.96
+        },
+        "gt_sgd": {
+          "loss": 0.20201768557429314,
+          "acc": 94.3
+        },
+        "swa_matched": {
+          "loss": 0.1832094981789589,
+          "acc": 94.59
+        },
+        "ema_matched": {
+          "loss": 0.18776495752334596,
+          "acc": 94.47
+        },
+        "tfm_ordered": {
+          "loss": 0.18266130018830298,
+          "acc": 94.52
+        },
+        "tfm_time_shuffled": {
+          "loss": 0.18350336721539498,
+          "acc": 94.53
+        }
+      }
+    },
+    {
+      "seed": 43,
+      "loss_var_plateau": 0.007942467752025752,
+      "stage1_descent": {
+        "frozen": {
+          "loss": 0.3463177804708481,
+          "acc": 89.88
+        },
+        "gt_sgd": {
+          "loss": 0.3389029154419899,
+          "acc": 90.22
+        },
+        "tfm_alone": {
+          "loss": 0.34561839179992676,
+          "acc": 89.7
+        },
+        "tfm_covariate": {
+          "loss": 0.35250811438560486,
+          "acc": 89.37
+        }
+      },
+      "stage2_middle": {
+        "frozen": {
+          "loss": 0.24540734626054764,
+          "acc": 92.75
+        },
+        "gt_sgd": {
+          "loss": 0.2494878430366516,
+          "acc": 92.08
+        },
+        "swa_matched": {
+          "loss": 0.21303149470090865,
+          "acc": 93.47
+        },
+        "tfm_alone": {
+          "loss": 0.2275009601831436,
+          "acc": 93.06
+        }
+      },
+      "stage3_plateau": {
+        "frozen": {
+          "loss": 0.1966688260436058,
+          "acc": 94.08
+        },
+        "gt_sgd": {
+          "loss": 0.20020487384200097,
+          "acc": 93.99
+        },
+        "swa_matched": {
+          "loss": 0.17576817594766617,
+          "acc": 94.75
+        },
+        "ema_matched": {
+          "loss": 0.17767845312952996,
+          "acc": 94.7
+        },
+        "tfm_ordered": {
+          "loss": 0.17976076193451881,
+          "acc": 94.6
+        },
+        "tfm_time_shuffled": {
+          "loss": 0.17560334557294846,
+          "acc": 94.79
+        }
+      }
+    },
+    {
+      "seed": 44,
+      "loss_var_plateau": 0.009047562338851664,
+      "stage1_descent": {
+        "frozen": {
+          "loss": 0.3867361539840698,
+          "acc": 88.06
+        },
+        "gt_sgd": {
+          "loss": 0.3274403589963913,
+          "acc": 90.58
+        },
+        "tfm_alone": {
+          "loss": 0.37684910430908203,
+          "acc": 88.61
+        },
+        "tfm_covariate": {
+          "loss": 0.4138802854537964,
+          "acc": 87.36
+        }
+      },
+      "stage2_middle": {
+        "frozen": {
+          "loss": 0.24929519572257997,
+          "acc": 92.69
+        },
+        "gt_sgd": {
+          "loss": 0.24306917371749878,
+          "acc": 92.41
+        },
+        "swa_matched": {
+          "loss": 0.21637313423156737,
+          "acc": 93.46
+        },
+        "tfm_alone": {
+          "loss": 0.22981408833265304,
+          "acc": 93.11
+        }
+      },
+      "stage3_plateau": {
+        "frozen": {
+          "loss": 0.2001961670845747,
+          "acc": 94.04
+        },
+        "gt_sgd": {
+          "loss": 0.18944740351438522,
+          "acc": 94.4
+        },
+        "swa_matched": {
+          "loss": 0.1722319811165333,
+          "acc": 94.77
+        },
+        "ema_matched": {
+          "loss": 0.17602865089178085,
+          "acc": 94.71
+        },
+        "tfm_ordered": {
+          "loss": 0.1742680995285511,
+          "acc": 94.68
+        },
+        "tfm_time_shuffled": {
+          "loss": 0.17243653882145882,
+          "acc": 94.73
+        }
+      }
+    },
+    {
+      "seed": 45,
+      "loss_var_plateau": 0.009442947894691047,
+      "stage1_descent": {
+        "frozen": {
+          "loss": 0.344348011803627,
+          "acc": 89.61
+        },
+        "gt_sgd": {
+          "loss": 0.35725487389564514,
+          "acc": 89.12
+        },
+        "tfm_alone": {
+          "loss": 0.3398289349794388,
+          "acc": 89.7
+        },
+        "tfm_covariate": {
+          "loss": 0.34548015546798705,
+          "acc": 89.56
+        }
+      },
+      "stage2_middle": {
+        "frozen": {
+          "loss": 0.2532050045967102,
+          "acc": 92.46
+        },
+        "gt_sgd": {
+          "loss": 0.2525683107614517,
+          "acc": 92.38
+        },
+        "swa_matched": {
+          "loss": 0.22759525324106217,
+          "acc": 93.27
+        },
+        "tfm_alone": {
+          "loss": 0.24171265637874603,
+          "acc": 93.0
+        }
+      },
+      "stage3_plateau": {
+        "frozen": {
+          "loss": 0.22236600112318994,
+          "acc": 93.36
+        },
+        "gt_sgd": {
+          "loss": 0.23019198176860808,
+          "acc": 92.89
+        },
+        "swa_matched": {
+          "loss": 0.19293754796683787,
+          "acc": 94.14
+        },
+        "ema_matched": {
+          "loss": 0.19659725455641747,
+          "acc": 94.05
+        },
+        "tfm_ordered": {
+          "loss": 0.19859003217667343,
+          "acc": 94.05
+        },
+        "tfm_time_shuffled": {
+          "loss": 0.19284073248058559,
+          "acc": 94.1
+        }
+      }
+    },
+    {
+      "seed": 46,
+      "loss_var_plateau": 0.008374240350180868,
+      "stage1_descent": {
+        "frozen": {
+          "loss": 0.3702929595947266,
+          "acc": 89.01
+        },
+        "gt_sgd": {
+          "loss": 0.3621411843061447,
+          "acc": 89.76
+        },
+        "tfm_alone": {
+          "loss": 0.3490254358291626,
+          "acc": 89.86
+        },
+        "tfm_covariate": {
+          "loss": 0.34800339941978453,
+          "acc": 89.95
+        }
+      },
+      "stage2_middle": {
+        "frozen": {
+          "loss": 0.25551516204476354,
+          "acc": 92.73
+        },
+        "gt_sgd": {
+          "loss": 0.25342372431755067,
+          "acc": 92.42
+        },
+        "swa_matched": {
+          "loss": 0.2274872522354126,
+          "acc": 93.3
+        },
+        "tfm_alone": {
+          "loss": 0.2360929812669754,
+          "acc": 93.18
+        }
+      },
+      "stage3_plateau": {
+        "frozen": {
+          "loss": 0.19374361116886138,
+          "acc": 94.33
+        },
+        "gt_sgd": {
+          "loss": 0.21452240904569625,
+          "acc": 93.78
+        },
+        "swa_matched": {
+          "loss": 0.1889051463007927,
+          "acc": 94.51
+        },
+        "ema_matched": {
+          "loss": 0.18901014300584792,
+          "acc": 94.38
+        },
+        "tfm_ordered": {
+          "loss": 0.18546468850374223,
+          "acc": 94.64
+        },
+        "tfm_time_shuffled": {
+          "loss": 0.18920314264297486,
+          "acc": 94.53
+        }
+      }
+    }
+  ]
+}
