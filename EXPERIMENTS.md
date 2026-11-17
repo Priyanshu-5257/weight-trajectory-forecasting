@@ -194,7 +194,39 @@ We investigated three core hypotheses:
 
 ---
 
-## 7. Synthesis: When to Use Weight Trajectory Forecasting
+## 7. Experiment 5: Feasibility Benchmark (v1.2) & Matched Quality Profiling
+
+* **Objective:** Test whether low-rank TimesFM forecasting achieves comparable or better model quality than SWA, EMA, or continued optimization at lower end-to-end computational cost, with strict validation-based hyperparameter selection ($r \in \{1, 4, 8, 16\}$, $h \in \{8, 16, 32\}$) and automated unit testing (`test_leakage_and_reproducibility.py`).
+* **Protocol:** 10 paired seeds (`42..51`). California Housing (Adam, cutoff step 200) and MNIST (SGD+Mom, cutoff step 2000).
+
+### Key Empirical Results (Validation Selected, Evaluated on Untouched Test Split)
+
+| Method | California Housing Test MSE | MNIST Test Loss | MNIST Test Accuracy | Total Latency (Median) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint** | $0.2916 \pm 0.0078$ | $0.2038 \pm 0.0097$ | $94.01\% \pm 0.28\%$ | $0.001\text{ ms}$ |
+| **Continued Training ($h=16$)** | $0.2847 \pm 0.0063$ | $0.2015 \pm 0.0065$ | $94.08\% \pm 0.24\%$ | $13.04\text{ ms}$ |
+| **Continued Training ($h=32$)** | **$0.2801 \pm 0.0041$** 🏆 | $0.2032 \pm 0.0119$ | $94.13\% \pm 0.31\%$ | $31.58\text{ ms}$ |
+| **Matched SWA** | $0.2981 \pm 0.0085$ | **$0.1810 \pm 0.0042$** 🏆 | **$94.75\% \pm 0.16\%$** 🏆 | **$< 0.05\text{ ms}$** |
+| **Low-Rank Linear (Val-Selected)** | $0.2932 \pm 0.0084$ | $0.2223 \pm 0.0165$ 💥 | $93.45\% \pm 0.42\%$ | $0.04\text{ ms}$ |
+| **Low-Rank Damped (Val-Selected)** | $0.2924 \pm 0.0081$ | $0.2149 \pm 0.0137$ | $93.71\% \pm 0.35\%$ | $0.04\text{ ms}$ |
+| **Low-Rank TimesFM (Val-Selected)**| $0.2993 \pm 0.0088$ | $0.1824 \pm 0.0044$ 🟢 | $94.70\% \pm 0.16\%$ | $67.99\text{ ms}$ |
+| **TimesFM Shuffled Control** | $0.2961 \pm 0.0066$ | **$0.1806 \pm 0.0043$** 🏆 | **$94.76\% \pm 0.15\%$** | $47.30\text{ ms}$ |
+
+### Mechanistic Alignments:
+- **Cosine Similarity to SWA Displacement:**
+  - TimesFM Ordered: `0.9354 ± 0.1128` (MNIST)
+  - TimesFM Shuffled: **`0.9937 ± 0.0026` (MNIST)**, **`0.9968 ± 0.0019` (California)**
+  - Shuffled TimesFM displacement is collinear with SWA.
+- **Cosine Similarity to Continuation Steps:**
+  - `cos_sim = -0.4629 ± 0.5948` (MNIST). Negative correlation to actual gradient steps.
+- **Speedup at Matched Quality:**
+  $$\text{Speedup} = \frac{T_{\text{continued to match quality}}}{T_{\text{forecasting pipeline}}} \approx 0.001\times \text{ (vs SWA)}$$
+  SWA reaches lower loss in $<0.05\text{ ms}$ with 0 parameters and 0 MB VRAM, while TimesFM takes $68.0\text{ ms}$ with 2.0 GB VRAM.
+- **Recommendation:** **NO-GO for LoRA Adapters.**
+
+---
+
+## 8. Synthesis: Final Decision Framework
 
 ```mermaid
 flowchart TD
@@ -202,9 +234,8 @@ flowchart TD
     Check -->|No: Active Descent| HCheck{"Horizon Length?"}
     HCheck -->|Short h <= 12| TFMShort["TimesFM Zero-Shot Forecast<br>(Valid momentum extrapolation)"]
     HCheck -->|Long h > 12| TFMCov["TimesFM + Loss Covariate (XReg)<br>(Loss acts as potential brake)"]
-    Check -->|Yes: Stationary Basin| Resource{"Compute / Context?"}
-    Resource -->|Standard Training Loop| SWA["Matched SWA / EMA<br>(Fastest: < 0.1 ms, identical loss)"]
-    Resource -->|Offline / Zero-Gradient Denoising| LowRankCheck{"Decomposition Choice?"}
-    LowRankCheck -->|Per-Weight Foundation Model| SlowTFM["Full TimesFM (45.9s)<br>(High compute overhead)"]
-    LowRankCheck -->|Low-Rank Latent Subspace r=4| FastTFM["Low-Rank TimesFM (52ms)<br>(880x speedup, matches SWA)"]
+    Check -->|Yes: Stationary Basin| BaselineCompare{"Baseline Comparison"}
+    BaselineCompare --> SWA["Online Matched SWA / EMA<br>(Latency: < 0.05 ms | VRAM: 0 MB | Loss: 0.1810)"]
+    BaselineCompare --> TimesFM["Low-Rank TimesFM<br>(Latency: 68 ms | VRAM: 2.0 GB | Loss: 0.1824)"]
+    SWA --> Decision["DECISION: NO-GO for LoRA Scaling<br>SWA strictly dominates TimesFM on quality, latency, and memory"]
 ```

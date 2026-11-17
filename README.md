@@ -115,6 +115,43 @@ Instead of forecasting thousands of weights independently, we project checkpoint
 
 ---
 
+## 🛑 Feasibility Benchmark (v1.2) & Pre-Registered NO-GO Verdict
+
+> **Full Feasibility Report:** See [FEASIBILITY_REPORT.md](file:///home/prinshu/exp/weightSpace/anomlydet/FEASIBILITY_REPORT.md) for full latency profiling, mechanism alignment derivations, and scalability analysis.
+
+### Executive Recommendation: **NO-GO for LoRA Adapters / LLM Scaling**
+
+We executed the pre-registered **Low-Rank Forecasting Feasibility Benchmark (v1.2)** across 10 paired seeds (`42..51`) to determine whether foundation-model weight forecasting should be escalated to LoRA adapters. The benchmark enforces strict data hygiene (zero-leakage splits verified via automated unit tests in [`test_leakage_and_reproducibility.py`](file:///home/prinshu/exp/weightSpace/anomlydet/test_leakage_and_reproducibility.py)) and selects all hyperparameters ($r \in \{1, 4, 8, 16\}$, $h \in \{8, 16, 32\}$) strictly via minimum validation loss before evaluating once on untouched test sets.
+
+| Benchmark Visualization | Mechanistic Probe Visualization |
+| :---: | :---: |
+| ![Quality vs Compute](feasibility_quality_vs_compute.png) | ![Mechanistic Alignment](feasibility_mechanism_alignment.png) |
+
+| Rank vs Quality | Pipeline Latency Breakdown |
+| :---: | :---: |
+| ![Rank vs Quality](feasibility_rank_vs_quality.png) | ![Latency Breakdown](feasibility_latency_breakdown.png) |
+
+### Validation-Selected Test Performance (10 Paired Seeds, 95% CI)
+
+| Method | California Housing Test MSE | MNIST Test Cross-Entropy Loss | End-to-End Latency | Parameter & VRAM Overhead | Verdict vs SWA / Continued |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint ($W_T$)** | $0.2916 \pm 0.0078$ | $0.2038 \pm 0.0097$ | $0.001\text{ ms}$ | 0 MB | Baseline |
+| **Continued Training ($h=16$)** | $0.2847 \pm 0.0063$ | $0.2015 \pm 0.0065$ | $13.0\text{ ms}$ | 0 MB | 2x faster than TimesFM |
+| **Continued Training ($h=32$)** | **$0.2801 \pm 0.0041$** 🏆 | $0.2032 \pm 0.0119$ | $31.6\text{ ms}$ | 0 MB | **Wins Regression** |
+| **Matched SWA (Online Centroid)** | $0.2981 \pm 0.0085$ | **$0.1810 \pm 0.0042$** 🏆 | **$< 0.05\text{ ms}$** | 0 MB | **Wins Plateau Classification** |
+| **Low-Rank Linear (Val-Selected)** | $0.2932 \pm 0.0084$ | $0.2223 \pm 0.0165$ 💥 | $0.04\text{ ms}$ | 0 MB | Diverges on MNIST |
+| **Low-Rank Damped (Val-Selected)** | $0.2924 \pm 0.0081$ | $0.2149 \pm 0.0137$ | $0.04\text{ ms}$ | 0 MB | Degrades vs Frozen |
+| **Low-Rank TimesFM (Val-Selected)**| $0.2993 \pm 0.0088$ | $0.1824 \pm 0.0044$ 🟢 | **$68.0\text{ ms}$** | **2.0 GB VRAM** | **Fails to beat SWA (`0.1810`)** |
+| **TimesFM Shuffled-History Control**| $0.2961 \pm 0.0066$ | **$0.1806 \pm 0.0043$** 🏆 | $47.3\text{ ms}$ | 2.0 GB VRAM | **Matches SWA identically** |
+
+### Why We Conclude NO-GO:
+1. **Model Quality:** Zero-shot TimesFM (`0.1824`) does not beat parameter-free SWA (`0.1810`) on MNIST, and does not beat Continued Adam (`0.2801`) on California Housing.
+2. **Compute Inefficiency:** SWA executes in $<0.05\text{ ms}$ with zero parameters. Low-Rank TimesFM takes $68.0\text{ ms}$ ($750\times$ slower) and requires holding a 500M transformer in VRAM (~2 GB).
+3. **Disproven Mechanism:** The displacement vector produced by TimesFM has **zero or negative alignment to actual future gradient updates ($\cos \theta = -0.46$)**. Shuffling the temporal history yields an identical or superior test loss (`0.1806`) and is **$99.4\%$ collinear with the SWA vector ($\cos \theta = 0.9937$)**. TimesFM functions as an expensive non-linear shrinkage smoother around the Brownian trajectory centroid, not a directional optimizer.
+4. **Conclusion:** Testing on LoRA adapters is stopped. Use online SWA or EMA for checkpoint stabilization.
+
+---
+
 ## ⚠️ Failure Analysis & Operational Limitations
 
 | Scenario / Regime | Observed Failure Mode | Root Cause | Recommended Remedy |
@@ -129,9 +166,16 @@ Instead of forecasting thousands of weights independently, we project checkpoint
 ## 🛠️ Repository Structure
 
 ```
-├── experiment_low_rank_forecasting.py# 10-seed Low-Rank SVD + Latent TimesFM/Linear benchmark
+├── benchmark_feasibility_v1_2.py     # Feasibility Benchmark runner (10 seeds, val-selection, latency profiling)
+├── test_leakage_and_reproducibility.py# Automated unit test suite verifying zero data leakage & reproducibility
+├── generate_feasibility_figures.py   # Publication figures generator for Feasibility Benchmark
+├── FEASIBILITY_REPORT.md             # Definitive Feasibility Report & NO-GO recommendation
+├── feasibility_benchmark_results.json# Raw 10-seed per-run benchmark metrics & mechanistic probes
+├── feasibility_benchmark_summary.json# Aggregated statistics, 95% CIs, and latency breakdowns
+├── feasibility_benchmark_per_seed.csv# Flat CSV export of all 20 runs for auditability
+├── experiment_low_rank_forecasting.py# Initial Low-Rank SVD + Latent TimesFM/Linear benchmark
 ├── generate_low_rank_figures.py      # Low-rank publication figure generation script
-├── LOW_RANK_TRAJECTORIES.md          # Comprehensive Low-Rank Trajectory & Latent Extrapolation Report
+├── LOW_RANK_TRAJECTORIES.md          # Low-Rank Trajectory & Latent Extrapolation Report
 ├── low_rank_mnist_results.json       # 10-seed raw metrics & stats for MNIST low-rank benchmark
 ├── low_rank_regression_results.json  # 10-seed raw metrics & stats for California Housing low-rank
 ├── benchmark_rigorous_mnist.py       # Multi-epoch 3-stage MNIST benchmark with statistical tests
@@ -154,14 +198,23 @@ cd weight-trajectory-forecasting
 pip install -r requirements.txt
 ```
 
+### Run Automated Tests (Data Leakage & Reproducibility)
+```bash
+pytest test_leakage_and_reproducibility.py -v
+```
+
 ### Run Benchmarks
-1. **Low-Rank Weight Trajectory Benchmark (10 seeds, Ranks 1-16, SVD, Linear vs TimesFM):**
+1. **Feasibility Benchmark (v1.2 — 10 seeds, validation selection, mechanism probes, compute profiling):**
+   ```bash
+   python benchmark_feasibility_v1_2.py
+   python generate_feasibility_figures.py
+   ```
+2. **Low-Rank Weight Trajectory Benchmark (10 seeds, Ranks 1-16, SVD, Linear vs TimesFM):**
    ```bash
    # California Housing Regression
    python -c "from experiment_low_rank_forecasting import run_low_rank_regression; run_low_rank_regression(seeds=list(range(42, 52)))"
    # MNIST Classification
    python -c "from experiment_low_rank_forecasting import run_low_rank_mnist; run_low_rank_mnist(seeds=list(range(42, 52)))"
-   # Generate figures
    python generate_low_rank_figures.py
    ```
 2. **Multi-Stage MNIST Benchmark (Multi-epoch, 5 seeds, paired t-tests):**
