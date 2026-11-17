@@ -204,6 +204,33 @@ We tested whether low-rank weight trajectory forecasting can anticipate the **si
 
 ---
 
+## 🧭 Causal Mechanism: Does Grokking Require Leaving the Historical Subspace? (Oracle Projection Benchmark)
+
+> **Detailed Report:** See [SUBSPACE_DEPARTURE_REPORT.md](docs/SUBSPACE_DEPARTURE_REPORT.md) for full layer-wise projections, mathematical derivations, and causal ablations.
+
+To determine whether weight trajectory forecasting fails due to forecasting algorithms or because the optimization trajectory **geometrically departs the historical subspace**, we performed an oracle projection experiment across 5 seeds:
+
+| Predictive Coverage Collapse vs Horizon | Layer-wise Coverage Collapse (Attention & MLP Departure) |
+| :---: | :---: |
+| ![Predictive Coverage](figures/subspace_departure_coverage_vs_horizon.png) | ![Layer Breakdown](figures/subspace_departure_layer_breakdown.png) |
+
+| Oracle Projected Model Accuracy vs Actual | Radial Decay Alignment & Layer Causal Necessity |
+| :---: | :---: |
+| ![Reconstructed Accuracy](figures/subspace_departure_reconstructed_accuracy.png) | ![Radial & Causal Ablation](figures/subspace_departure_radial_and_causal_ablation.png) |
+
+### Key Findings:
+1. **First SVD Direction vs Radial Decay:** In embeddings, the dominant pre-grokking direction $u_1$ is **$89.1\% \pm 3.8\%$ collinear with radial $L_2$ shrinkage** ($\mathbf{v}_{\text{decay}} = -W_{\text{ref}} / \|W_{\text{ref}}\|$).
+2. **Predictive Coverage Collapse:** Historical basis $U_8$ explains $83.9\%$ of displacement at $h=8$, but collapses to **$41.2\% \pm 17.0\%$** at step 4,000. Even the **full Rank 32 basis** retains only **$43.1\%$ coverage**, meaning **$56.9\%$** of future displacement is strictly orthogonal to the historical manifold.
+3. **Layer Breakdown:** The departure is concentrated in the computational layers:
+   - **Self-Attention:** Coverage collapses from **$79.5\%$ down to $12.7\%$** (**$87.3\%$ orthogonal**).
+   - **MLP:** Coverage collapses from **$73.2\%$ down to $34.8\%$** (**$65.2\%$ orthogonal**).
+   - **Embeddings:** Coverage remains high at **$87.6\%$**.
+4. **Oracle Projection Fails Generalization:** Even when given the exact future displacement $\Delta W_{\text{actual}}$ projected onto historical basis $U_8$ or $U_{32}$, the reconstructed model achieves only **$2.6\% - 3.1\%$** test accuracy, while the actual model achieves **$83.1\%$** ($p = 0.0069$).
+
+**Conclusion:** Grokking fundamentally requires moving into dimensions orthogonal to the historical weight trajectory. Generalization is geometrically inaccessible from the pre-grokking subspace.
+
+---
+
 ## 🛠️ Repository Structure
 
 ```
@@ -214,6 +241,7 @@ We tested whether low-rank weight trajectory forecasting can anticipate the **si
 │   └── low_rank.py               # LowRankTrajectoryEngine & SVD decomposition
 │
 ├── benchmarks/                   # Standalone benchmark execution scripts
+│   ├── benchmark_subspace_departure.py  # Historical subspace departure & grokking
 │   ├── benchmark_grokking_trajectory.py # Grokking modular arithmetic benchmark
 │   ├── benchmark_feasibility_v1_2.py
 │   ├── benchmark_low_rank.py
@@ -236,10 +264,14 @@ We tested whether low-rank weight trajectory forecasting can anticipate the **si
 │
 ├── tests/                        # Automated unit test suite
 │   ├── __init__.py
+│   ├── test_subspace_analysis.py
+│   ├── test_timesfm_horizon.py
 │   ├── test_grokking.py
 │   └── test_leakage_and_reproducibility.py
 │
 ├── results/                      # Raw metrics and evaluation logs (JSON, CSV)
+│   ├── subspace_departure_summary.json
+│   ├── subspace_departure_results.json
 │   ├── grokking_benchmark_results.json
 │   ├── grokking_benchmark_summary.json
 │   ├── feasibility_benchmark_results.json
@@ -247,6 +279,7 @@ We tested whether low-rank weight trajectory forecasting can anticipate the **si
 │
 ├── figures/                      # High-resolution benchmark publication figures (.png)
 ├── docs/                         # In-depth research reports & experiment logs
+│   ├── SUBSPACE_DEPARTURE_REPORT.md # Causal subspace departure report
 │   ├── GROKKING_REPORT.md        # Modular arithmetic grokking phase transition report
 │   ├── FEASIBILITY_REPORT.md     # Definitive Feasibility Report & NO-GO recommendation
 │   ├── LOW_RANK_TRAJECTORIES.md  # Low-rank subspace concentration & latent ablation
