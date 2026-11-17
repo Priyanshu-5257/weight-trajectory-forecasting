@@ -78,6 +78,43 @@ Evaluated across **Early Descent (Step 64)**, **Middle Descent (Step 500)**, and
 
 ---
 
+## ⚡ Low-Rank Trajectory Forecasting: 880x Speedup & Latent Extrapolation (10-Seed Benchmark)
+
+> **Detailed Report:** See [LOW_RANK_TRAJECTORIES.md](file:///home/prinshu/exp/weightSpace/anomlydet/LOW_RANK_TRAJECTORIES.md) for full mathematical derivations, rank ablations, and per-seed metrics.
+
+Instead of forecasting thousands of weights independently, we project checkpoint displacement trajectories into their intrinsic subspace via thin SVD ($D \approx U_r C_r$), forecast latent coefficients, and reconstruct candidate model parameters.
+
+### Key Visualizations
+
+| Low-Rank Subspace Concentration | California Housing Performance vs. Rank |
+| :---: | :---: |
+| ![Explained Variance](low_rank_explained_variance.png) | ![Regression Rank vs Performance](low_rank_performance_vs_rank.png) |
+
+| MNIST Plateau Performance vs. Rank | Compute Overhead & Latency Comparison |
+| :---: | :---: |
+| ![MNIST Rank vs Performance](low_rank_mnist_performance_vs_rank.png) | ![Compute Overhead](low_rank_compute_tradeoff.png) |
+
+### 10-Seed Statistical Summary ($r \in \{1, 4, 8, 16\}$)
+
+| Metric / Scenario | Rank 1 | Rank 4 | Rank 8 | Rank 16 | Baseline Comparison |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Explained Trajectory Variance (California)** | **`93.21%`** | **`99.44%`** | **`99.97%`** | **`100.00%`** | $>99\%$ in $\le 4$ dimensions |
+| **Explained Trajectory Variance (MNIST)** | **`82.10%`** | **`97.90%`** | **`99.83%`** | **`99.98%`** | $>97.9\%$ in $\le 4$ dimensions |
+| **California Housing Test MSE (Linear)** | `0.3213` | `0.5259` 💥 | `0.5626` 💥 | `0.5631` 💥 | Severe linear divergence |
+| **California Housing Test MSE (TimesFM)** | `0.2995` | `0.3030` | `0.3025` | `0.3024` | Frozen: `0.2916`, Adam: `0.2815` |
+| **MNIST Test Loss (Low-Rank Linear)** | `0.6640` | `2.7066` 💥 | `2.8602` 💥 | `2.7887` 💥 | Catastrophic linear blow-up |
+| **MNIST Test Loss (Low-Rank TimesFM)** | **`0.1880`** 🟢 | `0.1932` | `0.1973` | `0.1973` | Frozen: `0.2038`, SGD: `0.1983` |
+| **MNIST Test Loss (TimesFM Shuffled Control)** | **`0.1808`** 🏆 | **`0.1810`** 🏆 | `0.1814` | `0.1815` | **Matches SWA (`0.1810`) identically!** |
+| **Forecasting Latency (Wall-Clock GPU)** | **`31.8 ms`** | **`52.1 ms`** | **`119.0 ms`** | **`219.0 ms`** | Full TimesFM: `45,900 ms` (**880x faster!**) |
+
+### Core Takeaways from Low-Rank Decomposition:
+1. **The Intrinsic Optimization Manifold is Rank $\le 4$:** Over $97.9\%$ to $99.4\%$ of cumulative checkpoint movement is captured by just 4 singular vectors.
+2. **Linear Extrapolation Diverges in Latent Space:** Naive linear extrapolation projects mini-batch noise outward, causing severe divergence ($0.20 \to 2.71$ loss). Foundation model forecasting (or non-linear shrinkage) is strictly required to bound the trajectory.
+3. **880x Wall-Clock Latency Reduction:** Low-rank TimesFM slashes forecasting latency from $45.9$ seconds to $52$ milliseconds, making parameter forecasting $12.5\times$ faster than continuing SGD training ($52$ ms vs $650$ ms).
+4. **TimesFM Operates as an Implicit SWA Operator:** In stationary plateaus, the time-shuffled control achieves identical test loss (`0.1810`) to online SWA (`0.1810`). Foundation models do not learn directional forward travel in plateau regimes; they perform non-linear shrinkage towards the trajectory centroid.
+
+---
+
 ## ⚠️ Failure Analysis & Operational Limitations
 
 | Scenario / Regime | Observed Failure Mode | Root Cause | Recommended Remedy |
@@ -92,18 +129,16 @@ Evaluated across **Early Descent (Step 64)**, **Middle Descent (Step 500)**, and
 ## 🛠️ Repository Structure
 
 ```
+├── experiment_low_rank_forecasting.py# 10-seed Low-Rank SVD + Latent TimesFM/Linear benchmark
+├── generate_low_rank_figures.py      # Low-rank publication figure generation script
+├── LOW_RANK_TRAJECTORIES.md          # Comprehensive Low-Rank Trajectory & Latent Extrapolation Report
+├── low_rank_mnist_results.json       # 10-seed raw metrics & stats for MNIST low-rank benchmark
+├── low_rank_regression_results.json  # 10-seed raw metrics & stats for California Housing low-rank
 ├── benchmark_rigorous_mnist.py       # Multi-epoch 3-stage MNIST benchmark with statistical tests
 ├── benchmark_rigorous_regression.py  # Leakage-free California Housing benchmark across 5 seeds
 ├── benchmark_cnn_mnist.py            # Convolutional network replication benchmark (SmallCNN)
-├── generate_publication_figures.py   # Publication figure generation script
-├── experiment_weight_forecast.py     # Initial descent exploration
-├── experiment_saturation_forecast.py # Initial plateau exploration
-├── experiment_saturation_covariate.py# XReg + TimesFM loss covariate exploration
-├── experiment_regression_forecast.py # Initial tabular regression exploration
+├── generate_publication_figures.py   # Full per-weight publication figure generation script
 ├── EXPERIMENTS.md                    # Detailed research log, hypothesis tests, and raw metrics
-├── rigorous_mnist_benchmark_results.json # Full multi-seed MNIST data & p-values
-├── rigorous_regression_results.json  # Full multi-seed regression data & CIs
-├── cnn_replication_results.json      # Small CNN metrics across seeds
 ├── requirements.txt                  # Python dependencies
 └── README.md                         # Main research documentation
 ```
@@ -120,7 +155,16 @@ pip install -r requirements.txt
 ```
 
 ### Run Benchmarks
-1. **Multi-Stage MNIST Benchmark (Multi-epoch, 5 seeds, paired t-tests):**
+1. **Low-Rank Weight Trajectory Benchmark (10 seeds, Ranks 1-16, SVD, Linear vs TimesFM):**
+   ```bash
+   # California Housing Regression
+   python -c "from experiment_low_rank_forecasting import run_low_rank_regression; run_low_rank_regression(seeds=list(range(42, 52)))"
+   # MNIST Classification
+   python -c "from experiment_low_rank_forecasting import run_low_rank_mnist; run_low_rank_mnist(seeds=list(range(42, 52)))"
+   # Generate figures
+   python generate_low_rank_figures.py
+   ```
+2. **Multi-Stage MNIST Benchmark (Multi-epoch, 5 seeds, paired t-tests):**
    ```bash
    python benchmark_rigorous_mnist.py
    ```
