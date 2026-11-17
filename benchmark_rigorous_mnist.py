@@ -56,7 +56,7 @@ def evaluate(model, dataloader, device, criterion):
 # 2. Rigorous Multi-Seed & Multi-Stage Benchmark
 # -------------------------------------------------------------
 def run_rigorous_benchmark(
-    seeds=[42, 43, 44, 45, 46],
+    seeds=list(range(42, 52)),
     total_steps=2500,
     stage1_step=150,   # Early descent
     stage2_step=750,   # Middle training
@@ -76,9 +76,14 @@ def run_rigorous_benchmark(
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
-    train_dataset = datasets.MNIST(root="./data", train=True, download=False, transform=transform)
+    full_train = datasets.MNIST(root="./data", train=True, download=False, transform=transform)
+    # Strict Train / Validation Split (50,000 train, 10,000 validation)
+    train_subset, val_subset = torch.utils.data.random_split(
+        full_train, [50000, 10000], generator=torch.Generator().manual_seed(42)
+    )
     test_dataset = datasets.MNIST(root="./data", train=False, download=False, transform=transform)
 
+    val_loader = DataLoader(val_subset, batch_size=256, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
     criterion = nn.CrossEntropyLoss()
 
@@ -114,14 +119,27 @@ def run_rigorous_benchmark(
         return W_fut_trend.T + res_pred
 
     all_seed_results = []
+    if os.path.exists("rigorous_mnist_benchmark_results.json"):
+        try:
+            with open("rigorous_mnist_benchmark_results.json") as f:
+                existing_data = json.load(f)
+                all_seed_results = existing_data.get("per_seed_runs", [])
+        except Exception:
+            all_seed_results = []
+
     timing_metrics = {"tfm_forecast_seconds": [], "sgd_train_seconds": []}
 
     for seed_idx, seed in enumerate(seeds):
+        existing_seeds = [s["seed"] for s in all_seed_results]
+        if seed in existing_seeds:
+            print(f">>> Seed {seed} already evaluated, skipping. <<<")
+            continue
+
         print(f"\n>>> Running Seed {seed} ({seed_idx + 1}/{len(seeds)}) <<<")
         torch.manual_seed(seed)
         np.random.seed(seed)
 
-        train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+        train_loader = DataLoader(train_subset, batch_size=64, shuffle=True)
         model = CompactMLP(in_features=196, hidden_dim=16, num_classes=10).to(device)
         optimizer = torch.optim.SGD(model.parameters(), lr=0.03, momentum=0.9)
 
@@ -277,8 +295,10 @@ def run_rigorous_benchmark(
             "tfm_time_shuffled": {"loss": l_s3_shuffled, "acc": a_s3_shuffled}
         }
 
-        print(f"  Stage 3 Plateau: Frozen={l_s3_f:.4f} | SWA={l_s3_swa:.4f} | EMA={l_s3_ema:.4f} | TimesFM-Ordered={l_s3_ordered:.4f} | TimesFM-Shuffled={l_s3_shuffled:.4f}")
+        print(f"  Stage 3 Plateau: Frozen={l_s3_f:.4f} | SWA={l_s3_swa:.4f} | EMA={l_s3_ema:.4f} | TimesFM-Ordered={l_s3_ordered:.4f} | TimesFM-Shuffled={l_s3_shuffled:.4f}", flush=True)
         all_seed_results.append(seed_data)
+        with open("rigorous_mnist_benchmark_results.json", "w") as f:
+            json.dump({"per_seed_runs": all_seed_results}, f, indent=2)
 
     # ---------------------------------------------------------
     # 3. Aggregate Statistical Analysis (Paired t-tests & 95% CI)
@@ -350,4 +370,4 @@ def run_rigorous_benchmark(
     return output_payload
 
 if __name__ == "__main__":
-    run_rigorous_benchmark(seeds=[42, 43, 44, 45, 46])
+    run_rigorous_benchmark(seeds=list(range(42, 52)))

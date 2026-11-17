@@ -72,14 +72,19 @@ def run_saturation_experiment(
     print(f"Total Steps: {total_steps} | Cut-off at Saturation: Step {context_k} | Horizon: {horizon_H} steps")
 
     # Load MNIST
+    # Load MNIST with Clean 3-Way Split (50k train / 10k val / 10k test)
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
-    train_dataset = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+    full_train = datasets.MNIST(root="./data", train=True, download=True, transform=transform)
+    train_subset, val_subset = torch.utils.data.random_split(
+        full_train, [50000, 10000], generator=torch.Generator().manual_seed(42)
+    )
     test_dataset = datasets.MNIST(root="./data", train=False, download=True, transform=transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_subset, batch_size=batch_size, shuffle=True)
+    val_loader = DataLoader(val_subset, batch_size=256, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
     in_features = 196 if downsample else 784

@@ -45,7 +45,7 @@ def evaluate_mse(model, x_tensor, y_tensor, criterion):
     return loss
 
 def run_clean_regression_benchmark(
-    seeds=[42, 43, 44, 45, 46],
+    seeds=list(range(42, 52)),
     total_steps=300,
     sat_step=200,
     horizon=48,
@@ -204,4 +204,4 @@ def run_clean_regression_benchmark(
     return all_seed_results
 
 if __name__ == "__main__":
-    run_clean_regression_benchmark(seeds=[42, 43, 44, 45, 46])
+    run_clean_regression_benchmark(seeds=list(range(42, 52)))

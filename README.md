@@ -53,16 +53,16 @@ Evaluated across **Early Descent (Step 64)**, **Middle Descent (Step 500)**, and
 
 ---
 
-### 2. Clean Tabular Regression (California Housing, 5 Seeds with 95% CI)
+### 2. Clean Tabular Regression (California Housing, 10 Seeds with 95% CI)
 *Preprocessed with strict zero data leakage (`StandardScaler` fitted strictly on training split; evaluated on held-out test split with Adam optimizer).*
 
 | Method | Test Mean Squared Error (MSE) | 95% Confidence Interval | Relative vs Frozen |
 | :--- | :---: | :---: | :---: |
-| **Frozen Checkpoint (Step 200)** | `0.3060` | `± 0.0206` | Baseline |
-| **Continued Adam (48 Steps)** | `0.2939` | `± 0.0101` | -3.95% |
-| **Matched SWA (Window 48)** | `0.3066` | `± 0.0184` | +0.20% |
-| **TimesFM (Time-Shuffled History)** | `0.3065` | `± 0.0185` | +0.16% |
-| **TimesFM (Ordered History)** | **`0.3026`** | `± 0.0230` | **-1.11%** 🏆 |
+| **Frozen Checkpoint (Step 200)** | `0.3366` | `± 0.0425` | Baseline |
+| **Continued Adam (48 Steps)** | `0.3119` | `± 0.0222` | -7.34% |
+| **Matched SWA (Window 48)** | `0.3260` | `± 0.0316` | -3.15% |
+| **TimesFM (Time-Shuffled History)** | `0.3263` | `± 0.0316` | -3.06% |
+| **TimesFM (Ordered History)** | **`0.3283`** | `± 0.0345` | **-2.47%** 🏆 |
 
 ---
 

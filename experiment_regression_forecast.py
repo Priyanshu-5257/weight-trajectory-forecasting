@@ -62,23 +62,26 @@ def run_regression_experiment(
     print("=== California Housing Regression Trajectory Experiment ===")
     print(f"Device: {device} | Optimizer: Adam (lr=0.005) | Total Steps: {total_steps}")
 
-    # Prepare Data
+    # Prepare Data with Strict No-Leakage Protocol
     X_raw, y_raw = fetch_california_housing(return_X_y=True)
+    X_train_raw, X_test_raw, y_train_raw, y_test_raw = train_test_split(
+        X_raw, y_raw, test_size=0.2, random_state=42
+    )
+    # Fit scalers strictly on training data
     scaler_x = StandardScaler()
     scaler_y = StandardScaler()
-    X_scaled = scaler_x.fit_transform(X_raw)
-    y_scaled = scaler_y.fit_transform(y_raw.reshape(-1, 1)).flatten()
+    X_train_scaled = scaler_x.fit_transform(X_train_raw)
+    y_train_scaled = scaler_y.fit_transform(y_train_raw.reshape(-1, 1)).flatten()
 
-    X_train_np, X_val_np, y_train_np, y_val_np = train_test_split(
-        X_scaled, y_scaled, test_size=0.2, random_state=42
-    )
+    X_test_scaled = scaler_x.transform(X_test_raw)
+    y_test_scaled = scaler_y.transform(y_test_raw.reshape(-1, 1)).flatten()
 
-    X_val = torch.tensor(X_val_np, dtype=torch.float32).to(device)
-    y_val = torch.tensor(y_val_np, dtype=torch.float32).to(device)
+    X_val = torch.tensor(X_test_scaled, dtype=torch.float32).to(device)
+    y_val = torch.tensor(y_test_scaled, dtype=torch.float32).to(device)
 
     train_dataset = TensorDataset(
-        torch.tensor(X_train_np, dtype=torch.float32),
-        torch.tensor(y_train_np, dtype=torch.float32)
+        torch.tensor(X_train_scaled, dtype=torch.float32),
+        torch.tensor(y_train_scaled, dtype=torch.float32)
     )
     train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
 

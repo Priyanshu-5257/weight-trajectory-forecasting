@@ -25,14 +25,19 @@ def run_saturation_covariate_experiment(
     print(f"Device: {device}")
     print(f"Context Cut-off: Step {context_k} | Horizon: {horizon_H} steps | Saturation Window: {sat_window} steps")
 
+    # Load MNIST with Clean 3-Way Split (50k train / 10k val / 10k test)
     transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
     ])
-    train_dataset = datasets.MNIST(root="./data", train=True, download=False, transform=transform)
+    full_train = datasets.MNIST(root="./data", train=True, download=False, transform=transform)
+    train_subset, val_subset = torch.utils.data.random_split(
+        full_train, [50000, 10000], generator=torch.Generator().manual_seed(42)
+    )
     test_dataset = datasets.MNIST(root="./data", train=False, download=False, transform=transform)
 
-    train_loader = DataLoader(train_dataset, batch_size=64, shuffle=True)
+    train_loader = DataLoader(train_subset, batch_size=64, shuffle=True)
+    val_loader = DataLoader(val_subset, batch_size=256, shuffle=False)
     test_loader = DataLoader(test_dataset, batch_size=256, shuffle=False)
 
     torch.manual_seed(42)
