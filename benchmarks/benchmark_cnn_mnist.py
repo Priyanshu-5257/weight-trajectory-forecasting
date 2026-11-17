@@ -152,9 +152,13 @@ def run_cnn_benchmark(
             "timesfm": {"loss": l_tfm, "acc": a_tfm}
         })
 
-    with open("cnn_replication_results.json", "w") as f:
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_file = os.path.join(results_dir, "cnn_replication_results.json")
+    with open(out_file, "w") as f:
         json.dump(cnn_results, f, indent=2)
-    print("\nSaved CNN results to cnn_replication_results.json")
+    print(f"\nSaved CNN results to {out_file}")
 
     return cnn_results
 

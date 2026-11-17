@@ -863,13 +863,18 @@ def aggregate_and_export_results(reg_data, mnist_data, compute_bench, ranks, hor
         "mnist_raw_runs": mnist_data
     }
 
-    with open(f"{filename_prefix}_results.json", "w") as f:
-        json.dump(full_payload, f, indent=2)
-    print(f"Saved {filename_prefix}_results.json")
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_base = os.path.join(results_dir, filename_prefix) if not os.path.isabs(filename_prefix) else filename_prefix
 
-    with open(f"{filename_prefix}_summary.json", "w") as f:
+    with open(f"{out_base}_results.json", "w") as f:
+        json.dump(full_payload, f, indent=2)
+    print(f"Saved {out_base}_results.json")
+
+    with open(f"{out_base}_summary.json", "w") as f:
         json.dump(summary, f, indent=2)
-    print(f"Saved {filename_prefix}_summary.json")
+    print(f"Saved {out_base}_summary.json")
 
     # Export CSV for tabular audit
     csv_rows = []
@@ -932,12 +937,12 @@ def aggregate_and_export_results(reg_data, mnist_data, compute_bench, ranks, hor
         csv_rows.append(row)
 
     fieldnames = list(csv_rows[0].keys())
-    with open(f"{filename_prefix}_per_seed.csv", "w", newline="") as f:
+    with open(f"{out_base}_per_seed.csv", "w", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in csv_rows:
             writer.writerow(r)
-    print(f"Saved {filename_prefix}_per_seed.csv")
+    print(f"Saved {out_base}_per_seed.csv")
 
     return summary
 

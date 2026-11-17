@@ -249,17 +249,26 @@ def run_saturation_covariate_experiment(
     plt.legend()
     plt.grid(True, alpha=0.3)
 
-    plt.tight_layout()
-    plt.savefig("saturation_covariate_forecast.png", dpi=300)
-    print("\nSaved plot to saturation_covariate_forecast.png")
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    fig_dir = os.path.join(root_dir, "figures")
+    res_dir = os.path.join(root_dir, "results")
+    os.makedirs(fig_dir, exist_ok=True)
+    os.makedirs(res_dir, exist_ok=True)
 
-    with open("saturation_covariate_results.json", "w") as f:
+    plt.tight_layout()
+    out_fig = os.path.join(fig_dir, "saturation_covariate_forecast.png")
+    plt.savefig(out_fig, dpi=300)
+    print(f"\nSaved plot to {out_fig}")
+    plt.close()
+
+    out_res = os.path.join(res_dir, "saturation_covariate_results.json")
+    with open(out_res, "w") as f:
         json.dump({
             "step_240_frozen": {"loss": loss_k, "acc": acc_k},
             "swa": {"loss": loss_swa, "acc": acc_swa},
             "comparison": comparison_data
         }, f, indent=2)
-    print("Saved metrics to saturation_covariate_results.json")
+    print(f"Saved metrics to {out_res}")
 
 if __name__ == "__main__":
     run_saturation_covariate_experiment()

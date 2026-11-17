@@ -3,14 +3,30 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+RESULTS_DIR = os.path.join(ROOT_DIR, "results")
+FIG_DIR = os.path.join(ROOT_DIR, "figures")
+os.makedirs(FIG_DIR, exist_ok=True)
+
+def find_file(filename):
+    p1 = os.path.join(RESULTS_DIR, filename)
+    if os.path.exists(p1):
+        return p1
+    if os.path.exists(filename):
+        return filename
+    return None
+
 def generate_all_low_rank_figures():
     # -------------------------------------------------------------
     # 1. Explained Variance & Reconstruction Error vs. Rank
     # -------------------------------------------------------------
-    if os.path.exists("low_rank_regression_results.json") and os.path.exists("low_rank_mnist_results.json"):
-        with open("low_rank_regression_results.json") as f:
+    reg_path = find_file("low_rank_regression_results.json")
+    mnist_path = find_file("low_rank_mnist_results.json")
+
+    if reg_path and mnist_path:
+        with open(reg_path) as f:
             reg_data = json.load(f)["summary"]
-        with open("low_rank_mnist_results.json") as f:
+        with open(mnist_path) as f:
             mnist_data = json.load(f)["summary"]
 
         ranks = [1, 4, 8, 16]
@@ -53,14 +69,16 @@ def generate_all_low_rank_figures():
             ax2.annotate(f"{val:.1f}%", (r, val), textcoords="offset points", xytext=(10, 8), ha='center', fontweight='bold', fontsize=8, color='#ff7f0e')
 
         plt.tight_layout()
-        plt.savefig("low_rank_explained_variance.png", dpi=300)
-        print("Saved low_rank_explained_variance.png")
+        out1 = os.path.join(FIG_DIR, "low_rank_explained_variance.png")
+        plt.savefig(out1, dpi=300)
+        print(f"Saved {out1}")
+        plt.close()
 
     # -------------------------------------------------------------
     # 2. Performance vs. Rank Across Methods (Regression)
     # -------------------------------------------------------------
-    if os.path.exists("low_rank_regression_results.json"):
-        with open("low_rank_regression_results.json") as f:
+    if reg_path:
+        with open(reg_path) as f:
             reg_sum = json.load(f)["summary"]
 
         ranks = [1, 4, 8, 16]
@@ -98,14 +116,16 @@ def generate_all_low_rank_figures():
         plt.grid(True, linestyle='--', alpha=0.4)
         plt.legend(loc='upper right', framealpha=0.9)
         plt.tight_layout()
-        plt.savefig("low_rank_performance_vs_rank.png", dpi=300)
-        print("Saved low_rank_performance_vs_rank.png")
+        out2 = os.path.join(FIG_DIR, "low_rank_performance_vs_rank.png")
+        plt.savefig(out2, dpi=300)
+        print(f"Saved {out2}")
+        plt.close()
 
     # -------------------------------------------------------------
     # 2b. Performance vs. Rank Across Methods (MNIST Classification)
     # -------------------------------------------------------------
-    if os.path.exists("low_rank_mnist_results.json"):
-        with open("low_rank_mnist_results.json") as f:
+    if mnist_path:
+        with open(mnist_path) as f:
             mnist_sum = json.load(f)["summary"]
 
         ranks = [1, 4, 8, 16]
@@ -136,8 +156,10 @@ def generate_all_low_rank_figures():
         plt.grid(True, linestyle='--', alpha=0.4)
         plt.legend(loc='upper left', framealpha=0.9)
         plt.tight_layout()
-        plt.savefig("low_rank_mnist_performance_vs_rank.png", dpi=300)
-        print("Saved low_rank_mnist_performance_vs_rank.png")
+        out3 = os.path.join(FIG_DIR, "low_rank_mnist_performance_vs_rank.png")
+        plt.savefig(out3, dpi=300)
+        print(f"Saved {out3}")
+        plt.close()
 
     # -------------------------------------------------------------
     # 3. Compute Efficiency & Latency Comparison
@@ -167,8 +189,10 @@ def generate_all_low_rank_figures():
     plt.text(bars[4].get_x() + bars[4].get_width()/2.0, 75, "45.9 s", ha='center', va='bottom', fontweight='bold', color='#d62728')
 
     plt.tight_layout()
-    plt.savefig("low_rank_compute_tradeoff.png", dpi=300)
-    print("Saved low_rank_compute_tradeoff.png")
+    out4 = os.path.join(FIG_DIR, "low_rank_compute_tradeoff.png")
+    plt.savefig(out4, dpi=300)
+    print(f"Saved {out4}")
+    plt.close()
 
 if __name__ == "__main__":
     generate_all_low_rank_figures()

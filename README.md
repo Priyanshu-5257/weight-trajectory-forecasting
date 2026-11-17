@@ -24,16 +24,16 @@ This repository contains the rigorous empirical validation, statistical benchmar
 ## 📊 Key Benchmark Visualizations
 
 ### 1. Rigorous MNIST Saturation Plateau (Multi-Epoch, 5 Seeds with 95% CI)
-![Rigorous MNIST Benchmark](rigorous_mnist_benchmark.png)
+![Rigorous MNIST Benchmark](figures/rigorous_mnist_benchmark.png)
 
 ### 2. Clean California Housing Regression (Zero Data Leakage, 5 Seeds with 95% CI)
-![Rigorous Regression Benchmark](rigorous_regression_benchmark.png)
+![Rigorous Regression Benchmark](figures/rigorous_regression_benchmark.png)
 
 ### 3. Compute Latency & Efficiency Tradeoff (Wall-Clock GPU Seconds)
-![Compute Efficiency Tradeoff](efficiency_tradeoff.png)
+![Compute Efficiency Tradeoff](figures/efficiency_tradeoff.png)
 
 ### 4. Convolutional Architecture Replication (Small CNN on MNIST)
-![CNN Replication Benchmark](cnn_replication_benchmark.png)
+![CNN Replication Benchmark](figures/cnn_replication_benchmark.png)
 
 ---
 
@@ -80,7 +80,7 @@ Evaluated across **Early Descent (Step 64)**, **Middle Descent (Step 500)**, and
 
 ## ⚡ Low-Rank Trajectory Forecasting: 880x Speedup & Latent Extrapolation (10-Seed Benchmark)
 
-> **Detailed Report:** See [LOW_RANK_TRAJECTORIES.md](file:///home/prinshu/exp/weightSpace/anomlydet/LOW_RANK_TRAJECTORIES.md) for full mathematical derivations, rank ablations, and per-seed metrics.
+> **Detailed Report:** See [LOW_RANK_TRAJECTORIES.md](docs/LOW_RANK_TRAJECTORIES.md) for full mathematical derivations, rank ablations, and per-seed metrics.
 
 Instead of forecasting thousands of weights independently, we project checkpoint displacement trajectories into their intrinsic subspace via thin SVD ($D \approx U_r C_r$), forecast latent coefficients, and reconstruct candidate model parameters.
 
@@ -88,11 +88,11 @@ Instead of forecasting thousands of weights independently, we project checkpoint
 
 | Low-Rank Subspace Concentration | California Housing Performance vs. Rank |
 | :---: | :---: |
-| ![Explained Variance](low_rank_explained_variance.png) | ![Regression Rank vs Performance](low_rank_performance_vs_rank.png) |
+| ![Explained Variance](figures/low_rank_explained_variance.png) | ![Regression Rank vs Performance](figures/low_rank_performance_vs_rank.png) |
 
 | MNIST Plateau Performance vs. Rank | Compute Overhead & Latency Comparison |
 | :---: | :---: |
-| ![MNIST Rank vs Performance](low_rank_mnist_performance_vs_rank.png) | ![Compute Overhead](low_rank_compute_tradeoff.png) |
+| ![MNIST Rank vs Performance](figures/low_rank_mnist_performance_vs_rank.png) | ![Compute Overhead](figures/low_rank_compute_tradeoff.png) |
 
 ### 10-Seed Statistical Summary ($r \in \{1, 4, 8, 16\}$)
 
@@ -117,19 +117,19 @@ Instead of forecasting thousands of weights independently, we project checkpoint
 
 ## 🛑 Feasibility Benchmark (v1.2) & Pre-Registered NO-GO Verdict
 
-> **Full Feasibility Report:** See [FEASIBILITY_REPORT.md](file:///home/prinshu/exp/weightSpace/anomlydet/FEASIBILITY_REPORT.md) for full latency profiling, mechanism alignment derivations, and scalability analysis.
+> **Full Feasibility Report:** See [FEASIBILITY_REPORT.md](docs/FEASIBILITY_REPORT.md) for full latency profiling, mechanism alignment derivations, and scalability analysis.
 
 ### Executive Recommendation: **NO-GO for LoRA Adapters / LLM Scaling**
 
-We executed the pre-registered **Low-Rank Forecasting Feasibility Benchmark (v1.2)** across 10 paired seeds (`42..51`) to determine whether foundation-model weight forecasting should be escalated to LoRA adapters. The benchmark enforces strict data hygiene (zero-leakage splits verified via automated unit tests in [`test_leakage_and_reproducibility.py`](file:///home/prinshu/exp/weightSpace/anomlydet/test_leakage_and_reproducibility.py)) and selects all hyperparameters ($r \in \{1, 4, 8, 16\}$, $h \in \{8, 16, 32\}$) strictly via minimum validation loss before evaluating once on untouched test sets.
+We executed the pre-registered **Low-Rank Forecasting Feasibility Benchmark (v1.2)** across 10 paired seeds (`42..51`) to determine whether foundation-model weight forecasting should be escalated to LoRA adapters. The benchmark enforces strict data hygiene (zero-leakage splits verified via automated unit tests in [`test_leakage_and_reproducibility.py`](tests/test_leakage_and_reproducibility.py)) and selects all hyperparameters ($r \in \{1, 4, 8, 16\}$, $h \in \{8, 16, 32\}$) strictly via minimum validation loss before evaluating once on untouched test sets.
 
 | Benchmark Visualization | Mechanistic Probe Visualization |
 | :---: | :---: |
-| ![Quality vs Compute](feasibility_quality_vs_compute.png) | ![Mechanistic Alignment](feasibility_mechanism_alignment.png) |
+| ![Quality vs Compute](figures/feasibility_quality_vs_compute.png) | ![Mechanistic Alignment](figures/feasibility_mechanism_alignment.png) |
 
 | Rank vs Quality | Pipeline Latency Breakdown |
 | :---: | :---: |
-| ![Rank vs Quality](feasibility_rank_vs_quality.png) | ![Latency Breakdown](feasibility_latency_breakdown.png) |
+| ![Rank vs Quality](figures/feasibility_rank_vs_quality.png) | ![Latency Breakdown](figures/feasibility_latency_breakdown.png) |
 
 ### Validation-Selected Test Performance (10 Paired Seeds, 95% CI)
 
@@ -166,25 +166,49 @@ We executed the pre-registered **Low-Rank Forecasting Feasibility Benchmark (v1.
 ## 🛠️ Repository Structure
 
 ```
-├── benchmark_feasibility_v1_2.py     # Feasibility Benchmark runner (10 seeds, val-selection, latency profiling)
-├── test_leakage_and_reproducibility.py# Automated unit test suite verifying zero data leakage & reproducibility
-├── generate_feasibility_figures.py   # Publication figures generator for Feasibility Benchmark
-├── FEASIBILITY_REPORT.md             # Definitive Feasibility Report & NO-GO recommendation
-├── feasibility_benchmark_results.json# Raw 10-seed per-run benchmark metrics & mechanistic probes
-├── feasibility_benchmark_summary.json# Aggregated statistics, 95% CIs, and latency breakdowns
-├── feasibility_benchmark_per_seed.csv# Flat CSV export of all 20 runs for auditability
-├── experiment_low_rank_forecasting.py# Initial Low-Rank SVD + Latent TimesFM/Linear benchmark
-├── generate_low_rank_figures.py      # Low-rank publication figure generation script
-├── LOW_RANK_TRAJECTORIES.md          # Low-Rank Trajectory & Latent Extrapolation Report
-├── low_rank_mnist_results.json       # 10-seed raw metrics & stats for MNIST low-rank benchmark
-├── low_rank_regression_results.json  # 10-seed raw metrics & stats for California Housing low-rank
-├── benchmark_rigorous_mnist.py       # Multi-epoch 3-stage MNIST benchmark with statistical tests
-├── benchmark_rigorous_regression.py  # Leakage-free California Housing benchmark across 5 seeds
-├── benchmark_cnn_mnist.py            # Convolutional network replication benchmark (SmallCNN)
-├── generate_publication_figures.py   # Full per-weight publication figure generation script
-├── EXPERIMENTS.md                    # Detailed research log, hypothesis tests, and raw metrics
-├── requirements.txt                  # Python dependencies
-└── README.md                         # Main research documentation
+├── src/                          # Core reusable library modules
+│   ├── __init__.py
+│   ├── models.py                 # Neural network architectures (MLP, CompactMNISTMLP, SmallCNN)
+│   └── low_rank.py               # LowRankTrajectoryEngine & SVD decomposition
+│
+├── benchmarks/                   # Standalone benchmark execution scripts
+│   ├── benchmark_feasibility_v1_2.py
+│   ├── benchmark_low_rank.py
+│   ├── benchmark_rigorous_mnist.py
+│   ├── benchmark_rigorous_regression.py
+│   └── benchmark_cnn_mnist.py
+│
+├── experiments/                  # Exploratory / baseline experiment scripts
+│   ├── experiment_weight_forecast.py
+│   ├── experiment_saturation_forecast.py
+│   ├── experiment_saturation_covariate.py
+│   └── experiment_regression_forecast.py
+│
+├── scripts/                      # Publication plotting scripts
+│   ├── generate_feasibility_figures.py
+│   ├── generate_low_rank_figures.py
+│   └── generate_publication_figures.py
+│
+├── tests/                        # Automated unit test suite
+│   ├── __init__.py
+│   └── test_leakage_and_reproducibility.py
+│
+├── results/                      # Raw metrics and evaluation logs (JSON, CSV)
+│   ├── feasibility_benchmark_results.json
+│   ├── feasibility_benchmark_summary.json
+│   ├── feasibility_benchmark_per_seed.csv
+│   ├── low_rank_mnist_results.json
+│   ├── low_rank_regression_results.json
+│   └── ...
+│
+├── figures/                      # High-resolution benchmark publication figures (.png)
+├── docs/                         # In-depth research reports & experiment logs
+│   ├── FEASIBILITY_REPORT.md     # Definitive Feasibility Report & NO-GO recommendation
+│   ├── LOW_RANK_TRAJECTORIES.md  # Low-rank subspace concentration & latent ablation
+│   └── EXPERIMENTS.md            # Detailed chronological research log
+│
+├── requirements.txt              # Python dependencies
+└── README.md                     # Main repository landing page
 ```
 
 ---
@@ -200,38 +224,38 @@ pip install -r requirements.txt
 
 ### Run Automated Tests (Data Leakage & Reproducibility)
 ```bash
-pytest test_leakage_and_reproducibility.py -v
+pytest tests/ -v
 ```
 
 ### Run Benchmarks
 1. **Feasibility Benchmark (v1.2 — 10 seeds, validation selection, mechanism probes, compute profiling):**
    ```bash
-   python benchmark_feasibility_v1_2.py
-   python generate_feasibility_figures.py
+   python benchmarks/benchmark_feasibility_v1_2.py
+   python scripts/generate_feasibility_figures.py
    ```
 2. **Low-Rank Weight Trajectory Benchmark (10 seeds, Ranks 1-16, SVD, Linear vs TimesFM):**
    ```bash
    # California Housing Regression
-   python -c "from experiment_low_rank_forecasting import run_low_rank_regression; run_low_rank_regression(seeds=list(range(42, 52)))"
+   python -c "from benchmarks.benchmark_low_rank import run_low_rank_regression; run_low_rank_regression(seeds=list(range(42, 52)))"
    # MNIST Classification
-   python -c "from experiment_low_rank_forecasting import run_low_rank_mnist; run_low_rank_mnist(seeds=list(range(42, 52)))"
-   python generate_low_rank_figures.py
+   python -c "from benchmarks.benchmark_low_rank import run_low_rank_mnist; run_low_rank_mnist(seeds=list(range(42, 52)))"
+   python scripts/generate_low_rank_figures.py
    ```
-2. **Multi-Stage MNIST Benchmark (Multi-epoch, 5 seeds, paired t-tests):**
+3. **Multi-Stage MNIST Benchmark (Multi-epoch, 5 seeds, paired t-tests):**
    ```bash
-   python benchmark_rigorous_mnist.py
+   python benchmarks/benchmark_rigorous_mnist.py
    ```
-2. **Leakage-Free California Housing Benchmark (5 seeds):**
+4. **Leakage-Free California Housing Benchmark (5 seeds):**
    ```bash
-   python benchmark_rigorous_regression.py
+   python benchmarks/benchmark_rigorous_regression.py
    ```
-3. **SmallCNN Replication Benchmark:**
+5. **SmallCNN Replication Benchmark:**
    ```bash
-   python benchmark_cnn_mnist.py
+   python benchmarks/benchmark_cnn_mnist.py
    ```
-4. **Regenerate Publication Figures:**
+6. **Regenerate All Publication Figures:**
    ```bash
-   python generate_publication_figures.py
+   python scripts/generate_publication_figures.py
    ```
 
 ---

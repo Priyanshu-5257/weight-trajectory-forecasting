@@ -4,7 +4,7 @@
 **Date:** November 17, 2026  
 **Final Recommendation:** **NO-GO** for Scaling to LoRA Adapters / Large Models  
 **Repository:** [github.com/Priyanshu-5257/weight-trajectory-forecasting](https://github.com/Priyanshu-5257/weight-trajectory-forecasting)  
-**Artifacts:** [`feasibility_benchmark_results.json`](feasibility_benchmark_results.json), [`feasibility_benchmark_summary.json`](feasibility_benchmark_summary.json), [`feasibility_benchmark_per_seed.csv`](feasibility_benchmark_per_seed.csv)
+**Artifacts:** [`feasibility_benchmark_results.json`](../results/feasibility_benchmark_results.json), [`feasibility_benchmark_summary.json`](../results/feasibility_benchmark_summary.json), [`feasibility_benchmark_per_seed.csv`](../results/feasibility_benchmark_per_seed.csv)
 
 ---
 

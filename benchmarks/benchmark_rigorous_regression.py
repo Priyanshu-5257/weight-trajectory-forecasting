@@ -189,7 +189,11 @@ def run_clean_regression_benchmark(
     print(f" TimesFM Time-Shuffled:Test MSE = {sh_m:.4f} +/- {sh_ci:.4f}")
     print("=" * 80)
 
-    with open("rigorous_regression_results.json", "w") as f:
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_file = os.path.join(results_dir, "rigorous_regression_results.json")
+    with open(out_file, "w") as f:
         json.dump({
             "summary": {
                 "frozen": {"mean": f_m, "ci95": f_ci},

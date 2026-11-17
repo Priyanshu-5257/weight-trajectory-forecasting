@@ -277,9 +277,13 @@ def run_regression_experiment(
         }
     }
 
-    with open("regression_results.json", "w") as f:
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    res_dir = os.path.join(root_dir, "results")
+    os.makedirs(res_dir, exist_ok=True)
+    out_file = os.path.join(res_dir, "regression_results.json")
+    with open(out_file, "w") as f:
         json.dump(results, f, indent=2)
-    print("\nSaved results to regression_results.json")
+    print(f"\nSaved results to {out_file}")
 
     return results
 

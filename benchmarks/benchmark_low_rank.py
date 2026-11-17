@@ -376,9 +376,13 @@ def run_low_rank_regression(
         "summary": summary,
         "per_seed_runs": all_seed_results
     }
-    with open("low_rank_regression_results.json", "w") as f:
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_file = os.path.join(results_dir, "low_rank_regression_results.json")
+    with open(out_file, "w") as f:
         json.dump(output_payload, f, indent=2)
-    print("\nSaved low_rank_regression_results.json", flush=True)
+    print(f"\nSaved {out_file}", flush=True)
 
     return output_payload
 
@@ -582,9 +586,13 @@ def run_low_rank_mnist(
         "summary": summary,
         "per_seed_runs": all_seed_results
     }
-    with open("low_rank_mnist_results.json", "w") as f:
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_file = os.path.join(results_dir, "low_rank_mnist_results.json")
+    with open(out_file, "w") as f:
         json.dump(output_payload, f, indent=2)
-    print("\nSaved low_rank_mnist_results.json", flush=True)
+    print(f"\nSaved {out_file}", flush=True)
 
     return output_payload
 

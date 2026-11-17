@@ -3,7 +3,15 @@ import json
 import numpy as np
 import matplotlib.pyplot as plt
 
-def generate_all_feasibility_figures(summary_path="feasibility_benchmark_summary.json"):
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DEFAULT_SUMMARY = os.path.join(ROOT_DIR, "results", "feasibility_benchmark_summary.json")
+FIG_DIR = os.path.join(ROOT_DIR, "figures")
+os.makedirs(FIG_DIR, exist_ok=True)
+
+def generate_all_feasibility_figures(summary_path=None):
+    if summary_path is None:
+        summary_path = DEFAULT_SUMMARY if os.path.exists(DEFAULT_SUMMARY) else "feasibility_benchmark_summary.json"
+
     if not os.path.exists(summary_path):
         print(f"Summary file {summary_path} not found. Skipping plot generation.")
         return
@@ -78,8 +86,9 @@ def generate_all_feasibility_figures(summary_path="feasibility_benchmark_summary
     ax2.legend(loc='upper right', fontsize=8.5, framealpha=0.9)
 
     plt.tight_layout()
-    plt.savefig("feasibility_rank_vs_quality.png", dpi=300)
-    print("Saved feasibility_rank_vs_quality.png")
+    out_path = os.path.join(FIG_DIR, "feasibility_rank_vs_quality.png")
+    plt.savefig(out_path, dpi=300)
+    print(f"Saved {out_path}")
     plt.close()
 
     # --------------------------------------------------------------------------
@@ -128,8 +137,9 @@ def generate_all_feasibility_figures(summary_path="feasibility_benchmark_summary
     plt.xlim(0.0005, 1000)
     plt.ylim(0.170, 0.220)
     plt.tight_layout()
-    plt.savefig("feasibility_quality_vs_compute.png", dpi=300)
-    print("Saved feasibility_quality_vs_compute.png")
+    out_path = os.path.join(FIG_DIR, "feasibility_quality_vs_compute.png")
+    plt.savefig(out_path, dpi=300)
+    print(f"Saved {out_path}")
     plt.close()
 
     # --------------------------------------------------------------------------
@@ -176,8 +186,9 @@ def generate_all_feasibility_figures(summary_path="feasibility_benchmark_summary
 
     bx2.set_ylim(0, max(stage_times) * 1.25)
     plt.tight_layout()
-    plt.savefig("feasibility_latency_breakdown.png", dpi=300)
-    print("Saved feasibility_latency_breakdown.png")
+    out_path = os.path.join(FIG_DIR, "feasibility_latency_breakdown.png")
+    plt.savefig(out_path, dpi=300)
+    print(f"Saved {out_path}")
     plt.close()
 
     # --------------------------------------------------------------------------
@@ -223,8 +234,9 @@ def generate_all_feasibility_figures(summary_path="feasibility_benchmark_summary
         cx2.annotate(f"{val:.2f}", (r, val), textcoords="offset points", xytext=(10, 8), ha='center', fontsize=8.5, color='#ff7f0e')
 
     plt.tight_layout()
-    plt.savefig("feasibility_mechanism_alignment.png", dpi=300)
-    print("Saved feasibility_mechanism_alignment.png")
+    out_path = os.path.join(FIG_DIR, "feasibility_mechanism_alignment.png")
+    plt.savefig(out_path, dpi=300)
+    print(f"Saved {out_path}")
     plt.close()
 
 if __name__ == "__main__":

@@ -118,10 +118,16 @@ def run_rigorous_benchmark(
         res_pred = forecast_weights_batch(W_res.T, horizon)
         return W_fut_trend.T + res_pred
 
+    root_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    results_dir = os.path.join(root_dir, "results")
+    os.makedirs(results_dir, exist_ok=True)
+    out_file = os.path.join(results_dir, "rigorous_mnist_benchmark_results.json")
+
     all_seed_results = []
-    if os.path.exists("rigorous_mnist_benchmark_results.json"):
+    lookup_file = out_file if os.path.exists(out_file) else "rigorous_mnist_benchmark_results.json"
+    if os.path.exists(lookup_file):
         try:
-            with open("rigorous_mnist_benchmark_results.json") as f:
+            with open(lookup_file) as f:
                 existing_data = json.load(f)
                 all_seed_results = existing_data.get("per_seed_runs", [])
         except Exception:
@@ -297,7 +303,7 @@ def run_rigorous_benchmark(
 
         print(f"  Stage 3 Plateau: Frozen={l_s3_f:.4f} | SWA={l_s3_swa:.4f} | EMA={l_s3_ema:.4f} | TimesFM-Ordered={l_s3_ordered:.4f} | TimesFM-Shuffled={l_s3_shuffled:.4f}", flush=True)
         all_seed_results.append(seed_data)
-        with open("rigorous_mnist_benchmark_results.json", "w") as f:
+        with open(out_file, "w") as f:
             json.dump({"per_seed_runs": all_seed_results}, f, indent=2)
 
     # ---------------------------------------------------------
@@ -363,9 +369,9 @@ def run_rigorous_benchmark(
         "summary_statistics": summary_stats,
         "per_seed_runs": all_seed_results
     }
-    with open("rigorous_mnist_benchmark_results.json", "w") as f:
+    with open(out_file, "w") as f:
         json.dump(output_payload, f, indent=2)
-    print("\nSaved comprehensive results to rigorous_mnist_benchmark_results.json")
+    print(f"\nSaved comprehensive results to {out_file}")
 
     return output_payload
 

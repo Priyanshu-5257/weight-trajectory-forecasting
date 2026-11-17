@@ -9,16 +9,18 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 from torchvision import datasets, transforms
 
-# Add workspace to path
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__)))
+# Add workspace root to path
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+if ROOT_DIR not in sys.path:
+    sys.path.insert(0, ROOT_DIR)
 
-from experiment_low_rank_forecasting import (
+from src.models import (
     RegressionMLP,
     CompactMNISTMLP,
     get_flat_params,
-    set_flat_params,
-    LowRankTrajectoryForecaster
+    set_flat_params
 )
+from src.low_rank import LowRankTrajectoryEngine as LowRankTrajectoryForecaster
 
 class TestLeakageAndReproducibility(unittest.TestCase):
     def setUp(self):
