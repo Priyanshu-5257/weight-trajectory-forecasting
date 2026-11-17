@@ -73,3 +73,42 @@ def load_mnist_tensors(data_root="./data", seed=42, device="cpu"):
         "x_val_t": x_val_t, "y_val_t": y_val_t,
         "x_test_t": x_test_t, "y_test_t": y_test_t
     }
+
+def load_modular_addition_dataset(p=113, frac_train=0.3, seed=42, device="cuda"):
+    """
+    Creates the exact modular addition dataset from Nanda et al. (2023) / Power et al. (2022).
+    - p: prime modulus (default 113)
+    - frac_train: fraction of p^2 equation pairs used for training (default 0.3 = 30%)
+    - Input sequence: [a, b, =] of length 3, with '=' mapped to token index p.
+    - Target label: (a + b) % p
+    Returns strictly disjoint train and test tensors directly on the specified device.
+    """
+    # Generate all pairs (a, b) in [0, p-1] x [0, p-1]
+    a = torch.arange(p).repeat_interleave(p)
+    b = torch.arange(p).repeat(p)
+    eq = torch.full((p * p,), p, dtype=torch.long) # '=' token is index p
+    dataset = torch.stack([a, b, eq], dim=1) # (p*p, 3)
+    labels = (a + b) % p # (p*p,)
+
+    # Random permutation with deterministic seed
+    gen = torch.Generator().manual_seed(seed)
+    perm = torch.randperm(p * p, generator=gen)
+    cutoff = int(p * p * frac_train)
+
+    train_indices = perm[:cutoff]
+    test_indices = perm[cutoff:]
+
+    train_data = dataset[train_indices].to(device)
+    train_labels = labels[train_indices].to(device)
+    test_data = dataset[test_indices].to(device)
+    test_labels = labels[test_indices].to(device)
+
+    return {
+        "p": p,
+        "train_data": train_data,
+        "train_labels": train_labels,
+        "test_data": test_data,
+        "test_labels": test_labels,
+        "num_train": len(train_indices),
+        "num_test": len(test_indices),
+    }
