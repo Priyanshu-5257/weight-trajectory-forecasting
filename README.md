@@ -18,6 +18,8 @@ This repository contains the rigorous empirical validation, statistical benchmar
 | **1. Effectiveness**<br>Can TimesFM produce lower-loss weights without gradients? | **Yes.** Across MNIST MLP, SmallCNN, and California Housing regression, TimesFM consistently produces weights with lower test loss than the current frozen checkpoint (e.g., MNIST plateau loss reduces from `0.2038 ± 0.0141` to `0.1841 ± 0.0113`, paired $p = 0.0036$). | **Confirmed** 🟢 |
 | **2. Mechanism**<br>Is it learning optimization dynamics or merely smoothing? | **Regime-dependent.** In **active descent**, temporal ordering and loss-covariate coupling are strictly necessary to avoid catastrophic momentum overshoot ($0.7415 \to 0.4662$). However, at a **genuine stationary plateau**, a time-shuffled history performs identically to ordered history ($p = 0.448$) and matches SWA (`0.1827` vs `0.1826`). Thus, plateau performance is **Brownian variance reduction (implicit SWA)**, not forward trajectory prediction. | **Decisive Mechanism Identified** 🔬 |
 | **3. Efficiency**<br>Is forecasting better than continuing training or simple SWA? | **Computationally inferior for standard training.** TimesFM requires **45.90s** for a 64-step parameter forecast, whereas standard SGD completes 64 steps in **0.65s** (~70x faster), and SWA executes in **< 0.1ms** with identical plateau loss. TimesFM is only compelling for offline checkpoint denoising or gradient-free/data-free parameter extrapolation. | **Quantified Tradeoff** ⚖️ |
+| **4. Grokking Circuit Emergence**<br>Can forecasting anticipate delayed algorithmic generalization? | **No.** During the pre-grokking plateau, checkpoint displacement is overwhelmingly 1D/2D ($>97\%$), but dominated by radial weight decay. Generalization requires orthogonal rotation of Fourier circuits in Attention and MLP layers ($>87\%$ orthogonal). Pre-grokking subspace forecasting yields chance accuracy (`0.86%` vs `83.14%`). | **Geometric Impossibility Proven** 🚫 |
+| **5. Autoregressive Language Models**<br>Does trajectory forecasting scale to real Transformers (SmolGPT)? | **No.** On a 1.25M-parameter causal language model (`SmolGPT` on TinyStories), displacement is $97.1\%$ rank 2, but linear extrapolation diverges catastrophically ($PPL \to 19,383$). TimesFM stabilizes but underperforms the frozen checkpoint ($PPL = 19.22$ vs $16.09$, $p = 0.04$). **Matched SWA achieves $PPL = 15.30$ ($p < 1e-4$) in $<0.01$ ms**, outperforming all forecasters. | **Definitive Transformer Result** 🔬 |
 
 ---
 
@@ -231,16 +233,60 @@ To determine whether weight trajectory forecasting fails due to forecasting algo
 
 ---
 
+## 🤖 Language Model Trajectory Forecasting: SmolGPT on TinyStories (1.25M Parameters)
+
+> **Detailed Report:** See [SMOLGPT_REPORT.md](docs/SMOLGPT_REPORT.md) for full architecture specifications, layer breakdown metrics, and statistical significance derivations.
+
+To test whether weight trajectory forecasting scales to real autoregressive Transformer language models, we evaluated low-rank extrapolations and **Google TimesFM 2.0 500M** on a 1.25M-parameter causal language model (`SmolGPT`: 4 layers, GQA, RoPE, SwiGLU, RMSNorm, tied embeddings; vocabulary 4,096) trained on the **TinyStories** corpus across 3 paired seeds with 95% confidence intervals.
+
+### Key Visualizations
+
+| SmolGPT Perplexity vs Horizon | Subspace Variance Concentration (P=1.25M) |
+| :---: | :---: |
+| ![SmolGPT PPL](figures/smolgpt_ppl_vs_horizon.png) | ![SmolGPT Spectrum](figures/smolgpt_explained_variance_and_spectrum.png) |
+
+| Directional Cosine Alignment & Layer Breakdown | Compute Overhead & Speedup Tradeoff |
+| :---: | :---: |
+| ![SmolGPT Alignment](figures/smolgpt_cosine_alignment_and_layer_breakdown.png) | ![SmolGPT Tradeoff](figures/smolgpt_compute_quality_tradeoff.png) |
+
+### 3-Seed SmolGPT Benchmark Results (P=1,246,080, Cutoff Step 1000, 95% CI)
+
+| Method / Baseline | $+160$ Steps ($h=8$) | $+320$ Steps ($h=16$) | $+640$ Steps ($h=32$) | $+1280$ Steps ($h=64$) | Compute Latency |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Continued AdamW (Ground Truth)** | **`15.19 ± 0.12`** 🟢 | **`14.49 ± 0.08`** 🟢 | **`13.41 ± 0.03`** 🟢 | **`12.23 ± 0.23`** 🏆 | $1.8\text{ s} - 14.5\text{ s}$ |
+| **Frozen Checkpoint ($W_{\text{ref}}$)** | `16.09 ± 0.13` | `16.09 ± 0.13` | `16.09 ± 0.13` | `16.09 ± 0.13` | $0.0\text{ ms}$ |
+| **Matched SWA (Last 16 Ckpts)** | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | $< 0.01\text{ ms}$ |
+| **Matched EMA ($\beta=0.9$)** | `15.50 ± 0.14` | `15.50 ± 0.14` | `15.50 ± 0.14` | `15.50 ± 0.14` | $< 0.01\text{ ms}$ |
+| **Weight Decay Only** | `16.09 ± 0.13` | `16.10 ± 0.14` | `16.12 ± 0.15` | `16.16 ± 0.17` | $9.3\text{ ms}$ |
+| **Low-Rank Linear (Rank 2)** | `20.36 ± 0.39` | `33.53 ± 1.04` | `191.67 ± 27.28` | `19383.52 ± 20137` 💥 | $9.0\text{ ms}$ |
+| **Low-Rank Damped (Rank 2, $\gamma=0.95$)** | `19.05 ± 0.31` | `23.27 ± 0.55` | `31.78 ± 0.96` | `40.70 ± 1.31` | $8.2\text{ ms}$ |
+| **Low-Rank TimesFM (Rank 2)** | `21.31 ± 2.12` | `27.43 ± 9.93` | `19.55 ± 9.43` | `19.22 ± 2.97` | $46.5\text{ ms}$ |
+| **Shuffled TimesFM (Rank 2 Control)** | `16.85 ± 0.90` | `17.00 ± 1.59` | `16.79 ± 0.20` | `17.08 ± 1.57` | $47.2\text{ ms}$ |
+| **Low-Rank TimesFM (Rank 4)** | `25.51 ± 3.39` | `23.44 ± 8.47` | `21.04 ± 11.56` | `19.39 ± 2.45` | $62.8\text{ ms}$ |
+
+### Core Takeaways on Transformer Language Models:
+1. **AdamW Checkpoint Concentration is Overwhelmingly Low-Rank:** Rank 1 captures **$92.61\%$** and Rank 2 captures **$97.10\%$** of total displacement variance ($D \in \mathbb{R}^{1,246,080 \times 32}$).
+2. **Linear Extrapolation Suffers Manifold Blowout:** In autoregressive models, cross-entropy is extremely sensitive to logit scale. Extrapolating along linear tangents punches out of the basin, causing catastrophic divergence ($PPL \to 19,383.52$).
+3. **TimesFM Cannot Beat the Frozen Checkpoint:** TimesFM's forecasts underperform the frozen checkpoint ($PPL = 19.22$ vs $16.09$, paired $p = 0.0430$) and are far inferior to continued AdamW ($PPL = 12.23$, $p = 0.0107$).
+4. **Matched SWA Strictly Dominates Every Forecaster:** Computing the centroid of the last 16 checkpoints reduces perplexity from $16.09$ to **$15.30$** ($p < 0.0001$) in $<0.01\text{ ms}$, outperforming TimesFM ($19.22$) without any forward forecasting risk.
+5. **Decisive Shuffled Control:** Scrambling the temporal order yields *better* perplexity ($16.79 – 17.08$) than ordered TimesFM ($19.22 – 27.43$), confirming that TimesFM does not model the true non-convex trajectory dynamics of neural language models.
+
+---
+
 ## 🛠️ Repository Structure
 
 ```
 ├── src/                          # Core reusable library modules
 │   ├── __init__.py
 │   ├── models.py                 # Architectures (MLP, CompactMNISTMLP, SmallCNN, GrokkingTransformer)
+│   ├── models_transformer.py     # SmolGPT Architecture (GQA, RoPE, SwiGLU, RMSNorm)
 │   ├── data.py                   # Splitters (California Housing, MNIST, Modular Addition)
-│   └── low_rank.py               # LowRankTrajectoryEngine & SVD decomposition
+│   ├── data_transformer.py       # TinyStories Dataset Loader & deterministic batching
+│   ├── low_rank.py               # LowRankTrajectoryEngine & SVD decomposition
+│   └── subspace_analysis.py      # Layer-wise subspace departure & oracle projections
 │
 ├── benchmarks/                   # Standalone benchmark execution scripts
+│   ├── benchmark_smolgpt_trajectory.py  # SmolGPT Transformer language model benchmark
 │   ├── benchmark_subspace_departure.py  # Historical subspace departure & grokking
 │   ├── benchmark_grokking_trajectory.py # Grokking modular arithmetic benchmark
 │   ├── benchmark_feasibility_v1_2.py
@@ -257,6 +303,8 @@ To determine whether weight trajectory forecasting fails due to forecasting algo
 │   └── experiment_regression_forecast.py
 │
 ├── scripts/                      # Publication plotting scripts
+│   ├── generate_smolgpt_figures.py
+│   ├── generate_subspace_departure_figures.py
 │   ├── generate_grokking_figures.py
 │   ├── generate_feasibility_figures.py
 │   ├── generate_low_rank_figures.py
@@ -264,12 +312,16 @@ To determine whether weight trajectory forecasting fails due to forecasting algo
 │
 ├── tests/                        # Automated unit test suite
 │   ├── __init__.py
+│   ├── test_smolgpt.py
 │   ├── test_subspace_analysis.py
 │   ├── test_timesfm_horizon.py
 │   ├── test_grokking.py
 │   └── test_leakage_and_reproducibility.py
 │
 ├── results/                      # Raw metrics and evaluation logs (JSON, CSV)
+│   ├── smolgpt_benchmark_results.json
+│   ├── smolgpt_benchmark_summary.json
+│   ├── smolgpt_benchmark_per_seed.csv
 │   ├── subspace_departure_summary.json
 │   ├── subspace_departure_results.json
 │   ├── grokking_benchmark_results.json
