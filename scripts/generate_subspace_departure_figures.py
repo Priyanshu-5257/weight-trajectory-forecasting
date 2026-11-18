@@ -46,9 +46,10 @@ def generate_subspace_departure_figures():
     # --------------------------------------------------------------------------
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.5))
 
-    colors = {1: "#9e9e9e", 2: "#ff9800", 4: "#4caf50", 8: "#1a73e8", 16: "#9c27b0", 32: "#e91e63"}
+    colors = {1: "#9e9e9e", 2: "#ff9800", 4: "#4caf50", 8: "#1a73e8", 16: "#9c27b0", 30: "#009688", 31: "#3f51b5", 32: "#e91e63"}
+    plot_ranks = [r for r in ranks if r in colors]
 
-    for r in ranks:
+    for r in plot_ranks:
         cov_means = [summary["coverage_full"][f"r_{r}"][f"h_{h}"]["mean"] * 100 for h in horizons]
         cov_ci = [summary["coverage_full"][f"r_{r}"][f"h_{h}"]["ci95"] * 100 for h in horizons]
         ax1.errorbar(delta_steps, cov_means, yerr=cov_ci, label=f"Rank {r}", color=colors[r], marker="o", capsize=3)

@@ -308,14 +308,16 @@ def benchmark_compute_costs(tfm_model, device, P=3322, T_context=64, ranks=[1, 4
             for _ in range(5):
                 with torch.no_grad():
                     _ = tfm_model(dummy_coords, horizon_len=h)
-            torch.cuda.synchronize()
+            if device.type == "cuda" and torch.cuda.is_available():
+                torch.cuda.synchronize()
 
             times = []
             for _ in range(15):
                 t0 = time.perf_counter()
                 with torch.no_grad():
                     _ = tfm_model(dummy_coords, horizon_len=h)
-                torch.cuda.synchronize()
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
                 times.append((time.perf_counter() - t0) * 1000.0)
             
             bench_results["timesfm_forecast_ms"][f"rank_{r}"][f"h_{h}"] = {
@@ -324,12 +326,15 @@ def benchmark_compute_costs(tfm_model, device, P=3322, T_context=64, ranks=[1, 4
             }
 
     # 5. Peak GPU Memory
-    torch.cuda.reset_peak_memory_stats()
-    dummy_coords = torch.randn(16, T_context, dtype=torch.float32, device=device)
-    with torch.no_grad():
-        _ = tfm_model(dummy_coords, horizon_len=32)
-    torch.cuda.synchronize()
-    bench_results["peak_gpu_memory_mib"] = float(torch.cuda.max_memory_allocated() / (1024.0 * 1024.0))
+    if device.type == "cuda" and torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        dummy_coords = torch.randn(16, T_context, dtype=torch.float32, device=device)
+        with torch.no_grad():
+            _ = tfm_model(dummy_coords, horizon_len=32)
+        torch.cuda.synchronize()
+        bench_results["peak_gpu_memory_mib"] = float(torch.cuda.max_memory_allocated() / (1024.0 * 1024.0))
+    else:
+        bench_results["peak_gpu_memory_mib"] = 0.0
 
     return bench_results
 

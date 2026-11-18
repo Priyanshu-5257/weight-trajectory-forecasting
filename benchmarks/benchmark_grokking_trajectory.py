@@ -133,7 +133,7 @@ def run_grokking_benchmark(
             loss = criterion(logits, train_y)
             loss.backward()
             optimizer.step()
-            if device.type == "cuda":
+            if device.type == "cuda" and torch.cuda.is_available():
                 torch.cuda.synchronize()
             dt = time.perf_counter() - t0_step
             step_times[step] = dt
@@ -333,6 +333,20 @@ def run_grokking_benchmark(
     print("=" * 80, flush=True)
 
     summary = {
+        "metadata": {
+            "version": "2.1",
+            "benchmark": "Grokking Modular Addition Weight Trajectory Forecasting",
+            "script": "benchmark_grokking_trajectory.py",
+            "cutoff_step": cutoff_step,
+            "eval_split": "nonsym_pairs",
+            "seeds": seeds,
+            "ranks": ranks,
+            "horizons": horizons,
+            "checkpoint_interval": checkpoint_interval,
+            "context_checkpoints": context_checkpoints,
+            "p": p,
+            "frac_train": frac_train
+        },
         "seeds": seeds,
         "p": p,
         "frac_train": frac_train,

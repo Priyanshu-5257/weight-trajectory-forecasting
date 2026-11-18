@@ -198,7 +198,7 @@ def run_smolgpt_benchmark(
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
             optimizer.step()
-            if device.type == "cuda":
+            if device.type == "cuda" and torch.cuda.is_available():
                 torch.cuda.synchronize()
             dt_step = time.perf_counter() - t_s0
             step_times.append(dt_step)

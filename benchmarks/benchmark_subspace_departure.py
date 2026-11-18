@@ -60,7 +60,7 @@ def run_subspace_departure_benchmark(
     cutoff_step=1500,
     context_checkpoints=32,
     checkpoint_interval=25,
-    ranks=[1, 2, 4, 8, 16, 32],
+    ranks=[1, 2, 4, 8, 16, 30, 31, 32],
     horizons=[8, 16, 32, 50, 64, 80, 100], # +200, +400, +800, +1250, +1600, +2000, +2500 steps
     device_str="cuda" if torch.cuda.is_available() else "cpu"
 ):
@@ -84,7 +84,7 @@ def run_subspace_departure_benchmark(
 
         torch.manual_seed(seed)
         np.random.seed(seed)
-        if device.type == "cuda":
+        if device.type == "cuda" and torch.cuda.is_available():
             torch.cuda.manual_seed_all(seed)
 
         data = load_modular_addition_dataset(p=p, frac_train=frac_train, seed=seed)
@@ -144,7 +144,7 @@ def run_subspace_departure_benchmark(
 
         # Construct historical displacement matrix: (P, T)
         D_full = torch.stack([saved_checkpoints[s] - w_ref for s in hist_steps], dim=1)
-        U_full, S_full, cum_var_full = compute_svd_basis(D_full)
+        U_full, S_full, cum_var_full, r_eff_full = compute_svd_basis(D_full, return_effective_rank=True)
 
         # 1. Cosine alignment with radial decay direction
         cos_radial_full = compute_radial_decay_alignment(U_full, w_ref)
@@ -152,19 +152,22 @@ def run_subspace_departure_benchmark(
         U_layers = {}
         S_layers = {}
         cum_var_layers = {}
+        r_eff_layers = {}
 
         for layer_name, idx_tensor in layer_tensors.items():
             D_layer = D_full[idx_tensor]
             w_ref_layer = w_ref[idx_tensor]
-            U_l, S_l, cum_var_l = compute_svd_basis(D_layer)
+            U_l, S_l, cum_var_l, r_eff_l = compute_svd_basis(D_layer, return_effective_rank=True)
             U_layers[layer_name] = U_l
             S_layers[layer_name] = S_l
             cum_var_layers[layer_name] = cum_var_l
+            r_eff_layers[layer_name] = r_eff_l
             cos_radial_layers[layer_name] = compute_radial_decay_alignment(U_l, w_ref_layer)
 
-        print(f"  Radial Decay Alignment | Full: {cos_radial_full:.4f} | Embed: {cos_radial_layers['embed']:.4f} | Attn: {cos_radial_layers['attn']:.4f} | MLP: {cos_radial_layers['mlp']:.4f} | Unembed: {cos_radial_layers['unembed']:.4f}")
+        print(f"  Radial Decay Alignment | Full: {cos_radial_full:.4f} | Embed: {cos_radial_layers['embed']:.4f} | Attn: {cos_radial_layers['attn']:.4f} | MLP: {cos_radial_layers['mlp']:.4f} | Unembed: {cos_radial_layers['unembed']:.4f} | Effective Rank: {r_eff_full}")
 
         # 2. Evaluation across horizons
+        recon_ranks = [2, 8, 30, 31, 32]
         horizon_results = {}
         for h in horizons:
             fut_step = cutoff_step + h * checkpoint_interval
@@ -191,19 +194,19 @@ def run_subspace_departure_benchmark(
 
             # Subspace predictive coverage across ranks
             for r in ranks:
-                U_r = U_full[:, :r]
+                U_r = U_full[:, :min(r, U_full.shape[1])]
                 dw_par, dw_perp, cov_full = project_displacement(dw_act, U_r)
                 h_res["coverage_full"][f"r_{r}"] = cov_full
 
                 # Layer-wise predictive coverage
                 for layer_name, idx_tensor in layer_tensors.items():
-                    U_layer_r = U_layers[layer_name][:, :r]
+                    U_layer_r = U_layers[layer_name][:, :min(r, U_layers[layer_name].shape[1])]
                     dw_layer = dw_act[idx_tensor]
                     _, _, cov_layer = project_displacement(dw_layer, U_layer_r)
                     h_res["coverage_layers"][layer_name][f"r_{r}"] = cov_layer
 
-                # Reconstruct models for selected key ranks: r in [2, 8, 32]
-                if r in [2, 8, 32]:
+                # Reconstruct models for selected key ranks: r in [2, 8, 30, 31, 32]
+                if r in recon_ranks:
                     # Projected continuation model
                     w_proj = w_ref + dw_par
                     set_flat_params(model, w_proj.to(device))
@@ -258,11 +261,13 @@ def run_subspace_departure_benchmark(
 
         seed_data = {
             "seed": seed,
+            "effective_rank_full": r_eff_full,
+            "effective_rank_layers": r_eff_layers,
             "cos_radial_full": cos_radial_full,
             "cos_radial_layers": cos_radial_layers,
-            "exp_var_full": {f"r_{r}": float(cum_var_full[r-1].item()) for r in ranks},
+            "exp_var_full": {f"r_{r}": float(cum_var_full[min(r, len(cum_var_full))-1].item()) for r in ranks},
             "exp_var_layers": {
-                l: {f"r_{r}": float(cum_var_layers[l][r-1].item()) for r in ranks} for l in layer_tensors.keys()
+                l: {f"r_{r}": float(cum_var_layers[l][min(r, len(cum_var_layers[l]))-1].item()) for r in ranks} for l in layer_tensors.keys()
             },
             "horizons": horizon_results
         }
@@ -275,7 +280,17 @@ def run_subspace_departure_benchmark(
     print(" AGGREGATING MULTI-SEED SUBSPACE DEPARTURE METRICS")
     print("=" * 80)
 
+    recon_ranks = [2, 8, 30, 31, 32]
     summary = {
+        "metadata": {
+            "version": "2.1",
+            "fix": "filtered zero-displacement column; effective numerical rank is 31",
+            "cutoff_step": cutoff_step,
+            "eval_split": "nonsym_pairs",
+            "seeds": seeds,
+            "checkpoint_interval": checkpoint_interval,
+            "context_checkpoints": context_checkpoints
+        },
         "seeds": seeds,
         "p": p,
         "frac_train": frac_train,
@@ -283,6 +298,7 @@ def run_subspace_departure_benchmark(
         "checkpoint_interval": checkpoint_interval,
         "ranks": ranks,
         "horizons": horizons,
+        "effective_rank_full": calc_stats([s["effective_rank_full"] for s in all_seed_results]),
         "cos_radial_full": calc_stats([s["cos_radial_full"] for s in all_seed_results]),
         "cos_radial_layers": {
             l: calc_stats([s["cos_radial_layers"][l] for s in all_seed_results]) for l in ["embed", "attn", "mlp", "unembed"]
@@ -299,7 +315,7 @@ def run_subspace_departure_benchmark(
         "coverage_layers": {l: {f"r_{r}": {} for r in ranks} for l in ["embed", "attn", "mlp", "unembed"]},
         "actual_continuation": {},
         "reconstructed_models": {
-            f"r_{r}": {"projected": {}, "orthogonal": {}, "paired_diff_projected_vs_actual": {}} for r in [2, 8, 32]
+            f"r_{r}": {"projected": {}, "orthogonal": {}, "paired_diff_projected_vs_actual": {}} for r in recon_ranks
         },
         "layer_selective_ablation_r8": {l: {} for l in ["embed", "attn", "mlp", "unembed"]}
     }
@@ -321,8 +337,8 @@ def run_subspace_departure_benchmark(
                 covs_layer = [s["horizons"][f"h_{h}"]["coverage_layers"][l][f"r_{r}"] for s in all_seed_results]
                 summary["coverage_layers"][l][f"r_{r}"][f"h_{h}"] = calc_stats(covs_layer)
 
-        # Reconstructed models for r in [2, 8, 32]
-        for r in [2, 8, 32]:
+        # Reconstructed models for r in recon_ranks: [2, 8, 30, 31, 32]
+        for r in recon_ranks:
             act_accs = [s["horizons"][f"h_{h}"]["actual"]["acc_nonsym"] for s in all_seed_results]
             proj_accs = [s["horizons"][f"h_{h}"]["reconstructed_models"][f"r_{r}"]["projected"]["acc_nonsym"] for s in all_seed_results]
             orth_accs = [s["horizons"][f"h_{h}"]["reconstructed_models"][f"r_{r}"]["orthogonal"]["acc_nonsym"] for s in all_seed_results]
@@ -363,6 +379,6 @@ if __name__ == "__main__":
         cutoff_step=1500,
         context_checkpoints=32,
         checkpoint_interval=25,
-        ranks=[1, 2, 4, 8, 16, 32],
+        ranks=[1, 2, 4, 8, 16, 30, 31, 32],
         horizons=[8, 16, 32, 50, 64, 80, 100]
     )

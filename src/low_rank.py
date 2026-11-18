@@ -15,16 +15,23 @@ class LowRankTrajectoryEngine:
             self.w_ref = ref_checkpoint.copy()
 
         # Displacement matrix D = [W_1 - W_ref, ..., W_T - W_ref]
-        t0 = time.perf_counter()
+        t0_prep = time.perf_counter()
         self.D = weight_window - self.w_ref[:, None]
+        self.prep_time = time.perf_counter() - t0_prep
         
         # Truncated SVD
+        t0_svd = time.perf_counter()
         self.U, self.S, self.Vt = np.linalg.svd(self.D, full_matrices=False)
-        self.svd_time = time.perf_counter() - t0
+        self.svd_time = time.perf_counter() - t0_svd
 
         s_sq = self.S ** 2
         total_var = np.sum(s_sq)
         self.explained_variance_ratio = s_sq / (total_var + 1e-12)
+
+        # Detect effective numerical rank (filter singular values below floating-point machine precision)
+        eps = float(np.finfo(np.float32).eps)
+        tol = float(self.S[0] * max(self.D.shape) * eps) if len(self.S) > 0 else 1e-12
+        self.effective_rank = int(np.sum(self.S > tol))
 
     def get_rank_diagnostics(self, rank):
         r = min(rank, self.T, self.P)
@@ -35,6 +42,7 @@ class LowRankTrajectoryEngine:
         rec_error = float(np.linalg.norm(self.D - D_rec) / (norm_D + 1e-12))
         return {
             "rank": r,
+            "effective_rank": self.effective_rank,
             "explained_variance": exp_var,
             "reconstruction_error": rec_error
         }

@@ -4778,5 +4778,38 @@
         }
       }
     }
+  },
+  "metadata": {
+    "version": "2.1",
+    "benchmark": "Grokking Modular Addition Weight Trajectory Forecasting",
+    "script": "benchmark_grokking_trajectory.py",
+    "cutoff_step": 1500,
+    "eval_split": "nonsym_pairs",
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46
+    ],
+    "ranks": [
+      1,
+      2,
+      4,
+      8
+    ],
+    "horizons": [
+      8,
+      16,
+      32,
+      50,
+      64,
+      80,
+      100
+    ],
+    "checkpoint_interval": 25,
+    "context_checkpoints": 32,
+    "p": 97,
+    "frac_train": 0.5
   }
 }

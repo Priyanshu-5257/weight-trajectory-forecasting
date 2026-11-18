@@ -9,6 +9,7 @@ import sys
 import json
 import time
 import math
+import copy
 import csv
 import numpy as np
 import torch
@@ -166,6 +167,10 @@ def run_smolgpt_w2_benchmark(
                     w2_checkpoints_history.append(w2_t)
                     if step == cutoff_step:
                         w_ref_full = get_flat_params(model).cpu().numpy().copy()
+                        cutoff_model_state = copy.deepcopy(model.state_dict())
+                        torch_rng_cutoff = torch.get_rng_state()
+                        cuda_rng_cutoff = torch.cuda.get_rng_state(device) if device.type == "cuda" and torch.cuda.is_available() else None
+                        np_rng_cutoff = np.random.get_state()
 
             # Record future continuation checkpoints
             if step > cutoff_step:
@@ -188,6 +193,68 @@ def run_smolgpt_w2_benchmark(
         train_elapsed = time.perf_counter() - t_train_start
         print(f"Training completed in {train_elapsed:.2f} s ({total_steps / train_elapsed:.1f} steps/s)", flush=True)
 
+        # ----------------------------------------------------------------------
+        # Phase 1b: Genuine Independent W2-Only Continuation from Cutoff Step
+        # ----------------------------------------------------------------------
+        print(f"Phase 1b: Independent W2-Only Continuation from Cutoff Step {cutoff_step}...", flush=True)
+        model_w2 = copy.deepcopy(model)
+        model_w2.load_state_dict(cutoff_model_state)
+        for name, param in model_w2.named_parameters():
+            if "mlp.w2" in name:
+                param.requires_grad = True
+            else:
+                param.requires_grad = False
+
+        optimizer_w2 = optim.AdamW(
+            [p for p in model_w2.parameters() if p.requires_grad],
+            lr=lr, betas=(0.9, 0.95), weight_decay=weight_decay
+        )
+
+        # Restore RNG to cutoff step so identical future data batches are produced
+        torch.set_rng_state(torch_rng_cutoff)
+        if cuda_rng_cutoff is not None and device.type == "cuda" and torch.cuda.is_available():
+            torch.cuda.set_rng_state(cuda_rng_cutoff, device)
+        np.random.set_state(np_rng_cutoff)
+
+        indep_w2_checkpoints = {}
+        w2_step_times = []
+        t_w2_start = time.perf_counter()
+
+        for step in range(cutoff_step + 1, total_steps + 1):
+            t_w2_s0 = time.perf_counter()
+            model_w2.train()
+            x, y = get_random_batch(train_tokens, batch_size=batch_size, block_size=block_size, device=device)
+            _, loss = model_w2(x, y)
+            optimizer_w2.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_([p for p in model_w2.parameters() if p.requires_grad], 1.0)
+            optimizer_w2.step()
+            if device.type == "cuda" and torch.cuda.is_available():
+                torch.cuda.synchronize()
+            dt_step = time.perf_counter() - t_w2_s0
+            w2_step_times.append(dt_step)
+
+            steps_after = step - cutoff_step
+            if steps_after % checkpoint_interval == 0:
+                h_curr = steps_after // checkpoint_interval
+                if h_curr in horizons:
+                    # Semantic regression check: bitwise immutability of all frozen parameters
+                    for name, param in model_w2.named_parameters():
+                        if not param.requires_grad:
+                            ref_p = cutoff_model_state[name].to(device)
+                            assert torch.equal(param.data, ref_p.data), f"Frozen parameter {name} modified during W2 continuation!"
+
+                    w_future_full_indep = get_flat_params(model_w2).cpu().numpy().copy()
+                    w2_future_indep = get_mlp_w2_params(model_w2).cpu().numpy().copy()
+                    indep_w2_checkpoints[h_curr] = {
+                        "w_full": w_future_full_indep,
+                        "w_w2": w2_future_indep,
+                        "cum_step_time": float(np.sum(w2_step_times[:steps_after]))
+                    }
+
+        w2_elapsed = time.perf_counter() - t_w2_start
+        print(f"Independent W2 training completed in {w2_elapsed:.2f} s", flush=True)
+
         # Assemble W2 historical weight window
         w2_weight_window = np.column_stack(w2_checkpoints_history)  # (174592, 32)
         w_w2_ref = w2_weight_window[:, -1].copy()
@@ -204,17 +271,25 @@ def run_smolgpt_w2_benchmark(
 
         # Evaluate W2-Only Matched SWA (over last 16 W2 checkpoints)
         reset_to_frozen_ref()
+        t0_swa = time.perf_counter()
         w_w2_swa = np.mean(w2_weight_window[:, -16:], axis=1)
         set_mlp_w2_params(model, torch.from_numpy(w_w2_swa).float())
+        if device.type == "cuda" and torch.cuda.is_available():
+            torch.cuda.synchronize()
+        t_swa_load = time.perf_counter() - t0_swa
         swa_w2_metrics = eval_both(model)
 
         # Evaluate W2-Only Matched EMA (beta=0.9)
         reset_to_frozen_ref()
+        t0_ema = time.perf_counter()
         w_w2_ema = w2_weight_window[:, 0].copy()
         beta = 0.9
         for col in range(1, w2_weight_window.shape[1]):
             w_w2_ema = beta * w_w2_ema + (1.0 - beta) * w2_weight_window[:, col]
         set_mlp_w2_params(model, torch.from_numpy(w_w2_ema).float())
+        if device.type == "cuda" and torch.cuda.is_available():
+            torch.cuda.synchronize()
+        t_ema_load = time.perf_counter() - t0_ema
         ema_w2_metrics = eval_both(model)
 
         # SVD Rank Diagnostics for W2
@@ -247,7 +322,7 @@ def run_smolgpt_w2_benchmark(
             w_actual_w2 = future_checkpoints[h]["w_w2"]
             adamw_time = future_checkpoints[h]["cum_step_time"]
 
-            # 1. Full Continued AdamW (Ground Truth Optimizer)
+            # 1. Full Continued AdamW (Ground Truth Joint Optimizer)
             set_flat_params(model, torch.from_numpy(w_actual_full).float())
             full_adamw_metrics = eval_both(model)
             h_data["methods"]["full_continued_adamw"] = {
@@ -255,21 +330,63 @@ def run_smolgpt_w2_benchmark(
                 "cos_sim_w2": 1.0,
                 "rel_l2_w2": 0.0,
                 "time_ms": adamw_time * 1000.0,
-                "speedup": 1.0
+                "speedup": 1.0,
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": adamw_time * 1000.0
+                }
             }
 
-            # 2. W2-Only Continuation (Upper bound for updating ONLY W2)
+            # 2a. Genuine Independent W2-Only Continuation (Upper bound for updating ONLY W2)
+            w_indep_full = indep_w2_checkpoints[h]["w_full"]
+            w_indep_w2 = indep_w2_checkpoints[h]["w_w2"]
+            indep_w2_time = indep_w2_checkpoints[h]["cum_step_time"]
+            set_flat_params(model, torch.from_numpy(w_indep_full).float())
+            w2_indep_metrics = eval_both(model)
+            norm_w2_act = np.linalg.norm(w_actual_w2 - w_w2_ref)
+            norm_w2_indep = np.linalg.norm(w_indep_w2 - w_w2_ref)
+            d_indep = w_indep_w2 - w_w2_ref
+            d_act = w_actual_w2 - w_w2_ref
+            cos_indep = float(np.dot(d_indep, d_act) / (norm_w2_indep * norm_w2_act + 1e-8)) if norm_w2_indep > 1e-8 else 0.0
+
+            h_data["methods"]["w2_independent_continuation"] = {
+                **w2_indep_metrics,
+                "cos_sim_w2": cos_indep,
+                "rel_l2_w2": float(np.linalg.norm(w_indep_w2 - w_actual_w2) / (norm_w2_act + 1e-8)),
+                "time_ms": indep_w2_time * 1000.0,
+                "speedup": float(adamw_time / max(indep_w2_time, 1e-6)),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": indep_w2_time * 1000.0
+                }
+            }
+
+            # 2b. Oracle W2 Transplant (Preserved Historical Condition: W2 from full training inserted into frozen checkpoint)
             reset_to_frozen_ref()
             set_mlp_w2_params(model, torch.from_numpy(w_actual_w2).float())
             w2_actual_metrics = eval_both(model)
-            norm_w2_act = np.linalg.norm(w_actual_w2 - w_w2_ref)
-            h_data["methods"]["w2_only_actual_continuation"] = {
+            h_data["methods"]["oracle_w2_transplant"] = {
                 **w2_actual_metrics,
                 "cos_sim_w2": 1.0,
                 "rel_l2_w2": 0.0,
                 "time_ms": adamw_time * 1000.0,
-                "speedup": 1.0
+                "speedup": 1.0,
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": adamw_time * 1000.0
+                }
             }
+            # Maintain backward-compatible alias for existing downstream tools
+            h_data["methods"]["w2_only_actual_continuation"] = h_data["methods"]["oracle_w2_transplant"]
 
             # 3. Frozen Checkpoint Baseline
             reset_to_frozen_ref()
@@ -278,21 +395,34 @@ def run_smolgpt_w2_benchmark(
                 "cos_sim_w2": 0.0,
                 "rel_l2_w2": 1.0,
                 "time_ms": 0.0,
-                "speedup": float("inf")
+                "speedup": float("inf"),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": 0.0
+                }
             }
 
             # 4. W2-Only SWA Baseline
             reset_to_frozen_ref()
             set_mlp_w2_params(model, torch.from_numpy(w_w2_swa).float())
             d_swa = w_w2_swa - w_w2_ref
-            d_act = w_actual_w2 - w_w2_ref
             cos_swa = float(np.dot(d_swa, d_act) / (np.linalg.norm(d_swa) * norm_w2_act + 1e-8)) if np.linalg.norm(d_swa) > 1e-8 else 0.0
             h_data["methods"]["w2_matched_swa"] = {
                 **swa_w2_metrics,
                 "cos_sim_w2": cos_swa,
                 "rel_l2_w2": float(np.linalg.norm(w_w2_swa - w_actual_w2) / (norm_w2_act + 1e-8)),
-                "time_ms": 0.0,
-                "speedup": float("inf")
+                "time_ms": t_swa_load * 1000.0,
+                "speedup": float(adamw_time / max(t_swa_load, 1e-6)),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": t_swa_load * 1000.0,
+                    "total_latency_ms": t_swa_load * 1000.0
+                }
             }
 
             # 5. W2-Only EMA Baseline
@@ -304,8 +434,15 @@ def run_smolgpt_w2_benchmark(
                 **ema_w2_metrics,
                 "cos_sim_w2": cos_ema,
                 "rel_l2_w2": float(np.linalg.norm(w_w2_ema - w_actual_w2) / (norm_w2_act + 1e-8)),
-                "time_ms": 0.0,
-                "speedup": float("inf")
+                "time_ms": t_ema_load * 1000.0,
+                "speedup": float(adamw_time / max(t_ema_load, 1e-6)),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": t_ema_load * 1000.0,
+                    "total_latency_ms": t_ema_load * 1000.0
+                }
             }
 
             # Extrapolations across ranks strictly in W2 subspace
@@ -313,70 +450,117 @@ def run_smolgpt_w2_benchmark(
                 # Linear
                 w_lin_w2, c_lin, t_lin = engine.forecast_linear(r, h)
                 w_lin_np = w_lin_w2.numpy()
+                t0_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_mlp_w2_params(model, w_lin_w2)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_lin_load = time.perf_counter() - t0_load
                 lin_metrics = eval_both(model)
                 d_lin = w_lin_np - w_w2_ref
                 cos_lin = float(np.dot(d_lin, d_act) / (np.linalg.norm(d_lin) * norm_w2_act + 1e-8)) if np.linalg.norm(d_lin) > 1e-8 else 0.0
+                t_lin_total = engine.svd_time + t_lin + t_lin_load
 
                 h_data["methods"][f"w2_linear_r{r}"] = {
                     **lin_metrics,
                     "cos_sim_w2": cos_lin,
                     "rel_l2_w2": float(np.linalg.norm(w_lin_np - w_actual_w2) / (norm_w2_act + 1e-8)),
-                    "time_ms": t_lin * 1000.0,
-                    "speedup": float(adamw_time / max(t_lin, 1e-6))
+                    "time_ms": t_lin_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_lin_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_lin * 1000.0,
+                        "reconstruction_and_load_ms": t_lin_load * 1000.0,
+                        "total_latency_ms": t_lin_total * 1000.0
+                    }
                 }
 
                 # Damped (gamma=0.95)
                 w_damp_w2, c_damp, t_damp = engine.forecast_damped(r, h, gamma=0.95)
                 w_damp_np = w_damp_w2.numpy()
+                t0_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_mlp_w2_params(model, w_damp_w2)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_damp_load = time.perf_counter() - t0_load
                 damp_metrics = eval_both(model)
                 d_damp = w_damp_np - w_w2_ref
                 cos_damp = float(np.dot(d_damp, d_act) / (np.linalg.norm(d_damp) * norm_w2_act + 1e-8)) if np.linalg.norm(d_damp) > 1e-8 else 0.0
+                t_damp_total = engine.svd_time + t_damp + t_damp_load
 
                 h_data["methods"][f"w2_damped_r{r}"] = {
                     **damp_metrics,
                     "cos_sim_w2": cos_damp,
                     "rel_l2_w2": float(np.linalg.norm(w_damp_np - w_actual_w2) / (norm_w2_act + 1e-8)),
-                    "time_ms": t_damp * 1000.0,
-                    "speedup": float(adamw_time / max(t_damp, 1e-6))
+                    "time_ms": t_damp_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_damp_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_damp * 1000.0,
+                        "reconstruction_and_load_ms": t_damp_load * 1000.0,
+                        "total_latency_ms": t_damp_total * 1000.0
+                    }
                 }
 
                 # TimesFM-2.0
                 w_tfm_w2, c_tfm, t_tfm_f, t_tfm_r = engine.forecast_timesfm(r, h, tfm_model, device)
                 w_tfm_np = w_tfm_w2.numpy()
+                t0_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_mlp_w2_params(model, w_tfm_w2)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_tfm_load = time.perf_counter() - t0_load
                 tfm_metrics = eval_both(model)
                 d_tfm = w_tfm_np - w_w2_ref
                 cos_tfm = float(np.dot(d_tfm, d_act) / (np.linalg.norm(d_tfm) * norm_w2_act + 1e-8)) if np.linalg.norm(d_tfm) > 1e-8 else 0.0
-                total_t_tfm = t_tfm_f + t_tfm_r
+                t_tfm_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load
 
                 h_data["methods"][f"w2_timesfm_r{r}"] = {
                     **tfm_metrics,
                     "cos_sim_w2": cos_tfm,
                     "rel_l2_w2": float(np.linalg.norm(w_tfm_np - w_actual_w2) / (norm_w2_act + 1e-8)),
-                    "time_ms": total_t_tfm * 1000.0,
-                    "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
+                    "time_ms": t_tfm_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_tfm_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_tfm_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_tfm_r + t_tfm_load) * 1000.0,
+                        "total_latency_ms": t_tfm_total * 1000.0
+                    }
                 }
 
                 # Shuffled TimesFM Control
                 w_shuf_w2, c_shuf, t_shuf_f, t_shuf_r = engine.forecast_timesfm(r, h, tfm_model, device, shuffle=True, seed=seed)
                 w_shuf_np = w_shuf_w2.numpy()
+                t0_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_mlp_w2_params(model, w_shuf_w2)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_shuf_load = time.perf_counter() - t0_load
                 shuf_metrics = eval_both(model)
                 d_shuf = w_shuf_np - w_w2_ref
                 cos_shuf = float(np.dot(d_shuf, d_act) / (np.linalg.norm(d_shuf) * norm_w2_act + 1e-8)) if np.linalg.norm(d_shuf) > 1e-8 else 0.0
+                t_shuf_total = engine.svd_time + t_shuf_f + t_shuf_r + t_shuf_load
 
                 h_data["methods"][f"w2_shuffled_timesfm_r{r}"] = {
                     **shuf_metrics,
                     "cos_sim_w2": cos_shuf,
                     "rel_l2_w2": float(np.linalg.norm(w_shuf_np - w_actual_w2) / (norm_w2_act + 1e-8)),
-                    "time_ms": (t_shuf_f + t_shuf_r) * 1000.0,
-                    "speedup": float(adamw_time / max(t_shuf_f + t_shuf_r, 1e-6))
+                    "time_ms": t_shuf_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_shuf_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_shuf_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_shuf_r + t_shuf_load) * 1000.0,
+                        "total_latency_ms": t_shuf_total * 1000.0
+                    }
                 }
 
             seed_data["horizons"][f"h_{h}"] = h_data
@@ -443,6 +627,11 @@ def run_smolgpt_w2_benchmark(
             paired_vs_adamw = calc_paired_diff_stats(v_ppl_vals, adamw_ppl_vals)
             paired_vs_frozen = calc_paired_diff_stats(v_ppl_vals, frozen_ppl_vals)
 
+            prep_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("checkpoint_prep_ms", 0.0) for s in all_seed_results]
+            svd_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("svd_ms", 0.0) for s in all_seed_results]
+            forecast_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("forecast_ms", 0.0) for s in all_seed_results]
+            recon_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("reconstruction_and_load_ms", 0.0) for s in all_seed_results]
+
             summary["horizons"][h_key]["methods"][method] = {
                 "train_loss": calc_stats(t_loss_vals),
                 "train_ppl": calc_stats(t_ppl_vals),
@@ -455,6 +644,13 @@ def run_smolgpt_w2_benchmark(
                 "speedup": calc_stats(speedup_vals),
                 "paired_diff_vs_adamw_ppl": paired_vs_adamw,
                 "paired_diff_vs_frozen_ppl": paired_vs_frozen,
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": calc_stats(prep_times),
+                    "svd_ms": calc_stats(svd_times),
+                    "forecast_ms": calc_stats(forecast_times),
+                    "reconstruction_and_load_ms": calc_stats(recon_times),
+                    "total_latency_ms": calc_stats(time_vals)
+                }
             }
 
     # Save JSON and CSV

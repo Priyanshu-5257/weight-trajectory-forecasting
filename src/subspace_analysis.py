@@ -38,22 +38,46 @@ def get_layer_parameter_indices(model):
     assert total_params == expected_total, f"Parameter count mismatch: {total_params} vs {expected_total}"
     return layer_indices
 
-def compute_svd_basis(D, rank=None):
+def compute_svd_basis(D, rank=None, return_effective_rank=False, tol=None):
     """
     Computes thin SVD of displacement matrix D: (P, T)
     D = U S V^T
+    Automatically filters out zero-displacement columns (e.g. W_ref - W_ref = 0)
+    and drops singular vectors below numerical tolerance to prevent nullspace leakage.
     Returns:
-        U: (P, min(P, T)) or (P, rank)
-        S: singular values (min(P, T),)
-        explained_variance_ratio: cumulative explained variance ratio
+        U: (P, min(rank, r_eff)) orthonormal basis
+        S: singular values (T_valid,)
+        cum_var: cumulative explained variance ratio
+        r_eff: (optional) effective numerical rank
     """
-    U, S, V = torch.linalg.svd(D.float(), full_matrices=False)
+    col_norms = torch.norm(D.float(), dim=0)
+    valid_cols = col_norms > 1e-12
+    if torch.sum(valid_cols) > 0:
+        D_valid = D[:, valid_cols].float()
+    else:
+        D_valid = D.float()
+
+    U, S, V = torch.linalg.svd(D_valid, full_matrices=False)
+
+    # Numerical tolerance for effective rank
+    if tol is None:
+        eps = torch.finfo(torch.float32).eps
+        tol = (S[0] * max(D_valid.shape) * eps).item() if len(S) > 0 else 1e-12
+    r_eff = int(torch.sum(S > tol).item())
+
     var = S**2
     total_var = torch.sum(var) + 1e-12
     cum_var = torch.cumsum(var, dim=0) / total_var
+
+    max_valid_rank = min(r_eff, U.shape[1])
     if rank is not None:
-        r = min(rank, U.shape[1])
+        r = min(rank, max_valid_rank)
         U = U[:, :r]
+    else:
+        U = U[:, :max_valid_rank]
+
+    if return_effective_rank:
+        return U, S, cum_var, r_eff
     return U, S, cum_var
 
 def compute_radial_decay_alignment(U, w_ref):

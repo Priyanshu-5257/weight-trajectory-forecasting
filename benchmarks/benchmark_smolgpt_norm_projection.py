@@ -84,6 +84,43 @@ def project_tensor_wise_norm(model: nn.Module, w_cand_t: torch.Tensor, w_ref_t: 
     return torch.cat(out_parts)
 
 
+def compute_displacement_and_weight_cosine(w_forecast, w_actual, w_ref):
+    """
+    Independently computes:
+    1. Forecast displacement cosine: cos(w_forecast - w_ref, w_actual - w_ref)
+    2. Full weight-direction cosine: cos(w_forecast, w_actual)
+    """
+    if isinstance(w_forecast, torch.Tensor):
+        w_f = w_forecast.detach().cpu().numpy().flatten()
+    else:
+        w_f = np.asarray(w_forecast).flatten()
+    if isinstance(w_actual, torch.Tensor):
+        w_a = w_actual.detach().cpu().numpy().flatten()
+    else:
+        w_a = np.asarray(w_actual).flatten()
+    if isinstance(w_ref, torch.Tensor):
+        w_r = w_ref.detach().cpu().numpy().flatten()
+    else:
+        w_r = np.asarray(w_ref).flatten()
+
+    # Weight cosine
+    norm_f = float(np.linalg.norm(w_f))
+    norm_a = float(np.linalg.norm(w_a))
+    cos_weight = float(np.dot(w_f, w_a) / (norm_f * norm_a + 1e-12))
+
+    # Displacement cosine
+    d_f = w_f - w_r
+    d_a = w_a - w_r
+    norm_df = float(np.linalg.norm(d_f))
+    norm_da = float(np.linalg.norm(d_a))
+    if norm_df > 1e-8 and norm_da > 1e-8:
+        cos_disp = float(np.dot(d_f, d_a) / (norm_df * norm_da))
+    else:
+        cos_disp = 0.0
+
+    return cos_disp, cos_weight
+
+
 def run_smolgpt_norm_benchmark(
     seeds=[42, 43, 44],
     cutoff_step=1000,
@@ -225,8 +262,12 @@ def run_smolgpt_norm_benchmark(
 
         # Evaluate Matched SWA (over last 16 checkpoints)
         reset_to_frozen_ref()
+        t0_swa = time.perf_counter()
         w_swa = np.mean(weight_window[:, -16:], axis=1)
         set_flat_params(model, torch.from_numpy(w_swa).float())
+        if device.type == "cuda" and torch.cuda.is_available():
+            torch.cuda.synchronize()
+        t_swa_load = time.perf_counter() - t0_swa
         swa_metrics = eval_both(model)
 
         seed_data = {
@@ -258,8 +299,17 @@ def run_smolgpt_norm_benchmark(
                 **full_adamw_metrics,
                 "weight_norm": act_global_norm,
                 "cos_sim": 1.0,
+                "cos_sim_displacement": 1.0,
+                "cos_sim_weight": 1.0,
                 "time_ms": adamw_time * 1000.0,
-                "speedup": 1.0
+                "speedup": 1.0,
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": adamw_time * 1000.0
+                }
             }
 
             # 2. Frozen Checkpoint Baseline
@@ -268,140 +318,278 @@ def run_smolgpt_norm_benchmark(
                 **frozen_metrics,
                 "weight_norm": ref_global_norm,
                 "cos_sim": 0.0,
+                "cos_sim_displacement": 0.0,
+                "cos_sim_weight": compute_displacement_and_weight_cosine(w_ref, w_actual_full, w_ref)[1],
                 "time_ms": 0.0,
-                "speedup": float("inf")
+                "speedup": float("inf"),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": 0.0,
+                    "total_latency_ms": 0.0
+                }
             }
 
             # 3. Matched SWA
             reset_to_frozen_ref()
             set_flat_params(model, torch.from_numpy(w_swa).float())
-            d_swa = w_swa - w_ref
-            d_act = w_actual_full - w_ref
-            norm_act = np.linalg.norm(d_act)
-            cos_swa = float(np.dot(d_swa, d_act) / (np.linalg.norm(d_swa) * norm_act + 1e-8)) if np.linalg.norm(d_swa) > 1e-8 else 0.0
+            cos_disp_swa, cos_weight_swa = compute_displacement_and_weight_cosine(w_swa, w_actual_full, w_ref)
             h_data["methods"]["matched_swa"] = {
                 **swa_metrics,
                 "weight_norm": float(np.linalg.norm(w_swa)),
-                "cos_sim": cos_swa,
-                "time_ms": 0.0,
-                "speedup": float("inf")
+                "cos_sim": cos_disp_swa,
+                "cos_sim_displacement": cos_disp_swa,
+                "cos_sim_weight": cos_weight_swa,
+                "time_ms": t_swa_load * 1000.0,
+                "speedup": float(adamw_time / max(t_swa_load, 1e-6)),
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": 0.0,
+                    "svd_ms": 0.0,
+                    "forecast_ms": 0.0,
+                    "reconstruction_and_load_ms": t_swa_load * 1000.0,
+                    "total_latency_ms": t_swa_load * 1000.0
+                }
             }
 
             # Evaluate Ranks
             for r in ranks:
                 # ----------------- Linear -----------------
-                w_lin_raw, c_lin, t_lin = engine.forecast_linear(r, h)
+                w_lin_raw, c_lin, t_lin_f = engine.forecast_linear(r, h)
                 w_lin_raw_np = w_lin_raw.numpy()
-                d_lin = w_lin_raw_np - w_ref
-                cos_lin = float(np.dot(d_lin, d_act) / (np.linalg.norm(d_lin) * norm_act + 1e-8)) if np.linalg.norm(d_lin) > 1e-8 else 0.0
 
                 # 4a. Linear Unprojected
+                t0_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_flat_params(model, w_lin_raw)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_lin_load = time.perf_counter() - t0_load
                 lin_raw_metrics = eval_both(model)
+                cos_disp_lin_raw, cos_weight_lin_raw = compute_displacement_and_weight_cosine(w_lin_raw_np, w_actual_full, w_ref)
+                t_lin_raw_total = engine.svd_time + t_lin_f + t_lin_load
+
                 h_data["methods"][f"linear_unprojected_r{r}"] = {
                     **lin_raw_metrics,
                     "weight_norm": float(np.linalg.norm(w_lin_raw_np)),
-                    "cos_sim": cos_lin,
-                    "time_ms": t_lin * 1000.0,
-                    "speedup": float(adamw_time / max(t_lin, 1e-6))
+                    "cos_sim": cos_disp_lin_raw,
+                    "cos_sim_displacement": cos_disp_lin_raw,
+                    "cos_sim_weight": cos_weight_lin_raw,
+                    "time_ms": t_lin_raw_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_lin_raw_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_lin_f * 1000.0,
+                        "reconstruction_and_load_ms": t_lin_load * 1000.0,
+                        "total_latency_ms": t_lin_raw_total * 1000.0
+                    }
                 }
 
                 # 4b. Linear Global Norm Matched (||W|| = ||W_ref||)
+                t0_norm = time.perf_counter()
                 w_lin_global = project_global_norm(w_lin_raw, ref_global_norm)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_lin_global)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_lin_glob_load = time.perf_counter() - t0_norm
                 lin_global_metrics = eval_both(model)
+                cos_disp_lin_global, cos_weight_lin_global = compute_displacement_and_weight_cosine(w_lin_global, w_actual_full, w_ref)
+                t_lin_glob_total = engine.svd_time + t_lin_f + t_lin_glob_load
+
                 h_data["methods"][f"linear_global_norm_r{r}"] = {
                     **lin_global_metrics,
                     "weight_norm": float(torch.norm(w_lin_global).item()),
-                    "cos_sim": cos_lin,
-                    "time_ms": t_lin * 1000.0,
-                    "speedup": float(adamw_time / max(t_lin, 1e-6))
+                    "cos_sim": cos_disp_lin_global,
+                    "cos_sim_displacement": cos_disp_lin_global,
+                    "cos_sim_weight": cos_weight_lin_global,
+                    "time_ms": t_lin_glob_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_lin_glob_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_lin_f * 1000.0,
+                        "reconstruction_and_load_ms": t_lin_glob_load * 1000.0,
+                        "total_latency_ms": t_lin_glob_total * 1000.0
+                    }
                 }
 
                 # 4c. Linear Tensor-Wise Norm Matched (||p_i|| = ||p_{i,ref}||)
+                t0_tensor = time.perf_counter()
                 w_lin_tensor = project_tensor_wise_norm(model, w_lin_raw, w_ref_t)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_lin_tensor)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_lin_tens_load = time.perf_counter() - t0_tensor
                 lin_tensor_metrics = eval_both(model)
+                cos_disp_lin_tensor, cos_weight_lin_tensor = compute_displacement_and_weight_cosine(w_lin_tensor, w_actual_full, w_ref)
+                t_lin_tens_total = engine.svd_time + t_lin_f + t_lin_tens_load
+
                 h_data["methods"][f"linear_tensor_norm_r{r}"] = {
                     **lin_tensor_metrics,
                     "weight_norm": float(torch.norm(w_lin_tensor).item()),
-                    "cos_sim": cos_lin,
-                    "time_ms": t_lin * 1000.0,
-                    "speedup": float(adamw_time / max(t_lin, 1e-6))
+                    "cos_sim": cos_disp_lin_tensor,
+                    "cos_sim_displacement": cos_disp_lin_tensor,
+                    "cos_sim_weight": cos_weight_lin_tensor,
+                    "time_ms": t_lin_tens_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_lin_tens_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_lin_f * 1000.0,
+                        "reconstruction_and_load_ms": t_lin_tens_load * 1000.0,
+                        "total_latency_ms": t_lin_tens_total * 1000.0
+                    }
                 }
 
                 # 4d. Linear Oracle Radial Norm Matched (||W|| = ||W_actual||)
+                t0_oracle = time.perf_counter()
                 w_lin_oracle = project_global_norm(w_lin_raw, act_global_norm)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_lin_oracle)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_lin_ora_load = time.perf_counter() - t0_oracle
                 lin_oracle_metrics = eval_both(model)
+                cos_disp_lin_oracle, cos_weight_lin_oracle = compute_displacement_and_weight_cosine(w_lin_oracle, w_actual_full, w_ref)
+                t_lin_ora_total = engine.svd_time + t_lin_f + t_lin_ora_load
+
                 h_data["methods"][f"linear_oracle_norm_r{r}"] = {
                     **lin_oracle_metrics,
                     "weight_norm": float(torch.norm(w_lin_oracle).item()),
-                    "cos_sim": cos_lin,
-                    "time_ms": t_lin * 1000.0,
-                    "speedup": float(adamw_time / max(t_lin, 1e-6))
+                    "cos_sim": cos_disp_lin_oracle,
+                    "cos_sim_displacement": cos_disp_lin_oracle,
+                    "cos_sim_weight": cos_weight_lin_oracle,
+                    "time_ms": t_lin_ora_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_lin_ora_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_lin_f * 1000.0,
+                        "reconstruction_and_load_ms": t_lin_ora_load * 1000.0,
+                        "total_latency_ms": t_lin_ora_total * 1000.0
+                    }
                 }
 
                 # ----------------- TimesFM -----------------
                 w_tfm_raw, c_tfm, t_tfm_f, t_tfm_r = engine.forecast_timesfm(r, h, tfm_model, device)
                 w_tfm_raw_np = w_tfm_raw.numpy()
-                d_tfm = w_tfm_raw_np - w_ref
-                cos_tfm = float(np.dot(d_tfm, d_act) / (np.linalg.norm(d_tfm) * norm_act + 1e-8)) if np.linalg.norm(d_tfm) > 1e-8 else 0.0
-                total_t_tfm = t_tfm_f + t_tfm_r
 
                 # 5a. TimesFM Unprojected
+                t0_tfm_load = time.perf_counter()
                 reset_to_frozen_ref()
                 set_flat_params(model, w_tfm_raw)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_tfm_load_dt = time.perf_counter() - t0_tfm_load
                 tfm_raw_metrics = eval_both(model)
+                cos_disp_tfm_raw, cos_weight_tfm_raw = compute_displacement_and_weight_cosine(w_tfm_raw_np, w_actual_full, w_ref)
+                t_tfm_raw_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load_dt
+
                 h_data["methods"][f"timesfm_unprojected_r{r}"] = {
                     **tfm_raw_metrics,
                     "weight_norm": float(np.linalg.norm(w_tfm_raw_np)),
-                    "cos_sim": cos_tfm,
-                    "time_ms": total_t_tfm * 1000.0,
-                    "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
+                    "cos_sim": cos_disp_tfm_raw,
+                    "cos_sim_displacement": cos_disp_tfm_raw,
+                    "cos_sim_weight": cos_weight_tfm_raw,
+                    "time_ms": t_tfm_raw_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_tfm_raw_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_tfm_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_tfm_r + t_tfm_load_dt) * 1000.0,
+                        "total_latency_ms": t_tfm_raw_total * 1000.0
+                    }
                 }
 
                 # 5b. TimesFM Global Norm Matched (||W|| = ||W_ref||)
+                t0_tfm_glob = time.perf_counter()
                 w_tfm_global = project_global_norm(w_tfm_raw, ref_global_norm)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_tfm_global)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_tfm_glob_load = time.perf_counter() - t0_tfm_glob
                 tfm_global_metrics = eval_both(model)
+                cos_disp_tfm_global, cos_weight_tfm_global = compute_displacement_and_weight_cosine(w_tfm_global, w_actual_full, w_ref)
+                t_tfm_glob_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_glob_load
+
                 h_data["methods"][f"timesfm_global_norm_r{r}"] = {
                     **tfm_global_metrics,
                     "weight_norm": float(torch.norm(w_tfm_global).item()),
-                    "cos_sim": cos_tfm,
-                    "time_ms": total_t_tfm * 1000.0,
-                    "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
+                    "cos_sim": cos_disp_tfm_global,
+                    "cos_sim_displacement": cos_disp_tfm_global,
+                    "cos_sim_weight": cos_weight_tfm_global,
+                    "time_ms": t_tfm_glob_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_tfm_glob_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_tfm_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_tfm_r + t_tfm_glob_load) * 1000.0,
+                        "total_latency_ms": t_tfm_glob_total * 1000.0
+                    }
                 }
 
                 # 5c. TimesFM Tensor-Wise Norm Matched (||p_i|| = ||p_{i,ref}||)
+                t0_tfm_tens = time.perf_counter()
                 w_tfm_tensor = project_tensor_wise_norm(model, w_tfm_raw, w_ref_t)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_tfm_tensor)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_tfm_tens_load = time.perf_counter() - t0_tfm_tens
                 tfm_tensor_metrics = eval_both(model)
+                cos_disp_tfm_tensor, cos_weight_tfm_tensor = compute_displacement_and_weight_cosine(w_tfm_tensor, w_actual_full, w_ref)
+                t_tfm_tens_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_tens_load
+
                 h_data["methods"][f"timesfm_tensor_norm_r{r}"] = {
                     **tfm_tensor_metrics,
                     "weight_norm": float(torch.norm(w_tfm_tensor).item()),
-                    "cos_sim": cos_tfm,
-                    "time_ms": total_t_tfm * 1000.0,
-                    "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
+                    "cos_sim": cos_disp_tfm_tensor,
+                    "cos_sim_displacement": cos_disp_tfm_tensor,
+                    "cos_sim_weight": cos_weight_tfm_tensor,
+                    "time_ms": t_tfm_tens_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_tfm_tens_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_tfm_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_tfm_r + t_tfm_tens_load) * 1000.0,
+                        "total_latency_ms": t_tfm_tens_total * 1000.0
+                    }
                 }
 
                 # 5d. TimesFM Oracle Radial Norm Matched (||W|| = ||W_actual||)
+                t0_tfm_ora = time.perf_counter()
                 w_tfm_oracle = project_global_norm(w_tfm_raw, act_global_norm)
                 reset_to_frozen_ref()
                 set_flat_params(model, w_tfm_oracle)
+                if device.type == "cuda" and torch.cuda.is_available():
+                    torch.cuda.synchronize()
+                t_tfm_ora_load = time.perf_counter() - t0_tfm_ora
                 tfm_oracle_metrics = eval_both(model)
+                cos_disp_tfm_oracle, cos_weight_tfm_oracle = compute_displacement_and_weight_cosine(w_tfm_oracle, w_actual_full, w_ref)
+                t_tfm_ora_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_ora_load
+
                 h_data["methods"][f"timesfm_oracle_norm_r{r}"] = {
                     **tfm_oracle_metrics,
                     "weight_norm": float(torch.norm(w_tfm_oracle).item()),
-                    "cos_sim": cos_tfm,
-                    "time_ms": total_t_tfm * 1000.0,
-                    "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
+                    "cos_sim": cos_disp_tfm_oracle,
+                    "cos_sim_displacement": cos_disp_tfm_oracle,
+                    "cos_sim_weight": cos_weight_tfm_oracle,
+                    "time_ms": t_tfm_ora_total * 1000.0,
+                    "speedup": float(adamw_time / max(t_tfm_ora_total, 1e-6)),
+                    "timing_breakdown": {
+                        "checkpoint_prep_ms": engine.prep_time * 1000.0,
+                        "svd_ms": engine.svd_time * 1000.0,
+                        "forecast_ms": t_tfm_f * 1000.0,
+                        "reconstruction_and_load_ms": (t_tfm_r + t_tfm_ora_load) * 1000.0,
+                        "total_latency_ms": t_tfm_ora_total * 1000.0
+                    }
                 }
 
             seed_data["horizons"][f"h_{h}"] = h_data
@@ -451,11 +639,17 @@ def run_smolgpt_norm_benchmark(
             gap_vals = [s["horizons"][h_key]["methods"][method]["gen_gap"] for s in all_seed_results]
             norm_vals = [s["horizons"][h_key]["methods"][method]["weight_norm"] for s in all_seed_results]
             cos_vals = [s["horizons"][h_key]["methods"][method]["cos_sim"] for s in all_seed_results]
+            cos_weight_vals = [s["horizons"][h_key]["methods"][method].get("cos_sim_weight", 0.0) for s in all_seed_results]
             time_vals = [s["horizons"][h_key]["methods"][method]["time_ms"] for s in all_seed_results]
             speedup_vals = [s["horizons"][h_key]["methods"][method]["speedup"] for s in all_seed_results]
 
             paired_vs_adamw = calc_paired_diff_stats(v_ppl_vals, adamw_ppl_vals)
             paired_vs_frozen = calc_paired_diff_stats(v_ppl_vals, frozen_ppl_vals)
+
+            prep_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("checkpoint_prep_ms", 0.0) for s in all_seed_results]
+            svd_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("svd_ms", 0.0) for s in all_seed_results]
+            forecast_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("forecast_ms", 0.0) for s in all_seed_results]
+            recon_times = [s["horizons"][h_key]["methods"][method].get("timing_breakdown", {}).get("reconstruction_and_load_ms", 0.0) for s in all_seed_results]
 
             summary["horizons"][h_key]["methods"][method] = {
                 "train_loss": calc_stats(t_loss_vals),
@@ -465,10 +659,19 @@ def run_smolgpt_norm_benchmark(
                 "gen_gap": calc_stats(gap_vals),
                 "weight_norm": calc_stats(norm_vals),
                 "cos_sim": calc_stats(cos_vals),
+                "cos_sim_displacement": calc_stats(cos_vals),
+                "cos_sim_weight": calc_stats(cos_weight_vals),
                 "time_ms": calc_stats(time_vals),
                 "speedup": calc_stats(speedup_vals),
                 "paired_diff_vs_adamw_ppl": paired_vs_adamw,
                 "paired_diff_vs_frozen_ppl": paired_vs_frozen,
+                "timing_breakdown": {
+                    "checkpoint_prep_ms": calc_stats(prep_times),
+                    "svd_ms": calc_stats(svd_times),
+                    "forecast_ms": calc_stats(forecast_times),
+                    "reconstruction_and_load_ms": calc_stats(recon_times),
+                    "total_latency_ms": calc_stats(time_vals)
+                }
             }
 
     # Save JSON and CSV
