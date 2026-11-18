@@ -16,7 +16,9 @@ from .models import (
 from .models_transformer import (
     SmolGPTConfig,
     SmolGPT,
-    evaluate_transformer_loss_and_ppl
+    evaluate_transformer_loss_and_ppl,
+    get_mlp_params,
+    set_mlp_params
 )
 from .data import (
     load_california_housing_splits,

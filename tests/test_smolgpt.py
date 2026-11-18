@@ -68,6 +68,24 @@ class TestSmolGPTComponents:
         # Verify weight tying is preserved
         assert torch.allclose(model.wte.weight, model.lm_head.weight)
 
+    def test_smolgpt_mlp_parameters_isolation(self, config):
+        from src.models_transformer import get_mlp_params, set_mlp_params
+        model = SmolGPT(config)
+        mlp_orig = get_mlp_params(model)
+        assert mlp_orig.dim() == 1
+
+        wte_before = model.wte.weight.clone()
+        attn_before = model.h[0].attn.c_q.weight.clone()
+
+        perturbed_mlp = mlp_orig + 0.99
+        set_mlp_params(model, perturbed_mlp)
+
+        mlp_check = get_mlp_params(model)
+        assert torch.allclose(mlp_check, perturbed_mlp, atol=1e-6)
+        # Verify non-MLP parameters were untouched
+        assert torch.allclose(model.wte.weight, wte_before)
+        assert torch.allclose(model.h[0].attn.c_q.weight, attn_before)
+
     def test_tinystories_batch_loader(self):
         # Create synthetic token sequence
         seq_len = 1000

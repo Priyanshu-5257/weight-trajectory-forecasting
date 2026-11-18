@@ -276,6 +276,37 @@ To test whether weight trajectory forecasting scales to real autoregressive Tran
 
 ---
 
+### 🔬 Architectural Subspace Isolation: Choice A Option 1 (Feed-Forward MLP Blocks Only)
+
+To test the hypothesis that unconstrained forecasting across Attention and Token Embeddings causes the catastrophic blowout, we isolated trajectory forecasting strictly to the **MLP linear blocks** ($W_1, W_2, W_3$ across all 4 layers = 523,776 parameters) while keeping Token Embeddings, Causal Attention, and RMSNorm scales strictly **frozen** at step 1,000.
+
+| MLP Subspace Perplexity vs Horizon | Perplexity vs Truncation Rank in MLP Subspace |
+| :---: | :---: |
+| ![MLP PPL vs Horizon](figures/smolgpt_mlp_ppl_vs_horizon.png) | ![MLP Rank Comparison](figures/smolgpt_mlp_rank_comparison.png) |
+
+| Method / Baseline | Horizon ($h$) | Val Loss (PPL) | Train Loss (PPL) | Cosine Alignment ($\cos$) | Diff vs Frozen PPL |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint ($W_{\text{ref}}$)** | Base (Step 1000) | `2.7779 (16.09)` | `2.7437 (15.54)` | `0.0000` | Baseline |
+| **MLP Matched SWA (Last 16 Ckpts)** | Base (Step 1000) | **`2.7477 (15.61)`** ⭐ | **`2.7139 (15.09)`** | `-0.0344` | **`-0.48 (p=0.0057)`** |
+| **Full Continued AdamW** | $+160$ ($h=8$) | `2.7204 (15.19)` | `2.6783 (14.56)` | `+1.0000` | `-0.90 (p=0.0037)` |
+| **MLP-Only Actual Continuation** | $+160$ ($h=8$) | **`2.7332 (15.38)`** 🟢 | **`2.7001 (14.88)`** | `+1.0000` | **`-0.70 (p<0.0001)`** |
+| **MLP-Only Actual Continuation** | $+320$ ($h=16$) | `2.7638 (15.86)` | `2.7297 (15.33)` | `+1.0000` | `-0.23 (p=0.0162)` |
+| **MLP-Only Actual Continuation** | $+1280$ ($h=64$) | `3.5136 (33.65)` | `3.4831 (32.56)` | `+1.0000` | `+17.56 (p=0.0085)` |
+| **MLP Linear ($r=1$)** | $+160$ ($h=8$) | `2.8716 (17.67)` | `2.8399 (17.11)` | `+0.1303` | `+1.58 (p=0.0004)` |
+| **MLP Linear ($r=1$)** | $+1280$ ($h=64$) | `5.2227 (186.58)` 🛡️ | `5.2012 (182.20)` | `+0.3052` | `+170.50 (p=0.0071)` |
+| **MLP Damped ($r=1, \gamma=0.95$)** | $+160$ ($h=8$) | `2.8434 (17.17)` | `2.8109 (16.63)` | `+0.1303` | `+1.09 (p=0.0006)` |
+| **MLP Damped ($r=1, \gamma=0.95$)** | $+1280$ ($h=64$) | `3.1694 (23.79)` | `3.1362 (23.02)` | `+0.3052` | `+7.71 (p=0.0008)` |
+| **MLP TimesFM ($r=1$)** | $+160$ ($h=8$) | `2.8548 (17.37)` | `2.8226 (16.82)` | `+0.1303` | `+1.28 (p=0.0003)` |
+| **MLP TimesFM ($r=1$)** | $+1280$ ($h=64$) | `3.8687 (49.02)` | `3.8392 (46.49)` | `+0.3052` | `+32.93 (p=0.0517)` |
+
+**Key Findings from Choice A Option 1:**
+1. **100x Stability Improvement:** Freezing Attention and Embeddings completely eliminates the exponential explosion ($PPL = 186.58$ vs $>19,000$ at $h=64$).
+2. **Stable Positive Cosine Alignment:** Feed-forward weights maintain a consistently positive drift direction ($\cos = +0.13 \to +0.31$) across all horizons, avoiding the sign inversion seen in Attention.
+3. **Inter-Module Coupling Limit:** Actual AdamW continuation restricted strictly to MLP initially improves perplexity ($16.09 \to 15.38$ at $h=8$), but degrades at longer horizons ($PPL = 33.65$ at $h=64$) because deep Transformer representations require attention and embeddings to co-adapt with the MLPs.
+4. **Matched SWA Strictly Wins:** Online SWA on MLP checkpoints achieves $PPL = 15.61$ ($p = 0.0057$), strictly beating all extrapolations at zero computational cost.
+
+---
+
 ## 🛠️ Repository Structure
 
 ```
@@ -361,7 +392,17 @@ pytest tests/ -v
 ```
 
 ### Run Benchmarks
-1. **Grokking Algorithmic Phase Transition Benchmark (5 seeds, 1-Layer Transformer, Modular Addition):**
+1. **SmolGPT Language Model Trajectory Benchmark (3 seeds, Ranks 1-32, Train vs Val Loss):**
+   ```bash
+   python benchmarks/benchmark_smolgpt_trajectory.py
+   python scripts/generate_smolgpt_figures.py
+   ```
+2. **SmolGPT MLP-Isolated Benchmark (Choice A Option 1 — Feed-Forward Blocks Only):**
+   ```bash
+   python benchmarks/benchmark_smolgpt_mlp_only.py
+   python scripts/generate_smolgpt_mlp_figures.py
+   ```
+3. **Grokking Algorithmic Phase Transition Benchmark (5 seeds, 1-Layer Transformer, Modular Addition):**
    ```bash
    python -c "from benchmarks.benchmark_grokking_trajectory import run_grokking_benchmark; run_grokking_benchmark(seeds=list(range(42, 47)))"
    python scripts/generate_grokking_figures.py

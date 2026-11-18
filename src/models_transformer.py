@@ -221,6 +221,23 @@ def set_flat_params(model: nn.Module, flat_params: torch.Tensor) -> None:
         offset += numel
 
 
+def get_mlp_params(model: nn.Module) -> torch.Tensor:
+    """Returns a 1D tensor concatenating only MLP parameters (w1, w2, w3 across all layers)."""
+    return torch.cat([p.detach().flatten() for name, p in model.named_parameters() if "mlp" in name])
+
+
+def set_mlp_params(model: nn.Module, flat_mlp: torch.Tensor) -> None:
+    """Loads a 1D tensor strictly into MLP parameters, leaving Embeddings, Attention, and Norms untouched."""
+    offset = 0
+    device = next(model.parameters()).device
+    flat_mlp = flat_mlp.to(device)
+    for name, p in model.named_parameters():
+        if "mlp" in name:
+            numel = p.numel()
+            p.data.copy_(flat_mlp[offset:offset + numel].view_as(p))
+            offset += numel
+
+
 def evaluate_transformer_loss_and_ppl(
     model: nn.Module,
     val_batches: List[Tuple[torch.Tensor, torch.Tensor]]
