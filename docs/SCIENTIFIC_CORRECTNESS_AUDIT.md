@@ -231,9 +231,25 @@ pie title Scientific Audit Verdicts Across Published Claims
 
 ---
 
-## Remaining Uncertainties & Recommendations
+## Section 8: Final Controlled Benchmark Resolution & Provenance
 
-1. **Amortized vs. One-Shot SVD Profiling:**
-   - SVD preparation represents ~99% of total forecasting latency ($3.88$ s out of $3.89$ s). When forecasting multiple future checkpoints ($h=8, 16, 32, 64$), SVD is computed once. Reporting amortized per-query latency ($<75$ ms) alongside one-shot latency will clarify practical throughput.
-2. **Attention-Only Independent Continuation:**
-   - Having demonstrated that independent W2 and MLP training succeed, a complementary experiment isolating attention projections (`q_proj`, `k_proj`, `v_proj`, `out_proj`) while freezing MLPs would complete the modular adaptation taxonomy.
+See the dedicated comprehensive report: [FINAL_CONTROLLED_BENCHMARK.md](file:///home/prinshu/exp/weightSpace/anomlydet/docs/FINAL_CONTROLLED_BENCHMARK.md).
+
+### 8.1 Resolution of Historical SVD Rank Clamping (P0-A)
+- **Problem:** Previous runs used a float32 tolerance threshold $\text{tol} = S_0 \cdot \max(P, T) \cdot \varepsilon_{32} \approx 2.47$, which collapsed requested ranks 4, 8, 16, 30, and 31 down to rank 3.
+- **Correction:** We transitioned to `float64` SVD, removed the zero-displacement column ($W_{32} - W_{\text{ref}} = \mathbf{0}$), recorded condition number ($\kappa = 4,806.46 \pm 246.70$), and verified that SVD rank-31 projection matches independent float64 QR projection to within $2.3 \times 10^{-6}$.
+- **Verification:** The true rank-31 historical basis spans $42.0\%$ of the parameter displacement at $h=100$. $58.0\%$ departs into orthogonal dimensions, and the projected model fails to generalize ($3.16\%$ test accuracy vs. $83.91\%$ actual continuation).
+
+### 8.2 Resolution of Optimizer State Conflation in Continuation (P0-B)
+- **Problem:** Full training continued with accumulated AdamW state ($m_t, v_t, t$), whereas earlier independent branches used fresh optimizers, conflating parameter restriction with optimizer state restarts.
+- **Correction:** At step 1000, we saved the exact AdamW state and mapped momentum/variance tensors by parameter name. We executed all 6 controlled branches (`full_resumed`, `full_restarted`, `mlp_resumed`, `mlp_restarted`, `w2_resumed`, `w2_restarted`) on 100% identical minibatches across seeds 42, 43, 44.
+- **Verification:** Both resumed and restarted W2 training converge to $14.14$ PPL at $h=64$. Both resumed and restarted MLP training converge to $13.82$ PPL. This proves that optimizer state restart was NOT the cause of adaptation success; genuine gradient-based fine-tuning on Feed-Forward layers is stable and robust.
+
+---
+
+## Final Research Question Verdict
+
+> **Can weight-trajectory forecasting reach a quality comparable to gradient-based continuation at meaningfully lower total compute cost?**
+
+**Definitive Answer: No.**  
+At $h=64$, uninterrupted AdamW continuation achieves $12.23$ PPL in $19.24$ s. Linear extrapolation diverges ($35.30$ PPL for W2; $241.15$ PPL for MLP). TimesFM forecasting regularizes the update ($21.30$ PPL for W2), but remains substantially worse than doing nothing at all (frozen checkpoint: $16.09$ PPL). Stochastic Weight Averaging (SWA) achieves $15.58$ PPL in $2.4\text{ ms}$ ($7,862\times$ faster). For genuine acceleration, parameter-restricted training (W2: $14.14$ PPL in $11.25$ s) and SWA are empirically superior to zero-gradient trajectory forecasting.

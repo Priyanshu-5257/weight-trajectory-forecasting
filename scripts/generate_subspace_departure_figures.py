@@ -125,8 +125,8 @@ def generate_subspace_departure_figures():
     proj_8 = [summary["reconstructed_models"]["r_8"]["projected"][f"h_{h}"]["mean"] for h in horizons]
     proj_8_ci = [summary["reconstructed_models"]["r_8"]["projected"][f"h_{h}"]["ci95"] for h in horizons]
 
-    proj_32 = [summary["reconstructed_models"]["r_32"]["projected"][f"h_{h}"]["mean"] for h in horizons]
-    proj_32_ci = [summary["reconstructed_models"]["r_32"]["projected"][f"h_{h}"]["ci95"] for h in horizons]
+    proj_31 = [summary["reconstructed_models"]["r_31"]["projected"][f"h_{h}"]["mean"] for h in horizons]
+    proj_31_ci = [summary["reconstructed_models"]["r_31"]["projected"][f"h_{h}"]["ci95"] for h in horizons]
 
     orth_8_acc = [summary["reconstructed_models"]["r_8"]["orthogonal"][f"h_{h}"]["mean"] for h in horizons]
     orth_8_ci = [summary["reconstructed_models"]["r_8"]["orthogonal"][f"h_{h}"]["ci95"] for h in horizons]
@@ -134,7 +134,7 @@ def generate_subspace_departure_figures():
     # Panel 1: Accuracy comparison
     ax1.errorbar(delta_steps, act_acc, yerr=act_ci, label="Actual Continuation W(t+h)", color="#2e7d32", marker="o", capsize=3)
     ax1.errorbar(delta_steps, proj_8, yerr=proj_8_ci, label="Projected onto Historical Basis W_proj (Rank 8)", color="#d32f2f", marker="s", capsize=3)
-    ax1.errorbar(delta_steps, proj_32, yerr=proj_32_ci, label="Projected onto Full Basis W_proj (Rank 32)", color="#ff9800", marker="^", capsize=3)
+    ax1.errorbar(delta_steps, proj_31, yerr=proj_31_ci, label="Projected onto Full Basis W_proj (Rank 31)", color="#ff9800", marker="^", capsize=3)
     ax1.errorbar(delta_steps, orth_8_acc, yerr=orth_8_ci, label="Orthogonal Continuation W_orth (Rank 8)", color="#9c27b0", marker="D", capsize=3)
 
     ax1.set_xlabel("Steps beyond Pre-Grokking Cutoff (Step 1500)")
@@ -147,11 +147,11 @@ def generate_subspace_departure_figures():
     diff_8 = [summary["reconstructed_models"]["r_8"]["paired_diff_projected_vs_actual"][f"h_{h}"]["mean"] for h in horizons]
     diff_8_ci = [summary["reconstructed_models"]["r_8"]["paired_diff_projected_vs_actual"][f"h_{h}"]["ci95"] for h in horizons]
 
-    diff_32 = [summary["reconstructed_models"]["r_32"]["paired_diff_projected_vs_actual"][f"h_{h}"]["mean"] for h in horizons]
-    diff_32_ci = [summary["reconstructed_models"]["r_32"]["paired_diff_projected_vs_actual"][f"h_{h}"]["ci95"] for h in horizons]
+    diff_31 = [summary["reconstructed_models"]["r_31"]["paired_diff_projected_vs_actual"][f"h_{h}"]["mean"] for h in horizons]
+    diff_31_ci = [summary["reconstructed_models"]["r_31"]["paired_diff_projected_vs_actual"][f"h_{h}"]["ci95"] for h in horizons]
 
     ax2.errorbar(delta_steps, diff_8, yerr=diff_8_ci, label="Δ(Projected r=8 - Actual Continuation)", color="#d32f2f", marker="s", capsize=3)
-    ax2.errorbar(delta_steps, diff_32, yerr=diff_32_ci, label="Δ(Projected r=32 - Actual Continuation)", color="#ff9800", marker="^", capsize=3)
+    ax2.errorbar(delta_steps, diff_31, yerr=diff_31_ci, label="Δ(Projected r=31 - Actual Continuation)", color="#ff9800", marker="^", capsize=3)
     ax2.axhline(0, color="gray", linestyle="--", alpha=0.7)
 
     ax2.set_xlabel("Steps beyond Pre-Grokking Cutoff (Step 1500)")

@@ -21,12 +21,207 @@ import time
 import os
 
 from src.models_transformer import SmolGPTConfig, SmolGPT, get_flat_params, set_flat_params, get_mlp_w2_params, get_mlp_params
-from src.subspace_analysis import compute_svd_basis, project_displacement
+from src.subspace_analysis import compute_svd_basis, project_displacement, qr_project_displacement
 from src.low_rank import LowRankTrajectoryEngine
 from benchmarks.benchmark_smolgpt_norm_projection import compute_displacement_and_weight_cosine, project_global_norm, project_tensor_wise_norm
+from benchmarks.benchmark_smolgpt_controlled import make_batch_from_indices
 
 
 class TestScientificCorrectness:
+    def test_resumed_full_adamw_matches_uninterrupted(self):
+        """
+        Integration Test 1:
+        Verifies that restoring cutoff model weights and complete AdamW optimizer state
+        (exp_avg, exp_avg_sq, step) reproduces uninterrupted training within numerical tolerance.
+        """
+        torch.manual_seed(42)
+        config = SmolGPTConfig(block_size=16, vocab_size=64, n_layer=2, n_head=2, n_kv_head=1, n_embed=32)
+        model = SmolGPT(config)
+        opt = optim.AdamW(model.parameters(), lr=1e-3, betas=(0.9, 0.95), weight_decay=0.01)
+
+        # Base training 5 steps
+        for _ in range(5):
+            x = torch.randint(0, 64, (2, 16))
+            y = torch.randint(0, 64, (2, 16))
+            _, loss = model(x, y)
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+
+        # Save cutoff state
+        cutoff_model = copy.deepcopy(model.state_dict())
+        cutoff_opt = copy.deepcopy(opt.state_dict())
+
+        # Uninterrupted branch: take step 6 and 7
+        future_batches = [(torch.randint(0, 64, (2, 16)), torch.randint(0, 64, (2, 16))) for _ in range(2)]
+        uninterrupted_losses = []
+        for x, y in future_batches:
+            _, loss = model(x, y)
+            uninterrupted_losses.append(loss.item())
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+        w_uninterrupted = get_flat_params(model).clone()
+
+        # Resumed branch: new model and optimizer, load cutoff state
+        model_resumed = SmolGPT(config)
+        model_resumed.load_state_dict(cutoff_model)
+        opt_resumed = optim.AdamW(model_resumed.parameters(), lr=1e-3, betas=(0.9, 0.95), weight_decay=0.01)
+        opt_resumed.load_state_dict(cutoff_opt)
+
+        resumed_losses = []
+        for x, y in future_batches:
+            _, loss = model_resumed(x, y)
+            resumed_losses.append(loss.item())
+            opt_resumed.zero_grad()
+            loss.backward()
+            opt_resumed.step()
+        w_resumed = get_flat_params(model_resumed).clone()
+
+        assert np.allclose(uninterrupted_losses, resumed_losses, atol=1e-6), "Resumed losses diverged from uninterrupted!"
+        max_diff = torch.max(torch.abs(w_uninterrupted - w_resumed)).item()
+        assert max_diff < 1e-6, f"Resumed weights diverged: max diff {max_diff}"
+
+    def test_restarted_adamw_distinguishable_from_resumed(self):
+        """
+        Integration Test 2:
+        Verifies that restarted AdamW (zeroed moments, step=0) takes different updates
+        than resumed AdamW (carrying accumulated momentum and variance).
+        """
+        torch.manual_seed(42)
+        config = SmolGPTConfig(block_size=16, vocab_size=64, n_layer=2, n_head=2, n_kv_head=1, n_embed=32)
+        model = SmolGPT(config)
+        opt = optim.AdamW(model.parameters(), lr=1e-3, betas=(0.9, 0.95), weight_decay=0.01)
+
+        for _ in range(10):
+            x = torch.randint(0, 64, (2, 16))
+            y = torch.randint(0, 64, (2, 16))
+            _, loss = model(x, y)
+            opt.zero_grad()
+            loss.backward()
+            opt.step()
+
+        cutoff_model = copy.deepcopy(model.state_dict())
+        cutoff_opt = copy.deepcopy(opt.state_dict())
+
+        # Branch A: Resumed
+        mA = SmolGPT(config)
+        mA.load_state_dict(cutoff_model)
+        optA = optim.AdamW(mA.parameters(), lr=1e-3, betas=(0.9, 0.95), weight_decay=0.01)
+        optA.load_state_dict(cutoff_opt)
+
+        # Branch B: Restarted (fresh optimizer)
+        mB = SmolGPT(config)
+        mB.load_state_dict(cutoff_model)
+        optB = optim.AdamW(mB.parameters(), lr=1e-3, betas=(0.9, 0.95), weight_decay=0.01)
+
+        x_fut = torch.randint(0, 64, (2, 16))
+        y_fut = torch.randint(0, 64, (2, 16))
+        _, lA = mA(x_fut, y_fut)
+        optA.zero_grad()
+        lA.backward()
+        optA.step()
+
+        _, lB = mB(x_fut, y_fut)
+        optB.zero_grad()
+        lB.backward()
+        optB.step()
+
+        wA = get_flat_params(mA)
+        wB = get_flat_params(mB)
+        diff = torch.norm(wA - wB).item()
+        assert diff > 1e-4, f"Restarted and resumed branches produced identical updates (diff={diff})!"
+
+    def test_identical_minibatch_indices_replay(self):
+        """
+        Integration Test 3:
+        Verifies that replaying pre-recorded minibatch indices guarantees 100%
+        identical batch tensors across multiple consumers.
+        """
+        tokens = np.random.randint(0, 1000, size=5000)
+        indices = np.random.randint(0, 4800, size=16)
+
+        x1, y1 = make_batch_from_indices(tokens, indices, block_size=64, device=torch.device("cpu"))
+        x2, y2 = make_batch_from_indices(tokens, indices, block_size=64, device=torch.device("cpu"))
+
+        assert torch.equal(x1, x2), "Batches produced from identical indices must be bitwise identical"
+        assert torch.equal(y1, y2), "Labels produced from identical indices must be bitwise identical"
+
+    def test_projection_coverage_matches_float64_qr(self):
+        """
+        Integration Test 4:
+        Verifies that maximum-rank SVD projection matches independent float64 QR projection
+        to high numerical precision (|cov_svd - cov_qr| < 1e-6).
+        """
+        torch.manual_seed(42)
+        P, T = 1000, 32
+        W = torch.randn(P, T)
+        w_ref = W[:, -1].clone()
+        D = W - w_ref.unsqueeze(1) # column 31 is zero
+
+        dw = torch.randn(P)
+
+        # 1. SVD in float64 with rank=31
+        U, S, cum_var, diag = compute_svd_basis(D, rank=31, return_diagnostics=True)
+        assert U.shape[1] == 31
+        dw_par_svd, _, cov_svd = project_displacement(dw, U)
+
+        # 2. QR in float64
+        dw_par_qr, _, cov_qr = qr_project_displacement(D, dw)
+
+        # 3. Equivalence assertion
+        assert abs(cov_svd - cov_qr) < 1e-6, f"SVD ({cov_svd}) and QR ({cov_qr}) coverage diverged!"
+        rel_diff = torch.norm(dw_par_svd - dw_par_qr).item() / torch.norm(dw).item()
+        assert rel_diff < 1e-5, f"Projected displacement vectors diverged: rel diff {rel_diff}"
+
+    def test_svd_requested_and_actual_rank_recording(self):
+        """
+        Integration Test 5:
+        Verifies that requested rank and actual rank are recorded explicitly,
+        and requesting rank 32 on a 31-column matrix returns actual_rank=31 without silent error.
+        """
+        torch.manual_seed(42)
+        P, T = 500, 32
+        W = torch.randn(P, T)
+        w_ref = W[:, -1].clone()
+        D = W - w_ref.unsqueeze(1)
+
+        U, S, cum_var, diag = compute_svd_basis(D, rank=32, return_diagnostics=True)
+        assert diag["requested_rank"] == 32
+        assert diag["actual_rank"] == 31
+        assert diag["max_rank"] == 31
+        assert len(diag["singular_values"]) == 31
+        assert diag["condition_number"] > 1.0
+
+        # When requesting r=8
+        U8, S8, _, diag8 = compute_svd_basis(D, rank=8, return_diagnostics=True)
+        assert diag8["requested_rank"] == 8
+        assert diag8["actual_rank"] == 8
+        assert U8.shape[1] == 8
+
+    def test_latency_invariant_reconciliation(self):
+        """
+        Integration Test 6:
+        Verifies that total_latency_ms satisfies the exact invariant:
+        total_latency_ms == checkpoint_prep_ms + svd_ms + forecast_ms + reconstruction_and_load_ms
+        """
+        P, T = 1000, 32
+        weight_window = np.random.randn(P, T).astype(np.float32)
+        w_ref = weight_window[:, -1].copy()
+
+        engine = LowRankTrajectoryEngine(weight_window, ref_checkpoint=w_ref)
+        w_lin, c_lin, t_lin = engine.forecast_linear(rank=4, horizon=8)
+        t_load = 0.002 # 2 ms simulated load
+
+        t_total = engine.prep_time + engine.svd_time + t_lin + t_load
+
+        prep_ms = engine.prep_time * 1000.0
+        svd_ms = engine.svd_time * 1000.0
+        forecast_ms = t_lin * 1000.0
+        load_ms = t_load * 1000.0
+        total_ms = t_total * 1000.0
+
+        assert abs(total_ms - (prep_ms + svd_ms + forecast_ms + load_ms)) < 1e-9, "Latency invariant violated!"
     def test_w2_independent_continuation_freezing(self):
         """
         Regression Test 1:

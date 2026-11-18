@@ -459,7 +459,7 @@ def run_smolgpt_w2_benchmark(
                 lin_metrics = eval_both(model)
                 d_lin = w_lin_np - w_w2_ref
                 cos_lin = float(np.dot(d_lin, d_act) / (np.linalg.norm(d_lin) * norm_w2_act + 1e-8)) if np.linalg.norm(d_lin) > 1e-8 else 0.0
-                t_lin_total = engine.svd_time + t_lin + t_lin_load
+                t_lin_total = engine.prep_time + engine.svd_time + t_lin + t_lin_load
 
                 h_data["methods"][f"w2_linear_r{r}"] = {
                     **lin_metrics,
@@ -488,7 +488,7 @@ def run_smolgpt_w2_benchmark(
                 damp_metrics = eval_both(model)
                 d_damp = w_damp_np - w_w2_ref
                 cos_damp = float(np.dot(d_damp, d_act) / (np.linalg.norm(d_damp) * norm_w2_act + 1e-8)) if np.linalg.norm(d_damp) > 1e-8 else 0.0
-                t_damp_total = engine.svd_time + t_damp + t_damp_load
+                t_damp_total = engine.prep_time + engine.svd_time + t_damp + t_damp_load
 
                 h_data["methods"][f"w2_damped_r{r}"] = {
                     **damp_metrics,
@@ -517,7 +517,7 @@ def run_smolgpt_w2_benchmark(
                 tfm_metrics = eval_both(model)
                 d_tfm = w_tfm_np - w_w2_ref
                 cos_tfm = float(np.dot(d_tfm, d_act) / (np.linalg.norm(d_tfm) * norm_w2_act + 1e-8)) if np.linalg.norm(d_tfm) > 1e-8 else 0.0
-                t_tfm_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load
+                t_tfm_total = engine.prep_time + engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load
 
                 h_data["methods"][f"w2_timesfm_r{r}"] = {
                     **tfm_metrics,
@@ -546,7 +546,7 @@ def run_smolgpt_w2_benchmark(
                 shuf_metrics = eval_both(model)
                 d_shuf = w_shuf_np - w_w2_ref
                 cos_shuf = float(np.dot(d_shuf, d_act) / (np.linalg.norm(d_shuf) * norm_w2_act + 1e-8)) if np.linalg.norm(d_shuf) > 1e-8 else 0.0
-                t_shuf_total = engine.svd_time + t_shuf_f + t_shuf_r + t_shuf_load
+                t_shuf_total = engine.prep_time + engine.svd_time + t_shuf_f + t_shuf_r + t_shuf_load
 
                 h_data["methods"][f"w2_shuffled_timesfm_r{r}"] = {
                     **shuf_metrics,

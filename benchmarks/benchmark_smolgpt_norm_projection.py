@@ -367,7 +367,7 @@ def run_smolgpt_norm_benchmark(
                 t_lin_load = time.perf_counter() - t0_load
                 lin_raw_metrics = eval_both(model)
                 cos_disp_lin_raw, cos_weight_lin_raw = compute_displacement_and_weight_cosine(w_lin_raw_np, w_actual_full, w_ref)
-                t_lin_raw_total = engine.svd_time + t_lin_f + t_lin_load
+                t_lin_raw_total = engine.prep_time + engine.svd_time + t_lin_f + t_lin_load
 
                 h_data["methods"][f"linear_unprojected_r{r}"] = {
                     **lin_raw_metrics,
@@ -396,7 +396,7 @@ def run_smolgpt_norm_benchmark(
                 t_lin_glob_load = time.perf_counter() - t0_norm
                 lin_global_metrics = eval_both(model)
                 cos_disp_lin_global, cos_weight_lin_global = compute_displacement_and_weight_cosine(w_lin_global, w_actual_full, w_ref)
-                t_lin_glob_total = engine.svd_time + t_lin_f + t_lin_glob_load
+                t_lin_glob_total = engine.prep_time + engine.svd_time + t_lin_f + t_lin_glob_load
 
                 h_data["methods"][f"linear_global_norm_r{r}"] = {
                     **lin_global_metrics,
@@ -425,7 +425,7 @@ def run_smolgpt_norm_benchmark(
                 t_lin_tens_load = time.perf_counter() - t0_tensor
                 lin_tensor_metrics = eval_both(model)
                 cos_disp_lin_tensor, cos_weight_lin_tensor = compute_displacement_and_weight_cosine(w_lin_tensor, w_actual_full, w_ref)
-                t_lin_tens_total = engine.svd_time + t_lin_f + t_lin_tens_load
+                t_lin_tens_total = engine.prep_time + engine.svd_time + t_lin_f + t_lin_tens_load
 
                 h_data["methods"][f"linear_tensor_norm_r{r}"] = {
                     **lin_tensor_metrics,
@@ -454,7 +454,7 @@ def run_smolgpt_norm_benchmark(
                 t_lin_ora_load = time.perf_counter() - t0_oracle
                 lin_oracle_metrics = eval_both(model)
                 cos_disp_lin_oracle, cos_weight_lin_oracle = compute_displacement_and_weight_cosine(w_lin_oracle, w_actual_full, w_ref)
-                t_lin_ora_total = engine.svd_time + t_lin_f + t_lin_ora_load
+                t_lin_ora_total = engine.prep_time + engine.svd_time + t_lin_f + t_lin_ora_load
 
                 h_data["methods"][f"linear_oracle_norm_r{r}"] = {
                     **lin_oracle_metrics,
@@ -486,7 +486,7 @@ def run_smolgpt_norm_benchmark(
                 t_tfm_load_dt = time.perf_counter() - t0_tfm_load
                 tfm_raw_metrics = eval_both(model)
                 cos_disp_tfm_raw, cos_weight_tfm_raw = compute_displacement_and_weight_cosine(w_tfm_raw_np, w_actual_full, w_ref)
-                t_tfm_raw_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load_dt
+                t_tfm_raw_total = engine.prep_time + engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_load_dt
 
                 h_data["methods"][f"timesfm_unprojected_r{r}"] = {
                     **tfm_raw_metrics,
@@ -515,7 +515,7 @@ def run_smolgpt_norm_benchmark(
                 t_tfm_glob_load = time.perf_counter() - t0_tfm_glob
                 tfm_global_metrics = eval_both(model)
                 cos_disp_tfm_global, cos_weight_tfm_global = compute_displacement_and_weight_cosine(w_tfm_global, w_actual_full, w_ref)
-                t_tfm_glob_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_glob_load
+                t_tfm_glob_total = engine.prep_time + engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_glob_load
 
                 h_data["methods"][f"timesfm_global_norm_r{r}"] = {
                     **tfm_global_metrics,
@@ -544,7 +544,7 @@ def run_smolgpt_norm_benchmark(
                 t_tfm_tens_load = time.perf_counter() - t0_tfm_tens
                 tfm_tensor_metrics = eval_both(model)
                 cos_disp_tfm_tensor, cos_weight_tfm_tensor = compute_displacement_and_weight_cosine(w_tfm_tensor, w_actual_full, w_ref)
-                t_tfm_tens_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_tens_load
+                t_tfm_tens_total = engine.prep_time + engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_tens_load
 
                 h_data["methods"][f"timesfm_tensor_norm_r{r}"] = {
                     **tfm_tensor_metrics,
@@ -573,7 +573,7 @@ def run_smolgpt_norm_benchmark(
                 t_tfm_ora_load = time.perf_counter() - t0_tfm_ora
                 tfm_oracle_metrics = eval_both(model)
                 cos_disp_tfm_oracle, cos_weight_tfm_oracle = compute_displacement_and_weight_cosine(w_tfm_oracle, w_actual_full, w_ref)
-                t_tfm_ora_total = engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_ora_load
+                t_tfm_ora_total = engine.prep_time + engine.svd_time + t_tfm_f + t_tfm_r + t_tfm_ora_load
 
                 h_data["methods"][f"timesfm_oracle_norm_r{r}"] = {
                     **tfm_oracle_metrics,

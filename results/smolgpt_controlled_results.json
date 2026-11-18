@@ -1,0 +1,4409 @@
+[
+  {
+    "seed": 42,
+    "horizons": {
+      "h_8": {
+        "step": 1160,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.678903675079346,
+            "train_ppl": 14.569112056546613,
+            "val_loss": 2.7178455352783204,
+            "val_ppl": 15.147651982314745,
+            "gen_gap": 0.03894186019897461,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 1889.813621295616,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1889.813621295616
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.7116281270980833,
+            "train_ppl": 15.053765016206373,
+            "val_loss": 2.7450734257698057,
+            "val_ppl": 15.56575681790239,
+            "gen_gap": 0.03344529867172241,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 1882.6315415208228,
+            "diff_ppl_vs_full_resumed": 0.4181048355876449,
+            "speedup": 1.003814915248361,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1882.6315415208228
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.667853128910065,
+            "train_ppl": 14.40900169391159,
+            "val_loss": 2.7079904437065125,
+            "val_ppl": 14.999103665846102,
+            "gen_gap": 0.040137314796447665,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 1509.126573044341,
+            "diff_ppl_vs_full_resumed": -0.1485483164686432,
+            "speedup": 1.2522565403399664,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1509.126573044341
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6687812209129333,
+            "train_ppl": 14.422380780704412,
+            "val_loss": 2.7083622097969053,
+            "val_ppl": 15.00468086061706,
+            "gen_gap": 0.03958098888397199,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 1508.657464000862,
+            "diff_ppl_vs_full_resumed": -0.1429711216976841,
+            "speedup": 1.2526459228749993,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1508.657464000862
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.6567556858062744,
+            "train_ppl": 14.249982602066133,
+            "val_loss": 2.6994650840759276,
+            "val_ppl": 14.871774447854106,
+            "gen_gap": 0.04270939826965314,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 1384.130857186392,
+            "diff_ppl_vs_full_resumed": -0.2758775344606388,
+            "speedup": 1.3653431765383488,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1384.130857186392
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6566381216049195,
+            "train_ppl": 14.248307412715278,
+            "val_loss": 2.6993186712265014,
+            "val_ppl": 14.869597188374444,
+            "gen_gap": 0.042680549621581854,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 1352.8574332012795,
+            "diff_ppl_vs_full_resumed": -0.2780547939403011,
+            "speedup": 1.3969052280872878,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1352.8574332012795
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7389098405838013,
+            "train_ppl": 15.47011101310016,
+            "val_loss": 2.7815115809440614,
+            "val_ppl": 16.143404577201313,
+            "gen_gap": 0.0426017403602601,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 0.995752594886568,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.7005042552948,
+            "train_ppl": 14.887236800458327,
+            "val_loss": 2.7415979862213136,
+            "val_ppl": 15.511752869142912,
+            "gen_gap": 0.04109373092651358,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 1889.813621295616,
+            "diff_ppl_vs_full_resumed": 0.364100886828167,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1889.813621295616
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.701104772090912,
+            "train_ppl": 14.896179521062919,
+            "val_loss": 2.7363282322883604,
+            "val_ppl": 15.430224753678946,
+            "gen_gap": 0.035223460197448375,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 1889.813621295616,
+            "diff_ppl_vs_full_resumed": 0.282572771364201,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1889.813621295616
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7077731847763062,
+            "train_ppl": 14.995845330593639,
+            "val_loss": 2.7487783074378966,
+            "val_ppl": 15.62353306598108,
+            "gen_gap": 0.0410051226615904,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.1464049932546914,
+            "diff_ppl_vs_full_resumed": 0.4758810836663354,
+            "speedup": 880.4552855749771,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.1464049932546914,
+              "total_latency_ms": 2.1464049932546914
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.689959967136383,
+            "train_ppl": 14.731086181074154,
+            "val_loss": 2.7295268058776854,
+            "val_ppl": 15.325633304234422,
+            "gen_gap": 0.0395668387413024,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.4858579854480922,
+            "diff_ppl_vs_full_resumed": 0.17798132191967753,
+            "speedup": 760.2258988077168,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.4858579854480922,
+              "total_latency_ms": 2.4858579854480922
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.780134415626526,
+            "train_ppl": 16.12118774194948,
+            "val_loss": 2.823911130428314,
+            "val_ppl": 16.84259560799652,
+            "gen_gap": 0.04377671480178824,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 305.89695594972,
+            "diff_ppl_vs_full_resumed": 1.6949436256817734,
+            "speedup": 6.177941900167987,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.2306760181672871,
+              "reconstruction_and_load_ms": 2.2189089795574546,
+              "total_latency_ms": 305.89695594972
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 2.8737309694290163,
+            "train_ppl": 17.702944283185722,
+            "val_loss": 2.916245758533478,
+            "val_ppl": 18.471809489664686,
+            "gen_gap": 0.04251478910446149,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1505.0609469763003,
+            "diff_ppl_vs_full_resumed": 3.324157507349941,
+            "speedup": 1.255639265035939,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 5.523377971258014,
+              "reconstruction_and_load_ms": 2.9202839941717684,
+              "total_latency_ms": 1505.0609469763003
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.812903869152069,
+            "train_ppl": 16.658221346959717,
+            "val_loss": 2.8567660808563233,
+            "val_ppl": 17.405148980352397,
+            "gen_gap": 0.04386221170425442,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 459.57810996333137,
+            "diff_ppl_vs_full_resumed": 2.2574969980376522,
+            "speedup": 4.112061867886614,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 152.59497199440375,
+              "reconstruction_and_load_ms": 4.535767016932368,
+              "total_latency_ms": 459.57810996333137
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 2.985504853725433,
+            "train_ppl": 19.796494047727027,
+            "val_loss": 3.02719851732254,
+            "val_ppl": 20.639330794126426,
+            "gen_gap": 0.04169366359710702,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1545.9021389833651,
+            "diff_ppl_vs_full_resumed": 5.491678811811681,
+            "speedup": 1.2224665285335707,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 40.13743996620178,
+              "reconstruction_and_load_ms": 9.14741400629282,
+              "total_latency_ms": 1545.9021389833651
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.7753594398498533,
+            "train_ppl": 16.044392953530277,
+            "val_loss": 2.8191129684448244,
+            "val_ppl": 16.76197567446871,
+            "gen_gap": 0.04375352859497106,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 306.5439129713923,
+            "diff_ppl_vs_full_resumed": 1.6143236921539668,
+            "speedup": 6.164903432520547,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.582091033924371,
+              "reconstruction_and_load_ms": 2.5144509854726493,
+              "total_latency_ms": 306.5439129713923
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 2.8601841807365416,
+            "train_ppl": 17.4647433096602,
+            "val_loss": 2.9022102475166323,
+            "val_ppl": 18.214359153950447,
+            "gen_gap": 0.04202606678009069,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1506.079717015382,
+            "diff_ppl_vs_full_resumed": 3.066707171635702,
+            "speedup": 1.2547899025163718,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 6.532959989272058,
+              "reconstruction_and_load_ms": 2.9294720152392983,
+              "total_latency_ms": 1506.079717015382
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.833968937397003,
+            "train_ppl": 17.012849940846888,
+            "val_loss": 2.8789142847061155,
+            "val_ppl": 17.79494244650683,
+            "gen_gap": 0.04494534730911237,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 573.9061788772233,
+            "diff_ppl_vs_full_resumed": 2.6472904641920856,
+            "speedup": 3.2928964538991434,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 267.3446139669977,
+              "reconstruction_and_load_ms": 4.114193958230317,
+              "total_latency_ms": 573.9061788772233
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.0862987875938415,
+            "train_ppl": 21.89588648826546,
+            "val_loss": 3.1317328095436094,
+            "val_ppl": 22.913650153372547,
+            "gen_gap": 0.04543402194976798,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1755.2975739818066,
+            "diff_ppl_vs_full_resumed": 7.765998171057802,
+            "speedup": 1.0766343264570613,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 251.23747996985912,
+              "reconstruction_and_load_ms": 7.4428090010769665,
+              "total_latency_ms": 1755.2975739818066
+            }
+          }
+        }
+      },
+      "h_16": {
+        "step": 1320,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.639168608188629,
+            "train_ppl": 14.001557986710846,
+            "val_loss": 2.672835874557495,
+            "val_ppl": 14.480977253422783,
+            "gen_gap": 0.03366726636886597,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 3766.8688024859875,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3766.8688024859875
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.655546796321869,
+            "train_ppl": 14.232766356311433,
+            "val_loss": 2.6876288652420044,
+            "val_ppl": 14.696786511715443,
+            "gen_gap": 0.03208206892013532,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 3765.4152721515857,
+            "diff_ppl_vs_full_resumed": 0.2158092582926603,
+            "speedup": 1.0003860212564473,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3765.4152721515857
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.6448629260063172,
+            "train_ppl": 14.081514741364906,
+            "val_loss": 2.684337794780731,
+            "val_ppl": 14.648497856020395,
+            "gen_gap": 0.039474868774413974,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 3021.0896905045956,
+            "diff_ppl_vs_full_resumed": 0.16752060259761237,
+            "speedup": 1.2468576534901976,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3021.0896905045956
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.645753800868988,
+            "train_ppl": 14.094065198489636,
+            "val_loss": 2.6844964027404785,
+            "val_ppl": 14.6508214086408,
+            "gen_gap": 0.03874260187149048,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 3015.3773187776096,
+            "diff_ppl_vs_full_resumed": 0.16984415521801743,
+            "speedup": 1.2492197175552882,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3015.3773187776096
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.642840552330017,
+            "train_ppl": 14.053065433891266,
+            "val_loss": 2.6839391231536864,
+            "val_ppl": 14.642659079500975,
+            "gen_gap": 0.04109857082366952,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 2761.199573695194,
+            "diff_ppl_vs_full_resumed": 0.16168182607819226,
+            "speedup": 1.3642146110594062,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2761.199573695194
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6427396059036257,
+            "train_ppl": 14.051646898755104,
+            "val_loss": 2.6839577078819277,
+            "val_ppl": 14.642931211869442,
+            "gen_gap": 0.041218101978302,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 2709.8708585253917,
+            "diff_ppl_vs_full_resumed": 0.16195395844665939,
+            "speedup": 1.390054729226386,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2709.8708585253917
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7389098405838013,
+            "train_ppl": 15.47011101310016,
+            "val_loss": 2.7815115809440614,
+            "val_ppl": 16.143404577201313,
+            "gen_gap": 0.0426017403602601,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 1.6624273237785303,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.707334303855896,
+            "train_ppl": 14.989265384204698,
+            "val_loss": 2.748707377910614,
+            "val_ppl": 15.622424935466276,
+            "gen_gap": 0.04137307405471802,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 3766.8688024859875,
+            "diff_ppl_vs_full_resumed": 1.1414476820434931,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3766.8688024859875
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.7322094559669496,
+            "train_ppl": 15.366801811446354,
+            "val_loss": 2.7668794989585876,
+            "val_ppl": 15.908912693802993,
+            "gen_gap": 0.034670042991638006,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 3766.8688024859875,
+            "diff_ppl_vs_full_resumed": 1.4279354403802103,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3766.8688024859875
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7077731847763062,
+            "train_ppl": 14.995845330593639,
+            "val_loss": 2.7487783074378966,
+            "val_ppl": 15.62353306598108,
+            "gen_gap": 0.0410051226615904,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.172022999729961,
+            "diff_ppl_vs_full_resumed": 1.1425558125582977,
+            "speedup": 1734.2674561707252,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.172022999729961,
+              "total_latency_ms": 2.172022999729961
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.689959967136383,
+            "train_ppl": 14.731086181074154,
+            "val_loss": 2.7295268058776854,
+            "val_ppl": 15.325633304234422,
+            "gen_gap": 0.0395668387413024,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.710670989472419,
+            "diff_ppl_vs_full_resumed": 0.8446560508116399,
+            "speedup": 1389.6444153921968,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.710670989472419,
+              "total_latency_ms": 2.710670989472419
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.8439710974693297,
+            "train_ppl": 17.183869043690173,
+            "val_loss": 2.887632727622986,
+            "val_ppl": 17.950764914059533,
+            "gen_gap": 0.043661630153656095,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 305.9225539909676,
+            "diff_ppl_vs_full_resumed": 3.469787660636751,
+            "speedup": 12.313145119065673,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.2875110260210931,
+              "reconstruction_and_load_ms": 2.187672012951225,
+              "total_latency_ms": 305.9225539909676
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 3.149700939655304,
+            "train_ppl": 23.329086732876117,
+            "val_loss": 3.1887479424476624,
+            "val_ppl": 24.258035963990757,
+            "gen_gap": 0.0390470027923584,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.4258550042287,
+            "diff_ppl_vs_full_resumed": 9.777058710567974,
+            "speedup": 2.503858059841307,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.74855798529461,
+              "reconstruction_and_load_ms": 3.060012008063495,
+              "total_latency_ms": 1504.4258550042287
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.8838839173316955,
+            "train_ppl": 17.88359688058333,
+            "val_loss": 2.927480459213257,
+            "val_ppl": 18.680504860208874,
+            "gen_gap": 0.04359654188156137,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 346.38260293286294,
+            "diff_ppl_vs_full_resumed": 4.199527606786091,
+            "speedup": 10.874878734068798,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 40.622838016133755,
+              "reconstruction_and_load_ms": 3.3123939647339284,
+              "total_latency_ms": 346.38260293286294
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.275752592086792,
+            "train_ppl": 26.463133933341055,
+            "val_loss": 3.316269850730896,
+            "val_ppl": 27.557365516298965,
+            "gen_gap": 0.04051725864410427,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1544.3810790311545,
+            "diff_ppl_vs_full_resumed": 13.076388262876183,
+            "speedup": 2.4390798706554206,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 40.482280019205064,
+              "reconstruction_and_load_ms": 7.281514001078904,
+              "total_latency_ms": 1544.3810790311545
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.8358731985092165,
+            "train_ppl": 17.04527771507271,
+            "val_loss": 2.8792922735214233,
+            "val_ppl": 17.801670007111888,
+            "gen_gap": 0.043419075012206765,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 308.49867896176875,
+            "diff_ppl_vs_full_resumed": 3.320692753689105,
+            "speedup": 12.210323931250297,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 3.5478270146995783,
+              "reconstruction_and_load_ms": 2.5034809950739145,
+              "total_latency_ms": 308.49867896176875
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 3.1215532064437865,
+            "train_ppl": 22.68158147674609,
+            "val_loss": 3.157591760158539,
+            "val_ppl": 23.513900576269428,
+            "gen_gap": 0.036038553714752286,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.0069370297715,
+            "diff_ppl_vs_full_resumed": 9.032923322846646,
+            "speedup": 2.5045554709508786,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.474005021620542,
+              "reconstruction_and_load_ms": 2.915646997280419,
+              "total_latency_ms": 1504.0069370297715
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.8795010447502136,
+            "train_ppl": 17.805386871607475,
+            "val_loss": 2.923036217689514,
+            "val_ppl": 18.597668393800333,
+            "gen_gap": 0.04353517293930054,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 570.5168650019914,
+            "diff_ppl_vs_full_resumed": 4.116691140377551,
+            "speedup": 6.602554689549518,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 262.3323120060377,
+              "reconstruction_and_load_ms": 5.737182043958455,
+              "total_latency_ms": 570.5168650019914
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.2742541909217833,
+            "train_ppl": 26.423511235387373,
+            "val_loss": 3.310992479324341,
+            "val_ppl": 27.4123181345742,
+            "gen_gap": 0.03673828840255755,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1763.5561750503257,
+            "diff_ppl_vs_full_resumed": 12.931340881151417,
+            "speedup": 2.135950561585312,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 256.03001401759684,
+              "reconstruction_and_load_ms": 10.908876021858305,
+              "total_latency_ms": 1763.5561750503257
+            }
+          }
+        }
+      },
+      "h_32": {
+        "step": 1640,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.5424479842185974,
+            "train_ppl": 12.71074862855558,
+            "val_loss": 2.597220849990845,
+            "val_ppl": 13.426372233951723,
+            "gen_gap": 0.05477286577224749,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 7529.011910432018,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7529.011910432018
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.5499122977256774,
+            "train_ppl": 12.805980619786496,
+            "val_loss": 2.600129473209381,
+            "val_ppl": 13.465481341228637,
+            "gen_gap": 0.050217175483703524,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 7521.378741192166,
+            "diff_ppl_vs_full_resumed": 0.0391091072769143,
+            "speedup": 1.001014863032764,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7521.378741192166
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.612978982925415,
+            "train_ppl": 13.639622593379096,
+            "val_loss": 2.6599525213241577,
+            "val_ppl": 14.295610345915007,
+            "gen_gap": 0.04697353839874285,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 6038.017257524189,
+            "diff_ppl_vs_full_resumed": 0.8692381119632842,
+            "speedup": 1.2469344801970959,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 6038.017257524189
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6133551239967345,
+            "train_ppl": 13.644753980636017,
+            "val_loss": 2.6603236556053163,
+            "val_ppl": 14.300916921649634,
+            "gen_gap": 0.04696853160858172,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 6031.117726000957,
+            "diff_ppl_vs_full_resumed": 0.8745446876979113,
+            "speedup": 1.2483609593580702,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 6031.117726000957
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.6248956084251405,
+            "train_ppl": 13.803133180043298,
+            "val_loss": 2.670222747325897,
+            "val_ppl": 14.443186015582649,
+            "gen_gap": 0.04532713890075657,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 5539.306495396886,
+            "diff_ppl_vs_full_resumed": 1.0168137816309262,
+            "speedup": 1.3591975668233125,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5539.306495396886
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6247994661331178,
+            "train_ppl": 13.80180617897376,
+            "val_loss": 2.670169508457184,
+            "val_ppl": 14.442417097166922,
+            "gen_gap": 0.04537004232406616,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 5410.857144743204,
+            "diff_ppl_vs_full_resumed": 1.0160448632151997,
+            "speedup": 1.3914638122994356,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5410.857144743204
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7389098405838013,
+            "train_ppl": 15.47011101310016,
+            "val_loss": 2.7815115809440614,
+            "val_ppl": 16.143404577201313,
+            "gen_gap": 0.0426017403602601,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 2.71703234324959,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.7342869877815246,
+            "train_ppl": 15.398760016697306,
+            "val_loss": 2.7771433353424073,
+            "val_ppl": 16.073040017888417,
+            "gen_gap": 0.042856347560882746,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 7529.011910432018,
+            "diff_ppl_vs_full_resumed": 2.646667783936694,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7529.011910432018
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.862858533859253,
+            "train_ppl": 17.511512711540522,
+            "val_loss": 2.8984620809555053,
+            "val_ppl": 18.146216486846967,
+            "gen_gap": 0.03560354709625235,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 7529.011910432018,
+            "diff_ppl_vs_full_resumed": 4.7198442528952445,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7529.011910432018
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7077731847763062,
+            "train_ppl": 14.995845330593639,
+            "val_loss": 2.7487783074378966,
+            "val_ppl": 15.62353306598108,
+            "gen_gap": 0.0410051226615904,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.1527979988604784,
+            "diff_ppl_vs_full_resumed": 2.1971608320293576,
+            "speedup": 3497.314617728781,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.1527979988604784,
+              "total_latency_ms": 2.1527979988604784
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.689959967136383,
+            "train_ppl": 14.731086181074154,
+            "val_loss": 2.7295268058776854,
+            "val_ppl": 15.325633304234422,
+            "gen_gap": 0.0395668387413024,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.4644400109536946,
+            "diff_ppl_vs_full_resumed": 1.8992610702826997,
+            "speedup": 3055.059923133785,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.4644400109536946,
+              "total_latency_ms": 2.4644400109536946
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.028742325305939,
+            "train_ppl": 20.67121856574331,
+            "val_loss": 3.0694113254547117,
+            "val_ppl": 21.52922523704918,
+            "gen_gap": 0.04066900014877284,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 305.909140908625,
+            "diff_ppl_vs_full_resumed": 8.102853003097456,
+            "speedup": 24.611921984642276,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.2285239645279944,
+              "reconstruction_and_load_ms": 2.233245992101729,
+              "total_latency_ms": 305.909140908625
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 3.9826557993888856,
+            "train_ppl": 53.659353636535855,
+            "val_loss": 4.017326629161834,
+            "val_ppl": 55.552394983009826,
+            "gen_gap": 0.034670829772948775,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.1853549773805,
+            "diff_ppl_vs_full_resumed": 42.1260227490581,
+            "speedup": 5.00537509258308,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.534867010079324,
+              "reconstruction_and_load_ms": 3.033202956430614,
+              "total_latency_ms": 1504.1853549773805
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.8643006920814513,
+            "train_ppl": 17.536785302737993,
+            "val_loss": 2.9070632696151733,
+            "val_ppl": 18.302968679518603,
+            "gen_gap": 0.042762577533721924,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 347.6700418977998,
+            "diff_ppl_vs_full_resumed": 4.87659644556688,
+            "speedup": 21.655624595475576,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 41.62565397564322,
+              "reconstruction_and_load_ms": 3.5970169701613486,
+              "total_latency_ms": 347.6700418977998
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.278807783126831,
+            "train_ppl": 26.544107494890195,
+            "val_loss": 3.312658965587616,
+            "val_ppl": 27.458038471765818,
+            "gen_gap": 0.033851182460785,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1545.16668303404,
+            "diff_ppl_vs_full_resumed": 14.031666237814095,
+            "speedup": 4.8726211826210815,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 40.92520399717614,
+              "reconstruction_and_load_ms": 7.624194025993347,
+              "total_latency_ms": 1545.16668303404
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.0188952922821044,
+            "train_ppl": 20.46866729508925,
+            "val_loss": 3.058733105659485,
+            "val_ppl": 21.300554508927164,
+            "gen_gap": 0.03983781337738046,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 306.556656898465,
+            "diff_ppl_vs_full_resumed": 7.874182274975441,
+            "speedup": 24.559936119494253,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.602217962499708,
+              "reconstruction_and_load_ms": 2.507067983970046,
+              "total_latency_ms": 306.556656898465
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 3.9512976169586183,
+            "train_ppl": 52.002802791146195,
+            "val_loss": 3.979109764099121,
+            "val_ppl": 53.4694126426806,
+            "gen_gap": 0.02781214714050284,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.0476440335624,
+            "diff_ppl_vs_full_resumed": 40.04304040872888,
+            "speedup": 5.005833385863148,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.522515053395182,
+              "reconstruction_and_load_ms": 2.907843969296664,
+              "total_latency_ms": 1504.0476440335624
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.8792612195014953,
+            "train_ppl": 17.801117202280185,
+            "val_loss": 2.922911989688873,
+            "val_ppl": 18.595358186138395,
+            "gen_gap": 0.04365077018737784,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 563.8175838976167,
+            "diff_ppl_vs_full_resumed": 5.168985952186672,
+            "speedup": 13.35363090023671,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 254.9295499920845,
+              "reconstruction_and_load_ms": 6.4406629535369575,
+              "total_latency_ms": 563.8175838976167
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.370827114582062,
+            "train_ppl": 29.102588280873967,
+            "val_loss": 3.408142018318176,
+            "val_ppl": 30.209064196895277,
+            "gen_gap": 0.037314903736114235,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1763.9722490566783,
+            "diff_ppl_vs_full_resumed": 16.782691962943552,
+            "speedup": 4.268214488327874,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 259.3390310066752,
+              "reconstruction_and_load_ms": 8.015933039132506,
+              "total_latency_ms": 1763.9722490566783
+            }
+          }
+        }
+      },
+      "h_64": {
+        "step": 2280,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.4189483523368835,
+            "train_ppl": 11.234038849785279,
+            "val_loss": 2.5064244508743285,
+            "val_ppl": 12.26101174143445,
+            "gen_gap": 0.08747609853744498,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 15268.252921756357,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 15268.252921756357
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.4257198572158813,
+            "train_ppl": 11.310368339761453,
+            "val_loss": 2.5076101064682006,
+            "val_ppl": 12.27555770013683,
+            "gen_gap": 0.08189024925231925,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 14978.374518221244,
+            "diff_ppl_vs_full_resumed": 0.014545958702379735,
+            "speedup": 1.0193531282838786,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 14978.374518221244
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.5699082016944885,
+            "train_ppl": 13.064625075441473,
+            "val_loss": 2.6292617559432983,
+            "val_ppl": 13.863531453657478,
+            "gen_gap": 0.059353554248809726,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 12096.129921381362,
+            "diff_ppl_vs_full_resumed": 1.6025197122230281,
+            "speedup": 1.2622428017053526,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12096.129921381362
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.5702420830726624,
+            "train_ppl": 13.06898783874917,
+            "val_loss": 2.6293725967407227,
+            "val_ppl": 13.865068183703539,
+            "gen_gap": 0.059130513668060214,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 12079.891162051354,
+            "diff_ppl_vs_full_resumed": 1.6040564422690888,
+            "speedup": 1.2639396097972433,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12079.891162051354
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.602752673625946,
+            "train_ppl": 13.50085036723235,
+            "val_loss": 2.6553556084632874,
+            "val_ppl": 14.230045484297213,
+            "gen_gap": 0.052602934837341575,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 10942.479754623491,
+            "diff_ppl_vs_full_resumed": 1.969033742862763,
+            "speedup": 1.3953192753502797,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 10942.479754623491
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6027845621109007,
+            "train_ppl": 13.501280895760578,
+            "val_loss": 2.655355978012085,
+            "val_ppl": 14.23005074299438,
+            "gen_gap": 0.05257141590118408,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 10817.887713958044,
+            "diff_ppl_vs_full_resumed": 1.9690390015599295,
+            "speedup": 1.4113894805966716,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 10817.887713958044
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7389098405838013,
+            "train_ppl": 15.47011101310016,
+            "val_loss": 2.7815115809440614,
+            "val_ppl": 16.143404577201313,
+            "gen_gap": 0.0426017403602601,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 3.882392835766863,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.84675669670105,
+            "train_ppl": 17.231803147702273,
+            "val_loss": 2.891463541984558,
+            "val_ppl": 18.0196628454288,
+            "gen_gap": 0.04470684528350821,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 15268.252921756357,
+            "diff_ppl_vs_full_resumed": 5.758651103994351,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 15268.252921756357
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 3.4643558740615843,
+            "train_ppl": 31.95586953803611,
+            "val_loss": 3.496897876262665,
+            "val_ppl": 33.01288290230423,
+            "gen_gap": 0.0325420022010805,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 15268.252921756357,
+            "diff_ppl_vs_full_resumed": 20.751871160869776,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 15268.252921756357
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7077731847763062,
+            "train_ppl": 14.995845330593639,
+            "val_loss": 2.7487783074378966,
+            "val_ppl": 15.62353306598108,
+            "gen_gap": 0.0410051226615904,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.1204089862294495,
+            "diff_ppl_vs_full_resumed": 3.3625213245466306,
+            "speedup": 7200.6169663083,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.1204089862294495,
+              "total_latency_ms": 2.1204089862294495
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.689959967136383,
+            "train_ppl": 14.731086181074154,
+            "val_loss": 2.7295268058776854,
+            "val_ppl": 15.325633304234422,
+            "gen_gap": 0.0395668387413024,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.498311980161816,
+            "diff_ppl_vs_full_resumed": 3.0646215627999727,
+            "speedup": 6111.4276531498,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.498311980161816,
+              "total_latency_ms": 2.498311980161816
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.5588578581809998,
+            "train_ppl": 35.123058713411474,
+            "val_loss": 3.589281141757965,
+            "val_ppl": 36.208038122220565,
+            "gen_gap": 0.030423283576965332,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 305.9066669084132,
+            "diff_ppl_vs_full_resumed": 23.947026380786113,
+            "speedup": 49.911474882394735,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.2187359970994294,
+              "reconstruction_and_load_ms": 2.240559959318489,
+              "total_latency_ms": 305.9066669084132
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 5.262173366546631,
+            "train_ppl": 192.90027905608324,
+            "val_loss": 5.2881080389022825,
+            "val_ppl": 197.96852212756195,
+            "gen_gap": 0.0259346723556515,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.2900489643216,
+            "diff_ppl_vs_full_resumed": 185.7075103861275,
+            "speedup": 10.149806503252675,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.633849952369928,
+              "reconstruction_and_load_ms": 3.038914001081139,
+              "total_latency_ms": 1504.2900489643216
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 3.035081648826599,
+            "train_ppl": 20.802676344250365,
+            "val_loss": 3.0749660968780517,
+            "val_ppl": 21.64914792536772,
+            "gen_gap": 0.03988444805145264,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 346.8082929030061,
+            "diff_ppl_vs_full_resumed": 9.388136183933272,
+            "speedup": 44.025051402177745,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 40.8534889575094,
+              "reconstruction_and_load_ms": 3.507432993501425,
+              "total_latency_ms": 346.8082929030061
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.731477344036102,
+            "train_ppl": 41.740728051584824,
+            "val_loss": 3.761737036705017,
+            "val_ppl": 43.0230938027117,
+            "gen_gap": 0.030259692668914706,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1543.7075850204565,
+            "diff_ppl_vs_full_resumed": 30.762082061277248,
+            "speedup": 9.890638013256915,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 39.926048018969595,
+              "reconstruction_and_load_ms": 7.164251990616322,
+              "total_latency_ms": 1543.7075850204565
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.558790111541748,
+            "train_ppl": 35.12067932482209,
+            "val_loss": 3.5864723563194274,
+            "val_ppl": 36.10648020595124,
+            "gen_gap": 0.027682244777679443,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 306.83794495416805,
+            "diff_ppl_vs_full_resumed": 23.84546846451679,
+            "speedup": 49.75998950858882,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 1.8479099962860346,
+              "reconstruction_and_load_ms": 2.5426640058867633,
+              "total_latency_ms": 306.83794495416805
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 5.300264239311218,
+            "train_ppl": 200.38975383008696,
+            "val_loss": 5.303909730911255,
+            "val_ppl": 201.12160616467466,
+            "gen_gap": 0.0036454916000367987,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1504.0260850801133,
+            "diff_ppl_vs_full_resumed": 188.8605944232402,
+            "speedup": 10.151587843599854,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 4.475760040804744,
+              "reconstruction_and_load_ms": 2.933040028437972,
+              "total_latency_ms": 1504.0260850801133
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 3.026926815509796,
+            "train_ppl": 20.633723812283897,
+            "val_loss": 3.0666457533836367,
+            "val_ppl": 21.4697668691193,
+            "gen_gap": 0.03971893787384051,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 557.9577530152164,
+            "diff_ppl_vs_full_resumed": 9.208755127684851,
+            "speedup": 27.36453224145801,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 6.92498596617952,
+              "svd_ms": 295.52238498581573,
+              "forecast_ms": 251.4934530481696,
+              "reconstruction_and_load_ms": 4.0169290150515735,
+              "total_latency_ms": 557.9577530152164
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.7320481181144713,
+            "train_ppl": 41.76455937767353,
+            "val_loss": 3.762662661075592,
+            "val_ppl": 43.062935463194364,
+            "gen_gap": 0.030614542961120872,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1758.7293579126708,
+            "diff_ppl_vs_full_resumed": 30.801923721759913,
+            "speedup": 8.681411300188518,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 16.894525033421814,
+              "svd_ms": 1479.7227599774487,
+              "forecast_ms": 254.75028797518462,
+              "reconstruction_and_load_ms": 7.361784926615655,
+              "total_latency_ms": 1758.7293579126708
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "seed": 43,
+    "horizons": {
+      "h_8": {
+        "step": 1160,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.681098449230194,
+            "train_ppl": 14.601123082725683,
+            "val_loss": 2.7196059465408324,
+            "val_ppl": 15.174341564893215,
+            "gen_gap": 0.03850749731063852,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 1893.6633670236915,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1893.6633670236915
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.713561701774597,
+            "train_ppl": 15.08290075401279,
+            "val_loss": 2.7452031493186952,
+            "val_ppl": 15.567776194095451,
+            "gen_gap": 0.031641447544098256,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 1815.391524170991,
+            "diff_ppl_vs_full_resumed": 0.39343462920223615,
+            "speedup": 1.043115681554393,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1815.391524170991
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.6718868374824525,
+            "train_ppl": 14.46724078836475,
+            "val_loss": 2.7040233612060547,
+            "val_ppl": 14.939718854276046,
+            "gen_gap": 0.032136523723602206,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 2109.432947123423,
+            "diff_ppl_vs_full_resumed": -0.23462271061716855,
+            "speedup": 0.8977120460766621,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2109.432947123423
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6724036693573,
+            "train_ppl": 14.474719852088052,
+            "val_loss": 2.7034875392913817,
+            "val_ppl": 14.931715969766795,
+            "gen_gap": 0.031083869934081854,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 1468.999023840297,
+            "diff_ppl_vs_full_resumed": -0.24262559512641957,
+            "speedup": 1.2890841561441106,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1468.999023840297
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.657214331626892,
+            "train_ppl": 14.256519796044197,
+            "val_loss": 2.690679943561554,
+            "val_ppl": 14.741696034805656,
+            "gen_gap": 0.03346561193466213,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 1447.4806452635676,
+            "diff_ppl_vs_full_resumed": -0.4326455300875587,
+            "speedup": 1.3082477981450866,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1447.4806452635676
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.656765651702881,
+            "train_ppl": 14.25012461662704,
+            "val_loss": 2.6901161313056945,
+            "val_ppl": 14.733386828545353,
+            "gen_gap": 0.033350479602813454,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 1433.3302929881029,
+            "diff_ppl_vs_full_resumed": -0.4409547363478623,
+            "speedup": 1.3211632910345597,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1433.3302929881029
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7512752771377564,
+            "train_ppl": 15.662593300468002,
+            "val_loss": 2.7770292162895203,
+            "val_ppl": 16.07120588244145,
+            "gen_gap": 0.025753939151763827,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 0.8968643175482356,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.7061290383338927,
+            "train_ppl": 14.971210222254731,
+            "val_loss": 2.735676944255829,
+            "val_ppl": 15.420178504813547,
+            "gen_gap": 0.029547905921936124,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 1893.6633670236915,
+            "diff_ppl_vs_full_resumed": 0.2458369399203324,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1893.6633670236915
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.705242967605591,
+            "train_ppl": 14.95795054648236,
+            "val_loss": 2.73299480676651,
+            "val_ppl": 15.378874881712825,
+            "gen_gap": 0.02775183916091928,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 1893.6633670236915,
+            "diff_ppl_vs_full_resumed": 0.20453331681961018,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1893.6633670236915
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.716347360610962,
+            "train_ppl": 15.124975145018029,
+            "val_loss": 2.7452534556388857,
+            "val_ppl": 15.568559371328542,
+            "gen_gap": 0.02890609502792385,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.9510760214179754,
+            "diff_ppl_vs_full_resumed": 0.3942178064353268,
+            "speedup": 641.6857286224016,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.9510760214179754,
+              "total_latency_ms": 2.9510760214179754
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6940195679664614,
+            "train_ppl": 14.791010061983908,
+            "val_loss": 2.7241461277008057,
+            "val_ppl": 15.243392457749014,
+            "gen_gap": 0.030126559734344305,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.5385660119354725,
+            "diff_ppl_vs_full_resumed": 0.0690508928557989,
+            "speedup": 745.9578983254056,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.5385660119354725,
+              "total_latency_ms": 2.5385660119354725
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.7929047346115112,
+            "train_ppl": 16.328380595485235,
+            "val_loss": 2.81699675321579,
+            "val_ppl": 16.72654123295411,
+            "gen_gap": 0.024092018604278564,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 444.90778003819287,
+            "diff_ppl_vs_full_resumed": 1.5521996680608936,
+            "speedup": 4.256305355822573,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 1.6814169939607382,
+              "reconstruction_and_load_ms": 2.4348750011995435,
+              "total_latency_ms": 444.90778003819287
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 2.886491060256958,
+            "train_ppl": 17.930282805663992,
+            "val_loss": 2.9071019768714903,
+            "val_ppl": 18.303677150930046,
+            "gen_gap": 0.020610916614532293,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.0239299777895,
+            "diff_ppl_vs_full_resumed": 3.129335586036831,
+            "speedup": 0.8537614682284578,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 9.185989969410002,
+              "reconstruction_and_load_ms": 3.0780190136283636,
+              "total_latency_ms": 2218.0239299777895
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.845381772518158,
+            "train_ppl": 17.208127005020046,
+            "val_loss": 2.8684775710105894,
+            "val_ppl": 17.610187521126985,
+            "gen_gap": 0.023095798492431374,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 535.3697860264219,
+            "diff_ppl_vs_full_resumed": 2.43584595623377,
+            "speedup": 3.537112882440912,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 87.85832999274135,
+              "reconstruction_and_load_ms": 6.719967990648001,
+              "total_latency_ms": 535.3697860264219
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.019951033592224,
+            "train_ppl": 20.490288323814152,
+            "val_loss": 3.037602186203003,
+            "val_ppl": 20.855176403891697,
+            "gen_gap": 0.017651152610778986,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2303.3875749679282,
+            "diff_ppl_vs_full_resumed": 5.680834838998482,
+            "speedup": 0.8221210306086063,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 82.53031497588381,
+              "reconstruction_and_load_ms": 15.097338997293264,
+              "total_latency_ms": 2303.3875749679282
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.7888051509857177,
+            "train_ppl": 16.26157805861361,
+            "val_loss": 2.813182497024536,
+            "val_ppl": 16.66286343841071,
+            "gen_gap": 0.02437734603881836,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 448.86664202203974,
+            "diff_ppl_vs_full_resumed": 1.4885218735174952,
+            "speedup": 4.2187660871682935,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 3.3813589834608138,
+              "reconstruction_and_load_ms": 4.693794995546341,
+              "total_latency_ms": 448.86664202203974
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 2.8746315121650694,
+            "train_ppl": 17.71889372156425,
+            "val_loss": 2.895564329624176,
+            "val_ppl": 18.09370937687921,
+            "gen_gap": 0.0209328174591068,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.200795992743,
+            "diff_ppl_vs_full_resumed": 2.919367811985996,
+            "speedup": 0.8536933944143651,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.879303011577576,
+              "reconstruction_and_load_ms": 4.561571986414492,
+              "total_latency_ms": 2218.200795992743
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.8800503611564636,
+            "train_ppl": 17.815170349602152,
+            "val_loss": 2.902447021007538,
+            "val_ppl": 18.218672341956076,
+            "gen_gap": 0.022396659851074308,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 861.15166998934,
+            "diff_ppl_vs_full_resumed": 3.0443307770628607,
+            "speedup": 2.1989893685593533,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 411.533051985316,
+              "reconstruction_and_load_ms": 8.827129960991442,
+              "total_latency_ms": 861.15166998934
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.114967381954193,
+            "train_ppl": 22.532695369018132,
+            "val_loss": 3.13064249753952,
+            "val_ppl": 22.88868074025185,
+            "gen_gap": 0.01567511558532697,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2636.7371709784493,
+            "diff_ppl_vs_full_resumed": 7.714339175358635,
+            "speedup": 0.7181843483933533,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 417.72364696953446,
+              "reconstruction_and_load_ms": 13.253603014163673,
+              "total_latency_ms": 2636.7371709784493
+            }
+          }
+        }
+      },
+      "h_16": {
+        "step": 1320,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.6263203620910645,
+            "train_ppl": 13.822813260947422,
+            "val_loss": 2.676316165924072,
+            "val_ppl": 14.5314630752636,
+            "gen_gap": 0.049995803833007724,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 3730.0128520000726,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3730.0128520000726
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.643178129196167,
+            "train_ppl": 14.057810224500955,
+            "val_loss": 2.688577401638031,
+            "val_ppl": 14.710733562223242,
+            "gen_gap": 0.045399272441863925,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 3637.2504718601704,
+            "diff_ppl_vs_full_resumed": 0.17927048695964132,
+            "speedup": 1.0255034347668834,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3637.2504718601704
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.6482234716415407,
+            "train_ppl": 14.128915916563042,
+            "val_loss": 2.6868540763854982,
+            "val_ppl": 14.685404015384782,
+            "gen_gap": 0.03863060474395752,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 5184.343147964682,
+            "diff_ppl_vs_full_resumed": 0.1539409401211813,
+            "speedup": 0.71947645932049,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5184.343147964682
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6483690619468687,
+            "train_ppl": 14.130973099494598,
+            "val_loss": 2.686810326576233,
+            "val_ppl": 14.68476154581419,
+            "gen_gap": 0.03844126462936437,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 2919.1238927305676,
+            "diff_ppl_vs_full_resumed": 0.15329847055058998,
+            "speedup": 1.277785044097938,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2919.1238927305676
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.639467740058899,
+            "train_ppl": 14.005746925429404,
+            "val_loss": 2.6768993735313416,
+            "val_ppl": 14.539940406855703,
+            "gen_gap": 0.037431633472442716,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 2884.1933896183036,
+            "diff_ppl_vs_full_resumed": 0.008477331592102288,
+            "speedup": 1.2932603151461024,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2884.1933896183036
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.639225721359253,
+            "train_ppl": 14.002357682917518,
+            "val_loss": 2.6765878081321715,
+            "val_ppl": 14.535410970163447,
+            "gen_gap": 0.037362086772918524,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 2868.5562481405213,
+            "diff_ppl_vs_full_resumed": 0.0039478948998468155,
+            "speedup": 1.3003101662789327,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2868.5562481405213
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7512752771377564,
+            "train_ppl": 15.662593300468002,
+            "val_loss": 2.7770292162895203,
+            "val_ppl": 16.07120588244145,
+            "gen_gap": 0.025753939151763827,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 1.5397428071778503,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.706672155857086,
+            "train_ppl": 14.979343557348326,
+            "val_loss": 2.7376197934150697,
+            "val_ppl": 15.45016670750121,
+            "gen_gap": 0.030947637557983576,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 3730.0128520000726,
+            "diff_ppl_vs_full_resumed": 0.9187036322376105,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3730.0128520000726
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.7287169694900513,
+            "train_ppl": 15.313227072907933,
+            "val_loss": 2.7599314212799073,
+            "val_ppl": 15.798759452406145,
+            "gen_gap": 0.031214451789856046,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 3730.0128520000726,
+            "diff_ppl_vs_full_resumed": 1.2672963771425447,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3730.0128520000726
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.716347360610962,
+            "train_ppl": 15.124975145018029,
+            "val_loss": 2.7452534556388857,
+            "val_ppl": 15.568559371328542,
+            "gen_gap": 0.02890609502792385,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.619540006387979,
+            "diff_ppl_vs_full_resumed": 1.0370962960649415,
+            "speedup": 807.4424827671472,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.619540006387979,
+              "total_latency_ms": 4.619540006387979
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6940195679664614,
+            "train_ppl": 14.791010061983908,
+            "val_loss": 2.7241461277008057,
+            "val_ppl": 15.243392457749014,
+            "gen_gap": 0.030126559734344305,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.613989964127541,
+            "diff_ppl_vs_full_resumed": 0.7119293824854136,
+            "speedup": 808.4137332330286,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.613989964127541,
+              "total_latency_ms": 4.613989964127541
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.855325996875763,
+            "train_ppl": 17.380102143229575,
+            "val_loss": 2.8778091788291933,
+            "val_ppl": 17.775288013144873,
+            "gen_gap": 0.022483181953430353,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 444.6582310483791,
+            "diff_ppl_vs_full_resumed": 3.243824937881273,
+            "speedup": 8.38849388485568,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 1.2968590017408133,
+              "reconstruction_and_load_ms": 2.5698840036056936,
+              "total_latency_ms": 444.6582310483791
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 3.1605081439018248,
+            "train_ppl": 23.582576227251803,
+            "val_loss": 3.174108159542084,
+            "val_ppl": 23.905490475008968,
+            "gen_gap": 0.013600015640259144,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.756573041901,
+            "diff_ppl_vs_full_resumed": 9.374027399745367,
+            "speedup": 1.681127572677452,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.539017999079078,
+              "reconstruction_and_load_ms": 5.457634048070759,
+              "total_latency_ms": 2218.756573041901
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.937590789794922,
+            "train_ppl": 18.87032891478747,
+            "val_loss": 2.9583258867263793,
+            "val_ppl": 19.265691792529292,
+            "gen_gap": 0.020735096931457253,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 541.7605090187863,
+            "diff_ppl_vs_full_resumed": 4.734228717265692,
+            "speedup": 6.88498476708041,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 94.23026698641479,
+              "reconstruction_and_load_ms": 6.738753989338875,
+              "total_latency_ms": 541.7605090187863
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.3788564205169678,
+            "train_ppl": 29.33720249989057,
+            "val_loss": 3.3893414974212646,
+            "val_ppl": 29.646423594845444,
+            "gen_gap": 0.010485076904296786,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2311.750728986226,
+            "diff_ppl_vs_full_resumed": 15.114960519581844,
+            "speedup": 1.6135013196841506,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 94.85853998921812,
+              "reconstruction_and_load_ms": 11.132268002256751,
+              "total_latency_ms": 2311.750728986226
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.8492756128311156,
+            "train_ppl": 17.275263327896248,
+            "val_loss": 2.8722783446311952,
+            "val_ppl": 17.67724721594273,
+            "gen_gap": 0.023002731800079612,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 447.2141310106963,
+            "diff_ppl_vs_full_resumed": 3.1457841406791314,
+            "speedup": 8.340552306722302,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 3.858949989080429,
+              "reconstruction_and_load_ms": 2.5636929785832763,
+              "total_latency_ms": 447.2141310106963
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 3.141068434715271,
+            "train_ppl": 23.128565023970097,
+            "val_loss": 3.1547839283943175,
+            "val_ppl": 23.44797010348437,
+            "gen_gap": 0.013715493679046453,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.7703589443117,
+            "diff_ppl_vs_full_resumed": 8.916507028220769,
+            "speedup": 1.681117127314973,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.847606961149722,
+              "reconstruction_and_load_ms": 5.16283098841086,
+              "total_latency_ms": 2218.7703589443117
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.9438393831253054,
+            "train_ppl": 18.988611089932334,
+            "val_loss": 2.9647776961326597,
+            "val_ppl": 19.390392203132855,
+            "gen_gap": 0.02093831300735438,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 878.7348580663092,
+            "diff_ppl_vs_full_resumed": 4.858929127869255,
+            "speedup": 4.244753485946959,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 429.08766597975045,
+              "reconstruction_and_load_ms": 8.855704043526202,
+              "total_latency_ms": 878.7348580663092
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.3899805188179015,
+            "train_ppl": 29.66537434817987,
+            "val_loss": 3.400660145282745,
+            "val_ppl": 29.983887237186416,
+            "gen_gap": 0.010679626464843661,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2636.1179809318855,
+            "diff_ppl_vs_full_resumed": 15.452424161922815,
+            "speedup": 1.4149643069774471,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 417.3326430027373,
+              "reconstruction_and_load_ms": 13.025416934397072,
+              "total_latency_ms": 2636.1179809318855
+            }
+          }
+        }
+      },
+      "h_32": {
+        "step": 1640,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.5524603605270384,
+            "train_ppl": 12.838652670179574,
+            "val_loss": 2.595862293243408,
+            "val_ppl": 13.408144130120016,
+            "gen_gap": 0.04340193271636972,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 7462.337506178301,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7462.337506178301
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.5604857444763183,
+            "train_ppl": 12.942102343686038,
+            "val_loss": 2.602051281929016,
+            "val_ppl": 13.491384302980785,
+            "gen_gap": 0.041565537452697754,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 7509.317136602476,
+            "diff_ppl_vs_full_resumed": 0.08324017286076923,
+            "speedup": 0.9937438212330674,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7509.317136602476
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.62101571559906,
+            "train_ppl": 13.749682261610339,
+            "val_loss": 2.658039593696594,
+            "val_ppl": 14.268290017168336,
+            "gen_gap": 0.03702387809753427,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 11277.053481258918,
+            "diff_ppl_vs_full_resumed": 0.8601458870483203,
+            "speedup": 0.6617275974242556,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11277.053481258918
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.620883810520172,
+            "train_ppl": 13.747868728296694,
+            "val_loss": 2.6583415508270263,
+            "val_ppl": 14.27259907962142,
+            "gen_gap": 0.03745774030685434,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 5948.538150987588,
+            "diff_ppl_vs_full_resumed": 0.864454949501404,
+            "speedup": 1.25448258324432,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5948.538150987588
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.625186359882355,
+            "train_ppl": 13.80714704461973,
+            "val_loss": 2.6610941529273986,
+            "val_ppl": 14.311939985916501,
+            "gen_gap": 0.03590779304504377,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 5738.199739775155,
+            "diff_ppl_vs_full_resumed": 0.9037958557964849,
+            "speedup": 1.3004666697905334,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5738.199739775155
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.625092828273773,
+            "train_ppl": 13.80585570033842,
+            "val_loss": 2.660901737213135,
+            "val_ppl": 14.309186408685873,
+            "gen_gap": 0.03580890893936184,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 5863.44854690833,
+            "diff_ppl_vs_full_resumed": 0.901042278565857,
+            "speedup": 1.2726874716267496,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5863.44854690833
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7512752771377564,
+            "train_ppl": 15.662593300468002,
+            "val_loss": 2.7770292162895203,
+            "val_ppl": 16.07120588244145,
+            "gen_gap": 0.025753939151763827,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 2.6630617523214344,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.7308702945709227,
+            "train_ppl": 15.34623695658328,
+            "val_loss": 2.759349000453949,
+            "val_ppl": 15.78956060493696,
+            "gen_gap": 0.02847870588302648,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 7462.337506178301,
+            "diff_ppl_vs_full_resumed": 2.3814164748169446,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7462.337506178301
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.87848299741745,
+            "train_ppl": 17.787269368796498,
+            "val_loss": 2.9025296330451966,
+            "val_ppl": 18.220177485772325,
+            "gen_gap": 0.02404663562774667,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 7462.337506178301,
+            "diff_ppl_vs_full_resumed": 4.812033355652309,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7462.337506178301
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.716347360610962,
+            "train_ppl": 15.124975145018029,
+            "val_loss": 2.7452534556388857,
+            "val_ppl": 15.568559371328542,
+            "gen_gap": 0.02890609502792385,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.623938992153853,
+            "diff_ppl_vs_full_resumed": 2.1604152412085256,
+            "speedup": 1613.8486080462553,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.623938992153853,
+              "total_latency_ms": 4.623938992153853
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6940195679664614,
+            "train_ppl": 14.791010061983908,
+            "val_loss": 2.7241461277008057,
+            "val_ppl": 15.243392457749014,
+            "gen_gap": 0.030126559734344305,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.6135400189086795,
+            "diff_ppl_vs_full_resumed": 1.8352483276289977,
+            "speedup": 1617.4862417132554,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.6135400189086795,
+              "total_latency_ms": 4.6135400189086795
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.0294671297073363,
+            "train_ppl": 20.686206586977736,
+            "val_loss": 3.04889771938324,
+            "val_ppl": 21.092082210765344,
+            "gen_gap": 0.019430589675903498,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 444.4979770341888,
+            "diff_ppl_vs_full_resumed": 7.683938080645328,
+            "speedup": 16.78823727380953,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 1.176707970444113,
+              "reconstruction_and_load_ms": 2.5297810207121074,
+              "total_latency_ms": 444.4979770341888
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 4.033005011081696,
+            "train_ppl": 56.43023018411898,
+            "val_loss": 4.039915823936463,
+            "val_ppl": 56.82155958894543,
+            "gen_gap": 0.006910812854767023,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.7254690215923,
+            "diff_ppl_vs_full_resumed": 43.41341545882542,
+            "speedup": 3.36334423089713,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.9034120426513255,
+              "reconstruction_and_load_ms": 5.062135984189808,
+              "total_latency_ms": 2218.7254690215923
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.895685613155365,
+            "train_ppl": 18.095903978926593,
+            "val_loss": 2.9176911115646362,
+            "val_ppl": 18.49852707902475,
+            "gen_gap": 0.02200549840927124,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 541.0592560656369,
+            "diff_ppl_vs_full_resumed": 5.090382948904734,
+            "speedup": 13.792089170493798,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 93.54117402108386,
+              "reconstruction_and_load_ms": 6.726594001520425,
+              "total_latency_ms": 541.0592560656369
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.452272641658783,
+            "train_ppl": 31.572062822426755,
+            "val_loss": 3.463063371181488,
+            "val_ppl": 31.91459316528379,
+            "gen_gap": 0.010790729522705433,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2309.7694920143113,
+            "diff_ppl_vs_full_resumed": 18.506449035163776,
+            "speedup": 3.23077152589392,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 90.7917579752393,
+              "reconstruction_and_load_ms": 13.217813044320792,
+              "total_latency_ms": 2309.7694920143113
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.025776445865631,
+            "train_ppl": 20.610001050352885,
+            "val_loss": 3.0459107995033263,
+            "val_ppl": 21.02917584600623,
+            "gen_gap": 0.020134353637695224,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 446.9502860447392,
+            "diff_ppl_vs_full_resumed": 7.621031715886213,
+            "speedup": 16.6961242428455,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 3.4692619810812175,
+              "reconstruction_and_load_ms": 2.6895360206253827,
+              "total_latency_ms": 446.9502860447392
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 4.031571066379547,
+            "train_ppl": 56.349370342631396,
+            "val_loss": 4.0354241013526915,
+            "val_ppl": 56.566905252960254,
+            "gen_gap": 0.003853034973144709,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2216.4831489208154,
+            "diff_ppl_vs_full_resumed": 43.15876112284024,
+            "speedup": 3.3667467807330915,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 6.537655950523913,
+              "reconstruction_and_load_ms": 4.18557197554037,
+              "total_latency_ms": 2216.4831489208154
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.917941701412201,
+            "train_ppl": 18.503163202964195,
+            "val_loss": 2.9390691041946413,
+            "val_ppl": 18.89824582364966,
+            "gen_gap": 0.021127402782440186,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 937.2800570563413,
+            "diff_ppl_vs_full_resumed": 5.490101693529644,
+            "speedup": 7.961694533024432,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 487.64277098234743,
+              "reconstruction_and_load_ms": 8.845798030961305,
+              "total_latency_ms": 937.2800570563413
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.5497975826263426,
+            "train_ppl": 34.80627138045919,
+            "val_loss": 3.5602198362350466,
+            "val_ppl": 35.17092813972443,
+            "gen_gap": 0.010422253608703969,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2645.557266951073,
+            "diff_ppl_vs_full_resumed": 21.762784009604417,
+            "speedup": 2.8207053384931733,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 424.5030549936928,
+              "reconstruction_and_load_ms": 15.29429096262902,
+              "total_latency_ms": 2645.557266951073
+            }
+          }
+        }
+      },
+      "h_64": {
+        "step": 2280,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.406602644920349,
+            "train_ppl": 11.096199307119118,
+            "val_loss": 2.495171546936035,
+            "val_ppl": 12.123813143205506,
+            "gen_gap": 0.08856890201568612,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 14708.275116980076,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 14708.275116980076
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.4120142698287963,
+            "train_ppl": 11.156410549063075,
+            "val_loss": 2.4968350172042846,
+            "val_ppl": 12.143997529315723,
+            "gen_gap": 0.08482074737548828,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 15740.562705730554,
+            "diff_ppl_vs_full_resumed": 0.020184386110216224,
+            "speedup": 0.9344186349593042,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 15740.562705730554
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.569294345378876,
+            "train_ppl": 13.056607733827452,
+            "val_loss": 2.6245277285575868,
+            "val_ppl": 13.798056219150306,
+            "gen_gap": 0.05523338317871085,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 20198.051343788393,
+            "diff_ppl_vs_full_resumed": 1.6742430759447995,
+            "speedup": 0.7282026798839376,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 20198.051343788393
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.5689178466796876,
+            "train_ppl": 13.051692863279095,
+            "val_loss": 2.6241446137428284,
+            "val_ppl": 13.79277099188696,
+            "gen_gap": 0.05522676706314078,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 11971.425432537217,
+            "diff_ppl_vs_full_resumed": 1.668957848681453,
+            "speedup": 1.2286151887146501,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11971.425432537217
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.600639271736145,
+            "train_ppl": 13.472347773878475,
+            "val_loss": 2.644443893432617,
+            "val_ppl": 14.075615364103175,
+            "gen_gap": 0.04380462169647226,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 11533.402750792447,
+            "diff_ppl_vs_full_resumed": 1.9518022208976689,
+            "speedup": 1.2752762939774636,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11533.402750792447
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6005762696266173,
+            "train_ppl": 13.471499014285534,
+            "val_loss": 2.644363081455231,
+            "val_ppl": 14.074477931752371,
+            "gen_gap": 0.04378681182861355,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 11840.710584423505,
+            "diff_ppl_vs_full_resumed": 1.9506647885468649,
+            "speedup": 1.242178415907645,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11840.710584423505
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.7512752771377564,
+            "train_ppl": 15.662593300468002,
+            "val_loss": 2.7770292162895203,
+            "val_ppl": 16.07120588244145,
+            "gen_gap": 0.025753939151763827,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 3.9473927392359442,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.799725151062012,
+            "train_ppl": 16.440127598469772,
+            "val_loss": 2.828824245929718,
+            "val_ppl": 16.925548838097168,
+            "gen_gap": 0.02909909486770612,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 14708.275116980076,
+            "diff_ppl_vs_full_resumed": 4.801735694891661,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 14708.275116980076
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 3.584663248062134,
+            "train_ppl": 36.041218724810435,
+            "val_loss": 3.603928816318512,
+            "val_ppl": 36.742305012471995,
+            "gen_gap": 0.019265568256378263,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 14708.275116980076,
+            "diff_ppl_vs_full_resumed": 24.61849186926649,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 14708.275116980076
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.716347360610962,
+            "train_ppl": 15.124975145018029,
+            "val_loss": 2.7452534556388857,
+            "val_ppl": 15.568559371328542,
+            "gen_gap": 0.02890609502792385,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.590998985804617,
+            "diff_ppl_vs_full_resumed": 3.4447462281230354,
+            "speedup": 3203.719966494897,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.590998985804617,
+              "total_latency_ms": 4.590998985804617
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6940195679664614,
+            "train_ppl": 14.791010061983908,
+            "val_loss": 2.7241461277008057,
+            "val_ppl": 15.243392457749014,
+            "gen_gap": 0.030126559734344305,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 4.608712042681873,
+            "diff_ppl_vs_full_resumed": 3.1195793145435076,
+            "speedup": 3191.406835741712,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 4.608712042681873,
+              "total_latency_ms": 4.608712042681873
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.4910123229026793,
+            "train_ppl": 32.81915447713245,
+            "val_loss": 3.5052227854728697,
+            "val_ppl": 33.288859300606596,
+            "gen_gap": 0.01421046257019043,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 447.4813350243494,
+            "diff_ppl_vs_full_resumed": 21.16504615740109,
+            "speedup": 32.86902484140425,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 1.247107982635498,
+              "reconstruction_and_load_ms": 5.442738998681307,
+              "total_latency_ms": 447.4813350243494
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 5.574775767326355,
+            "train_ppl": 263.69042099911263,
+            "val_loss": 5.5739974021911625,
+            "val_ppl": 263.4852534269236,
+            "gen_gap": -0.0007783651351926935,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.7359310337342,
+            "diff_ppl_vs_full_resumed": 251.36144028371808,
+            "speedup": 6.62912377775724,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.747475989162922,
+              "reconstruction_and_load_ms": 5.228534049820155,
+              "total_latency_ms": 2218.7359310337342
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 3.0271063923835753,
+            "train_ppl": 20.637429484617094,
+            "val_loss": 3.047387957572937,
+            "val_ppl": 21.060262216893697,
+            "gen_gap": 0.02028156518936175,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 539.0358170261607,
+            "diff_ppl_vs_full_resumed": 8.936449073688191,
+            "speedup": 27.28626679786336,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 91.51162399211898,
+              "reconstruction_and_load_ms": 6.732704991009086,
+              "total_latency_ms": 539.0358170261607
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 4.238094663619995,
+            "train_ppl": 69.27573243950724,
+            "val_loss": 4.246872067451477,
+            "val_ppl": 69.8864699426273,
+            "gen_gap": 0.008777403831482289,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2313.8871370465495,
+            "diff_ppl_vs_full_resumed": 57.76265679942179,
+            "speedup": 6.356522270033339,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 90.8589560422115,
+              "reconstruction_and_load_ms": 17.26826000958681,
+              "total_latency_ms": 2313.8871370465495
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.518050479888916,
+            "train_ppl": 33.71862920045132,
+            "val_loss": 3.532146453857422,
+            "val_ppl": 34.1972918020119,
+            "gen_gap": 0.014095973968506037,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 450.3537390846759,
+            "diff_ppl_vs_full_resumed": 22.07347865880639,
+            "speedup": 32.65938270408056,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 6.859529996290803,
+              "reconstruction_and_load_ms": 2.7027210453525186,
+              "total_latency_ms": 450.3537390846759
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 5.516293931007385,
+            "train_ppl": 248.71158476505732,
+            "val_loss": 5.5070096254348755,
+            "val_ppl": 246.41315657752241,
+            "gen_gap": -0.009284305572509588,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2218.7008280307055,
+            "diff_ppl_vs_full_resumed": 234.28934343431692,
+            "speedup": 6.629228659924817,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 7.63694301713258,
+              "reconstruction_and_load_ms": 5.303964018821716,
+              "total_latency_ms": 2218.7008280307055
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 3.025144302845001,
+            "train_ppl": 20.59697669909382,
+            "val_loss": 3.0463525533676146,
+            "val_ppl": 21.03846761788596,
+            "gen_gap": 0.021208250522613437,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 876.3980161165819,
+            "diff_ppl_vs_full_resumed": 8.914654474680454,
+            "speedup": 16.782643098798985,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 8.946436049882323,
+              "svd_ms": 431.84505199315026,
+              "forecast_ms": 426.75253201741725,
+              "reconstruction_and_load_ms": 8.853996056132019,
+              "total_latency_ms": 876.3980161165819
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 4.217933309078217,
+            "train_ppl": 67.89302529771713,
+            "val_loss": 4.226348543167115,
+            "val_ppl": 68.46677171794506,
+            "gen_gap": 0.008415234088897883,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2666.541939950548,
+            "diff_ppl_vs_full_resumed": 56.342958574739555,
+            "speedup": 5.515861159585904,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 19.764890952501446,
+              "svd_ms": 2185.9950300422497,
+              "forecast_ms": 441.3155559450388,
+              "reconstruction_and_load_ms": 19.46646301075816,
+              "total_latency_ms": 2666.541939950548
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    "seed": 44,
+    "horizons": {
+      "h_8": {
+        "step": 1160,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.67501482963562,
+            "train_ppl": 14.512565054046801,
+            "val_loss": 2.723801648616791,
+            "val_ppl": 15.238142332209026,
+            "gen_gap": 0.048786818981170654,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 2251.458940736484,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2251.458940736484
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.705339217185974,
+            "train_ppl": 14.959390312233163,
+            "val_loss": 2.7543577790260314,
+            "val_ppl": 15.710947761963476,
+            "gen_gap": 0.04901856184005737,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 3958.6574422428384,
+            "diff_ppl_vs_full_resumed": 0.47280542975444995,
+            "speedup": 0.5687430583690225,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3958.6574422428384
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.664282965660095,
+            "train_ppl": 14.357650925451784,
+            "val_loss": 2.704563093185425,
+            "val_ppl": 14.947784474745351,
+            "gen_gap": 0.040280127525329945,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 3215.638920722995,
+            "diff_ppl_vs_full_resumed": -0.2903578574636754,
+            "speedup": 0.7001591273905443,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3215.638920722995
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.664581501483917,
+            "train_ppl": 14.36193783846568,
+            "val_loss": 2.70514600276947,
+            "val_ppl": 14.956500221575311,
+            "gen_gap": 0.04056450128555289,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 3211.3981574075297,
+            "diff_ppl_vs_full_resumed": -0.28164211063371525,
+            "speedup": 0.7010837119474536,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 3211.3981574075297
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.6505839586257935,
+            "train_ppl": 14.16230643212033,
+            "val_loss": 2.68968780040741,
+            "val_ppl": 14.72707741508514,
+            "gen_gap": 0.0391038417816163,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 1401.9109521177597,
+            "diff_ppl_vs_full_resumed": -0.5110649171238872,
+            "speedup": 1.6059928323802428,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1401.9109521177597
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.650388216972351,
+            "train_ppl": 14.15953455013798,
+            "val_loss": 2.6891723752021788,
+            "val_ppl": 14.719488664070793,
+            "gen_gap": 0.038784158229827614,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 1391.7942688567564,
+            "diff_ppl_vs_full_resumed": -0.5186536681382332,
+            "speedup": 1.6176664835571357,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 1391.7942688567564
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.740817832946777,
+            "train_ppl": 15.499656043650809,
+            "val_loss": 2.7752748250961305,
+            "val_ppl": 16.043035418606436,
+            "gen_gap": 0.03445699214935338,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 0.80489308639741,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.701096773147583,
+            "train_ppl": 14.896060367843662,
+            "val_loss": 2.734343183040619,
+            "val_ppl": 15.399625378320561,
+            "gen_gap": 0.033246409893036066,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 2251.458940736484,
+            "diff_ppl_vs_full_resumed": 0.16148304611153463,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2251.458940736484
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.6940576672554015,
+            "train_ppl": 14.791573599685101,
+            "val_loss": 2.730421209335327,
+            "val_ppl": 15.339346735408226,
+            "gen_gap": 0.03636354207992554,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 2251.458940736484,
+            "diff_ppl_vs_full_resumed": 0.10120440319919943,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2251.458940736484
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7082605242729185,
+            "train_ppl": 15.003155179352659,
+            "val_loss": 2.7436771035194396,
+            "val_ppl": 15.544037172654658,
+            "gen_gap": 0.035416579246521085,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.201600989792496,
+            "diff_ppl_vs_full_resumed": 0.30589484044563164,
+            "speedup": 1022.6462248041989,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.201600989792496,
+              "total_latency_ms": 2.201600989792496
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6887797474861146,
+            "train_ppl": 14.713710519259115,
+            "val_loss": 2.7243281602859497,
+            "val_ppl": 15.246167504451263,
+            "gen_gap": 0.035548412799835116,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.4244619999080896,
+            "diff_ppl_vs_full_resumed": 0.008025172242236422,
+            "speedup": 928.6427012763392,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.4244619999080896,
+              "total_latency_ms": 2.4244619999080896
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.783002781867981,
+            "train_ppl": 16.16749559483169,
+            "val_loss": 2.8154365181922913,
+            "val_ppl": 16.70046424590472,
+            "gen_gap": 0.03243373632431057,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 344.9123039608821,
+            "diff_ppl_vs_full_resumed": 1.4623219136956926,
+            "speedup": 6.527627210978912,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.1800520005635917,
+              "reconstruction_and_load_ms": 2.1663049701601267,
+              "total_latency_ms": 344.9123039608821
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 2.8787253499031067,
+            "train_ppl": 17.791580680148478,
+            "val_loss": 2.9078543305397035,
+            "val_ppl": 18.3174531711462,
+            "gen_gap": 0.029128980636596857,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.5725779603235,
+            "diff_ppl_vs_full_resumed": 3.0793108389371753,
+            "speedup": 1.4604949341505677,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.673039948102087,
+              "reconstruction_and_load_ms": 3.032827051356435,
+              "total_latency_ms": 1541.5725779603235
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.8366178631782533,
+            "train_ppl": 17.057975458354676,
+            "val_loss": 2.868586802482605,
+            "val_ppl": 17.612111212894316,
+            "gen_gap": 0.03196893930435163,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 385.9339019982144,
+            "diff_ppl_vs_full_resumed": 2.3739688806852897,
+            "speedup": 5.833794152520191,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 41.1004539928399,
+              "reconstruction_and_load_ms": 3.267501015216112,
+              "total_latency_ms": 385.9339019982144
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.016857016086578,
+            "train_ppl": 20.42698898816758,
+            "val_loss": 3.0425058245658874,
+            "val_ppl": 20.95769379565324,
+            "gen_gap": 0.02564880847930917,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1589.3155829398893,
+            "diff_ppl_vs_full_resumed": 5.719551463444212,
+            "speedup": 1.4166216986130424,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 48.23960398789495,
+              "reconstruction_and_load_ms": 7.209267991129309,
+              "total_latency_ms": 1589.3155829398893
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.7781357407569884,
+            "train_ppl": 16.088998907365326,
+            "val_loss": 2.8100823163986206,
+            "val_ppl": 16.611285543711713,
+            "gen_gap": 0.03194657564163217,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 345.37866595201194,
+            "diff_ppl_vs_full_resumed": 1.3731432115026863,
+            "speedup": 6.518813009282134,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.348062010947615,
+              "reconstruction_and_load_ms": 2.464656950905919,
+              "total_latency_ms": 345.37866595201194
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 2.865213692188263,
+            "train_ppl": 17.55280370087943,
+            "val_loss": 2.894482409954071,
+            "val_ppl": 18.074144022778444,
+            "gen_gap": 0.029268717765808194,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.3910310016945,
+            "diff_ppl_vs_full_resumed": 2.836001690569418,
+            "speedup": 1.460666953065986,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.487586033064872,
+              "reconstruction_and_load_ms": 3.0367340077646077,
+              "total_latency_ms": 1541.3910310016945
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.8679996013641356,
+            "train_ppl": 17.601772397270622,
+            "val_loss": 2.900164318084717,
+            "val_ppl": 18.177131955569873,
+            "gen_gap": 0.03216471672058141,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 608.4449490299448,
+            "diff_ppl_vs_full_resumed": 2.938989623360847,
+            "speedup": 3.7003494635398435,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 263.06006097001955,
+              "reconstruction_and_load_ms": 3.818941069766879,
+              "total_latency_ms": 608.4449490299448
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.1116201758384703,
+            "train_ppl": 22.45739987833823,
+            "val_loss": 3.1354787945747375,
+            "val_ppl": 22.999645311583414,
+            "gen_gap": 0.023858618736267267,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1811.1711950041354,
+            "diff_ppl_vs_full_resumed": 7.761502979374388,
+            "speedup": 1.243095598553478,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 269.6027240017429,
+              "reconstruction_and_load_ms": 7.70176004152745,
+              "total_latency_ms": 1811.1711950041354
+            }
+          }
+        }
+      },
+      "h_16": {
+        "step": 1320,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.602386164665222,
+            "train_ppl": 13.495903091261235,
+            "val_loss": 2.672171974182129,
+            "val_ppl": 14.471366517827056,
+            "gen_gap": 0.06978580951690683,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 4888.349669461604,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 4888.349669461604
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.6195371389389037,
+            "train_ppl": 13.72936732463062,
+            "val_loss": 2.6868062615394592,
+            "val_ppl": 14.684701851839819,
+            "gen_gap": 0.06726912260055551,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 7868.878775101621,
+            "diff_ppl_vs_full_resumed": 0.21333533401276306,
+            "speedup": 0.621225692906735,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 7868.878775101621
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.634435069561005,
+            "train_ppl": 13.935437686092069,
+            "val_loss": 2.6818669199943543,
+            "val_ppl": 14.612347931370273,
+            "gen_gap": 0.04743185043334952,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 6412.521006714087,
+            "diff_ppl_vs_full_resumed": 0.14098141354321747,
+            "speedup": 0.762313240665156,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 6412.521006714087
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6346333146095278,
+            "train_ppl": 13.938200591469442,
+            "val_loss": 2.681986117362976,
+            "val_ppl": 14.614089788603414,
+            "gen_gap": 0.04735280275344822,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 6416.7941099149175,
+            "diff_ppl_vs_full_resumed": 0.14272327077635794,
+            "speedup": 0.7618055972698835,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 6416.7941099149175
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.6343704223632813,
+            "train_ppl": 13.934536828215895,
+            "val_loss": 2.677335572242737,
+            "val_ppl": 14.546284093578342,
+            "gen_gap": 0.042965149879455655,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 2827.284986327868,
+            "diff_ppl_vs_full_resumed": 0.07491757575128588,
+            "speedup": 1.7289907784678922,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2827.284986327868
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.6343204259872435,
+            "train_ppl": 13.933840169288073,
+            "val_loss": 2.6771143555641173,
+            "val_ppl": 14.543066568823093,
+            "gen_gap": 0.04279392957687378,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 2812.9530144506134,
+            "diff_ppl_vs_full_resumed": 0.07170005099603749,
+            "speedup": 1.737799971897621,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 2812.9530144506134
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.740817832946777,
+            "train_ppl": 15.499656043650809,
+            "val_loss": 2.7752748250961305,
+            "val_ppl": 16.043035418606436,
+            "gen_gap": 0.03445699214935338,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 1.5716689007793807,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.703941798210144,
+            "train_ppl": 14.938500375740286,
+            "val_loss": 2.7367263555526735,
+            "val_ppl": 15.436369108151037,
+            "gen_gap": 0.032784557342529386,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 4888.349669461604,
+            "diff_ppl_vs_full_resumed": 0.9650025903239818,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 4888.349669461604
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.7282766580581663,
+            "train_ppl": 15.306485968170332,
+            "val_loss": 2.76447217464447,
+            "val_ppl": 15.870660842243312,
+            "gen_gap": 0.03619551658630371,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 4888.349669461604,
+            "diff_ppl_vs_full_resumed": 1.3992943244162568,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 4888.349669461604
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7082605242729185,
+            "train_ppl": 15.003155179352659,
+            "val_loss": 2.7436771035194396,
+            "val_ppl": 15.544037172654658,
+            "gen_gap": 0.035416579246521085,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.058254962321371,
+            "diff_ppl_vs_full_resumed": 1.0726706548276024,
+            "speedup": 2374.9971499878493,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.058254962321371,
+              "total_latency_ms": 2.058254962321371
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6887797474861146,
+            "train_ppl": 14.713710519259115,
+            "val_loss": 2.7243281602859497,
+            "val_ppl": 15.246167504451263,
+            "gen_gap": 0.035548412799835116,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.426435996312648,
+            "diff_ppl_vs_full_resumed": 0.7748009866242072,
+            "speedup": 2014.6213116233941,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.426435996312648,
+              "total_latency_ms": 2.426435996312648
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 2.849849319458008,
+            "train_ppl": 17.285177104476514,
+            "val_loss": 2.8792109966278074,
+            "val_ppl": 17.800223201469265,
+            "gen_gap": 0.029361677169799538,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 344.9359669466503,
+            "diff_ppl_vs_full_resumed": 3.3288566836422095,
+            "speedup": 14.17175979858796,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.190079958178103,
+              "reconstruction_and_load_ms": 2.1799399983137846,
+              "total_latency_ms": 344.9359669466503
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 3.1818360686302185,
+            "train_ppl": 24.090945599321046,
+            "val_loss": 3.2020861148834228,
+            "val_ppl": 24.583761291876925,
+            "gen_gap": 0.020250046253204257,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1544.6884279954247,
+            "diff_ppl_vs_full_resumed": 10.11239477404987,
+            "speedup": 3.164618560524416,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 7.766158028971404,
+              "reconstruction_and_load_ms": 3.055559005588293,
+              "total_latency_ms": 1544.6884279954247
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.927472174167633,
+            "train_ppl": 18.680350092014965,
+            "val_loss": 2.955881404876709,
+            "val_ppl": 19.218654672736395,
+            "gen_gap": 0.02840923070907575,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 391.05901203583926,
+            "diff_ppl_vs_full_resumed": 4.74728815490934,
+            "speedup": 12.500286450408163,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 46.22788802953437,
+              "reconstruction_and_load_ms": 3.265177016146481,
+              "total_latency_ms": 391.05901203583926
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.3802453756332396,
+            "train_ppl": 29.377978869117754,
+            "val_loss": 3.3953104972839356,
+            "val_ppl": 29.823912281206237,
+            "gen_gap": 0.015065121650696067,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1585.744665004313,
+            "diff_ppl_vs_full_resumed": 15.352545763379181,
+            "speedup": 3.0826839763943386,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 44.167739048134536,
+              "reconstruction_and_load_ms": 7.710214995313436,
+              "total_latency_ms": 1585.744665004313
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 2.84095184803009,
+            "train_ppl": 17.132064900883908,
+            "val_loss": 2.8694613575935364,
+            "val_ppl": 17.627520712015794,
+            "gen_gap": 0.028509509563446223,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 345.38222197443247,
+            "diff_ppl_vs_full_resumed": 3.1561541941887388,
+            "speedup": 14.153449015171004,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.3873639982193708,
+              "reconstruction_and_load_ms": 2.4289109860546887,
+              "total_latency_ms": 345.38222197443247
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 3.1497635006904603,
+            "train_ppl": 23.33054627034599,
+            "val_loss": 3.1704178929328917,
+            "val_ppl": 23.817435414984857,
+            "gen_gap": 0.020654392242431374,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.3568000076339,
+            "diff_ppl_vs_full_resumed": 9.346068897157801,
+            "speedup": 3.171458853289124,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.422527039423585,
+              "reconstruction_and_load_ms": 3.067562007345259,
+              "total_latency_ms": 1541.3568000076339
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.9274397015571596,
+            "train_ppl": 18.67974350213175,
+            "val_loss": 2.9548375487327574,
+            "val_ppl": 19.19860362900107,
+            "gen_gap": 0.02739784717559779,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 620.5108809517696,
+            "diff_ppl_vs_full_resumed": 4.727237111174015,
+            "speedup": 7.877943513196121,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 275.1197009929456,
+              "reconstruction_and_load_ms": 3.8252329686656594,
+              "total_latency_ms": 620.5108809517696
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.3792270183563233,
+            "train_ppl": 29.34807681862482,
+            "val_loss": 3.393438935279846,
+            "val_ppl": 29.76814718036695,
+            "gen_gap": 0.01421191692352286,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1829.0831790072843,
+            "diff_ppl_vs_full_resumed": 15.296780662539893,
+            "speedup": 2.6725682711240637,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 287.73084800923243,
+              "reconstruction_and_load_ms": 7.485620037186891,
+              "total_latency_ms": 1829.0831790072843
+            }
+          }
+        }
+      },
+      "h_32": {
+        "step": 1640,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.53330602645874,
+            "train_ppl": 12.595077039494841,
+            "val_loss": 2.5957974910736086,
+            "val_ppl": 13.407275281439343,
+            "gen_gap": 0.06249146461486843,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 12094.120367255528,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12094.120367255528
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.5391180872917176,
+            "train_ppl": 12.668493537352632,
+            "val_loss": 2.6019370913505555,
+            "val_ppl": 13.489843801960019,
+            "gen_gap": 0.06281900405883789,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 15697.665105515625,
+            "diff_ppl_vs_full_resumed": 0.08256852052067565,
+            "speedup": 0.7704407175183057,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 15697.665105515625
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.609059286117554,
+            "train_ppl": 13.58626405120991,
+            "val_loss": 2.6542461276054383,
+            "val_ppl": 14.214266276209342,
+            "gen_gap": 0.04518684148788443,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 12872.001606214326,
+            "diff_ppl_vs_full_resumed": 0.8069909947699987,
+            "speedup": 0.9395679659810442,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12872.001606214326
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.6091057300567626,
+            "train_ppl": 13.58689506548486,
+            "val_loss": 2.6535080909729003,
+            "val_ppl": 14.203779497282362,
+            "gen_gap": 0.044402360916137695,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 11167.390152055304,
+            "diff_ppl_vs_full_resumed": 0.7965042158430187,
+            "speedup": 1.0829853889388528,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11167.390152055304
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.6180105566978455,
+            "train_ppl": 13.708424305979275,
+            "val_loss": 2.6624425768852236,
+            "val_ppl": 14.331251565848884,
+            "gen_gap": 0.04443202018737802,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 5679.902209085412,
+            "diff_ppl_vs_full_resumed": 0.9239762844095409,
+            "speedup": 2.129283202782983,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5679.902209085412
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.618026065826416,
+            "train_ppl": 13.708636913343005,
+            "val_loss": 2.6623563528060914,
+            "val_ppl": 14.33001592015178,
+            "gen_gap": 0.04433028697967556,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 5575.699906912632,
+            "diff_ppl_vs_full_resumed": 0.9227406387124368,
+            "speedup": 2.169076630587937,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 5575.699906912632
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.740817832946777,
+            "train_ppl": 15.499656043650809,
+            "val_loss": 2.7752748250961305,
+            "val_ppl": 16.043035418606436,
+            "gen_gap": 0.03445699214935338,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 2.635760137167093,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.735804295539856,
+            "train_ppl": 15.422142409396294,
+            "val_loss": 2.7660327792167663,
+            "val_ppl": 15.895448004567776,
+            "gen_gap": 0.030228483676910223,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 12094.120367255528,
+            "diff_ppl_vs_full_resumed": 2.4881727231284323,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12094.120367255528
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 2.9233834743499756,
+            "train_ppl": 18.604127679469208,
+            "val_loss": 2.9513612270355223,
+            "val_ppl": 19.13197897810422,
+            "gen_gap": 0.027977752685546697,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 12094.120367255528,
+            "diff_ppl_vs_full_resumed": 5.7247036966648785,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 12094.120367255528
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7082605242729185,
+            "train_ppl": 15.003155179352659,
+            "val_loss": 2.7436771035194396,
+            "val_ppl": 15.544037172654658,
+            "gen_gap": 0.035416579246521085,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.056271012406796,
+            "diff_ppl_vs_full_resumed": 2.136761891215315,
+            "speedup": 5881.578981702302,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.056271012406796,
+              "total_latency_ms": 2.056271012406796
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6887797474861146,
+            "train_ppl": 14.713710519259115,
+            "val_loss": 2.7243281602859497,
+            "val_ppl": 15.246167504451263,
+            "gen_gap": 0.035548412799835116,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.42111599072814,
+            "diff_ppl_vs_full_resumed": 1.8388922230119196,
+            "speedup": 4995.2668164478455,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.42111599072814,
+              "total_latency_ms": 2.42111599072814
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.047468054294586,
+            "train_ppl": 21.061949142412036,
+            "val_loss": 3.0685200691223145,
+            "val_ppl": 21.51004572692456,
+            "gen_gap": 0.02105201482772845,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 344.89272796781734,
+            "diff_ppl_vs_full_resumed": 8.102770445485216,
+            "speedup": 35.06632464684513,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.1474519851617515,
+              "reconstruction_and_load_ms": 2.179328992497176,
+              "total_latency_ms": 344.89272796781734
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 4.127118003368378,
+            "train_ppl": 61.998984344362846,
+            "val_loss": 4.137448680400849,
+            "val_ppl": 62.642795605296044,
+            "gen_gap": 0.010330677032470703,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.3010259508155,
+            "diff_ppl_vs_full_resumed": 49.235520323856704,
+            "speedup": 7.8466958521582555,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.3753699865192175,
+              "reconstruction_and_load_ms": 3.0589450034312904,
+              "total_latency_ms": 1541.3010259508155
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 2.8940566301345827,
+            "train_ppl": 18.066450055083344,
+            "val_loss": 2.9203689336776733,
+            "val_ppl": 18.548129227119787,
+            "gen_gap": 0.026312303543090554,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 387.2435499797575,
+            "diff_ppl_vs_full_resumed": 5.140853945680444,
+            "speedup": 31.23130228479655,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 42.23205300513655,
+              "reconstruction_and_load_ms": 3.4455499844625592,
+              "total_latency_ms": 387.2435499797575
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.297098922729492,
+            "train_ppl": 27.034097043254995,
+            "val_loss": 3.316166412830353,
+            "val_ppl": 27.554515187684004,
+            "gen_gap": 0.01906749010086095,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1583.742999995593,
+            "diff_ppl_vs_full_resumed": 14.14723990624466,
+            "speedup": 7.636415988761549,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 42.21446200972423,
+              "reconstruction_and_load_ms": 7.661827025003731,
+              "total_latency_ms": 1583.742999995593
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.031571793556213,
+            "train_ppl": 20.72978994622395,
+            "val_loss": 3.0514100432395934,
+            "val_ppl": 21.14513897206035,
+            "gen_gap": 0.019838249683380216,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 345.34481301670894,
+            "diff_ppl_vs_full_resumed": 7.737863690621008,
+            "speedup": 35.02041991483559,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.3238369720056653,
+              "reconstruction_and_load_ms": 2.455029054544866,
+              "total_latency_ms": 345.34481301670894
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 4.082369065284729,
+            "train_ppl": 59.2857554364968,
+            "val_loss": 4.09045820236206,
+            "val_ppl": 59.76727093576856,
+            "gen_gap": 0.00808913707733172,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.448579984717,
+            "diff_ppl_vs_full_resumed": 46.35999565432921,
+            "speedup": 7.8459447329572525,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.5259890030138195,
+              "reconstruction_and_load_ms": 3.055880020838231,
+              "total_latency_ms": 1541.448579984717
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 2.9139789223670958,
+            "train_ppl": 18.429984347137903,
+            "val_loss": 2.9392882943153382,
+            "val_ppl": 18.902388586442456,
+            "gen_gap": 0.025309371948242454,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 623.8823719322681,
+            "diff_ppl_vs_full_resumed": 5.4951133050031125,
+            "speedup": 19.385257400041635,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 276.10054099932313,
+              "reconstruction_and_load_ms": 6.215883942786604,
+              "total_latency_ms": 623.8823719322681
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.417297124862671,
+            "train_ppl": 30.486901271641912,
+            "val_loss": 3.4349913716316225,
+            "val_ppl": 31.031144816224305,
+            "gen_gap": 0.017694246768951594,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1826.5805979026482,
+            "diff_ppl_vs_full_resumed": 17.623869534784962,
+            "speedup": 6.62118079056707,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 285.1731939590536,
+              "reconstruction_and_load_ms": 7.540692982729524,
+              "total_latency_ms": 1826.5805979026482
+            }
+          }
+        }
+      },
+      "h_64": {
+        "step": 2280,
+        "methods": {
+          "full_resumed": {
+            "train_loss": 2.421584498882294,
+            "train_ppl": 11.263692490989463,
+            "val_loss": 2.5093185544013976,
+            "val_ppl": 12.296547776439231,
+            "gen_gap": 0.08773405551910374,
+            "trainable_params": 1246080,
+            "optimizer_mode": "resumed",
+            "time_ms": 27751.819481723942,
+            "diff_ppl_vs_full_resumed": 0.0,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 27751.819481723942
+            }
+          },
+          "full_restarted": {
+            "train_loss": 2.422674858570099,
+            "train_ppl": 11.275980665264967,
+            "val_loss": 2.508850705623627,
+            "val_ppl": 12.29079619713081,
+            "gen_gap": 0.0861758470535281,
+            "trainable_params": 1246080,
+            "optimizer_mode": "restarted",
+            "time_ms": 31279.426667140797,
+            "diff_ppl_vs_full_resumed": -0.005751579308421739,
+            "speedup": 0.887222767125632,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 31279.426667140797
+            }
+          },
+          "mlp_resumed": {
+            "train_loss": 2.572088634967804,
+            "train_ppl": 13.093142697747215,
+            "val_loss": 2.624351441860199,
+            "val_ppl": 13.795624019777557,
+            "gen_gap": 0.05226280689239493,
+            "trainable_params": 523776,
+            "optimizer_mode": "resumed",
+            "time_ms": 25716.299786465243,
+            "diff_ppl_vs_full_resumed": 1.499076243338326,
+            "speedup": 1.0791528996068873,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 25716.299786465243
+            }
+          },
+          "mlp_restarted": {
+            "train_loss": 2.57247154712677,
+            "train_ppl": 13.098157181277346,
+            "val_loss": 2.624761199951172,
+            "val_ppl": 13.801278046652202,
+            "gen_gap": 0.05228965282440212,
+            "trainable_params": 523776,
+            "optimizer_mode": "restarted",
+            "time_ms": 17212.085837090854,
+            "diff_ppl_vs_full_resumed": 1.5047302702129706,
+            "speedup": 1.6123449385733768,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 17212.085837090854
+            }
+          },
+          "w2_resumed": {
+            "train_loss": 2.602965939044952,
+            "train_ppl": 13.503729938788464,
+            "val_loss": 2.647738540172577,
+            "val_ppl": 14.122066021611799,
+            "gen_gap": 0.0447726011276246,
+            "trainable_params": 174592,
+            "optimizer_mode": "resumed",
+            "time_ms": 11283.819655596744,
+            "diff_ppl_vs_full_resumed": 1.8255182451725673,
+            "speedup": 2.459434865919637,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11283.819655596744
+            }
+          },
+          "w2_restarted": {
+            "train_loss": 2.602984976768494,
+            "train_ppl": 13.503987021512945,
+            "val_loss": 2.647782766819,
+            "val_ppl": 14.122690607044062,
+            "gen_gap": 0.044797790050506325,
+            "trainable_params": 174592,
+            "optimizer_mode": "restarted",
+            "time_ms": 11025.411941634957,
+            "diff_ppl_vs_full_resumed": 1.8261428306048302,
+            "speedup": 2.5170777861755456,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 11025.411941634957
+            }
+          },
+          "frozen_checkpoint": {
+            "train_loss": 2.740817832946777,
+            "train_ppl": 15.499656043650809,
+            "val_loss": 2.7752748250961305,
+            "val_ppl": 16.043035418606436,
+            "gen_gap": 0.03445699214935338,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 0.0,
+            "diff_ppl_vs_full_resumed": 3.746487642167205,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 0.0
+            }
+          },
+          "oracle_w2_transplant": {
+            "train_loss": 2.808617889881134,
+            "train_ppl": 16.586977339805326,
+            "val_loss": 2.8350565791130067,
+            "val_ppl": 17.031363892598677,
+            "gen_gap": 0.026438689231872647,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 27751.819481723942,
+            "diff_ppl_vs_full_resumed": 4.734816116159445,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 27751.819481723942
+            }
+          },
+          "oracle_mlp_transplant": {
+            "train_loss": 3.4185317158699036,
+            "train_ppl": 30.524563369650267,
+            "val_loss": 3.440187430381775,
+            "val_ppl": 31.192804099620805,
+            "gen_gap": 0.021655714511871427,
+            "trainable_params": 0,
+            "optimizer_mode": "oracle_transplant",
+            "time_ms": 27751.819481723942,
+            "diff_ppl_vs_full_resumed": 18.896256323181575,
+            "speedup": 1.0,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 0.0,
+              "total_latency_ms": 27751.819481723942
+            }
+          },
+          "w2_matched_swa": {
+            "train_loss": 2.7082605242729185,
+            "train_ppl": 15.003155179352659,
+            "val_loss": 2.7436771035194396,
+            "val_ppl": 15.544037172654658,
+            "gen_gap": 0.035416579246521085,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.105202991515398,
+            "diff_ppl_vs_full_resumed": 3.2474893962154265,
+            "speedup": 13182.490996626992,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.105202991515398,
+              "total_latency_ms": 2.105202991515398
+            }
+          },
+          "mlp_matched_swa": {
+            "train_loss": 2.6887797474861146,
+            "train_ppl": 14.713710519259115,
+            "val_loss": 2.7243281602859497,
+            "val_ppl": 15.246167504451263,
+            "gen_gap": 0.035548412799835116,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 2.493730979040265,
+            "diff_ppl_vs_full_resumed": 2.9496197280120313,
+            "speedup": 11128.634048731463,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 0.0,
+              "svd_ms": 0.0,
+              "forecast_ms": 0.0,
+              "reconstruction_and_load_ms": 2.493730979040265,
+              "total_latency_ms": 2.493730979040265
+            }
+          },
+          "w2_linear_r2": {
+            "train_loss": 3.5893088936805726,
+            "train_ppl": 36.20904297883559,
+            "val_loss": 3.5956273317337035,
+            "val_ppl": 36.43855187919534,
+            "gen_gap": 0.006318438053130926,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 344.9003820423968,
+            "diff_ppl_vs_full_resumed": 24.142004102756104,
+            "speedup": 80.4632900589613,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.1715060099959373,
+              "reconstruction_and_load_ms": 2.1629290422424674,
+              "total_latency_ms": 344.9003820423968
+            }
+          },
+          "mlp_linear_r2": {
+            "train_loss": 5.634418725967407,
+            "train_ppl": 279.8961736380895,
+            "val_loss": 5.635662531852722,
+            "val_ppl": 280.2445267430486,
+            "gen_gap": 0.0012438058853145861,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.388918994926,
+            "diff_ppl_vs_full_resumed": 267.94797896660936,
+            "speedup": 18.004423893107862,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.4725590269081295,
+              "reconstruction_and_load_ms": 3.049649007152766,
+              "total_latency_ms": 1541.388918994926
+            }
+          },
+          "w2_timesfm_r2": {
+            "train_loss": 3.040700340270996,
+            "train_ppl": 20.91988914676751,
+            "val_loss": 3.0606576681137083,
+            "val_ppl": 21.34158822970283,
+            "gen_gap": 0.019957327842712314,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 388.7462039710954,
+            "diff_ppl_vs_full_resumed": 9.045040453263598,
+            "speedup": 71.38801407765614,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 43.84268500143662,
+              "reconstruction_and_load_ms": 3.3375719795003533,
+              "total_latency_ms": 388.7462039710954
+            }
+          },
+          "mlp_timesfm_r2": {
+            "train_loss": 3.8062580823898315,
+            "train_ppl": 44.98180534715195,
+            "val_loss": 3.8202221035957336,
+            "val_ppl": 45.614338304408626,
+            "gen_gap": 0.01396402120590201,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1585.7572649838403,
+            "diff_ppl_vs_full_resumed": 33.31779052796939,
+            "speedup": 17.500673081896142,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 43.42011304106563,
+              "reconstruction_and_load_ms": 8.470440981909633,
+              "total_latency_ms": 1585.7572649838403
+            }
+          },
+          "w2_linear_r16": {
+            "train_loss": 3.5658830046653747,
+            "train_ppl": 35.370672087600546,
+            "val_loss": 3.572410011291504,
+            "val_ppl": 35.602291767996974,
+            "gen_gap": 0.00652700662612915,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 345.39573901565745,
+            "diff_ppl_vs_full_resumed": 23.30574399155774,
+            "speedup": 80.34789184375519,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 1.3551259762607515,
+              "reconstruction_and_load_ms": 2.4746660492382944,
+              "total_latency_ms": 345.39573901565745
+            }
+          },
+          "mlp_linear_r16": {
+            "train_loss": 5.618047833442688,
+            "train_ppl": 275.3513265663068,
+            "val_loss": 5.620134949684143,
+            "val_ppl": 275.92661693218963,
+            "gen_gap": 0.002087116241455078,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1541.2725659552962,
+            "diff_ppl_vs_full_resumed": 263.6300691557504,
+            "speedup": 18.005783074795136,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 4.3500339961610734,
+              "reconstruction_and_load_ms": 3.0558209982700646,
+              "total_latency_ms": 1541.2725659552962
+            }
+          },
+          "w2_timesfm_r16": {
+            "train_loss": 3.0417436361312866,
+            "train_ppl": 20.941726169769183,
+            "val_loss": 3.062309741973877,
+            "val_ppl": 21.37687525010773,
+            "gen_gap": 0.020566105842590332,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 591.4396879961714,
+            "diff_ppl_vs_full_resumed": 9.080327473668499,
+            "speedup": 46.922484312387894,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 7.272263988852501,
+              "svd_ms": 334.2936830013059,
+              "forecast_ms": 245.93973701121286,
+              "reconstruction_and_load_ms": 3.9340039948001504,
+              "total_latency_ms": 591.4396879961714
+            }
+          },
+          "mlp_timesfm_r16": {
+            "train_loss": 3.81836451292038,
+            "train_ppl": 45.529684185605376,
+            "val_loss": 3.831556510925293,
+            "val_ppl": 46.13429090564484,
+            "gen_gap": 0.01319199800491333,
+            "trainable_params": 0,
+            "optimizer_mode": "none",
+            "time_ms": 1786.5658460068516,
+            "diff_ppl_vs_full_resumed": 33.837743129205606,
+            "speedup": 15.533611338060647,
+            "timing_breakdown": {
+              "checkpoint_prep_ms": 17.04927795799449,
+              "svd_ms": 1516.8174330028705,
+              "forecast_ms": 245.23389100795612,
+              "reconstruction_and_load_ms": 7.465244038030505,
+              "total_latency_ms": 1786.5658460068516
+            }
+          }
+        }
+      }
+    }
+  }
+]
