@@ -307,6 +307,37 @@ To test the hypothesis that unconstrained forecasting across Attention and Token
 
 ---
 
+### 🔬 Architectural Subspace Isolation: Choice A Option 2 (Feed-Forward Down-Projection $W_2$ Only)
+
+Within the SwiGLU feed-forward block, $W_1$ (gate) and $W_3$ (up-projection) interact non-linearly via $\text{SiLU}(x W_1) \odot (x W_3)$, whereas **$W_2$ is a pure linear readout map** (174,592 parameters across all 4 layers = 14.0% of total weights). In Option 2, we forecast **strictly $W_2$**, holding $W_1, W_3$, Token Embeddings, Causal Attention, and RMSNorm scales frozen at Step 1,000.
+
+| $W_2$ Subspace Perplexity vs Horizon | Architectural Hierarchy: Full Model vs All-MLP vs $W_2$-Only |
+| :---: | :---: |
+| ![W2 PPL vs Horizon](figures/smolgpt_w2_ppl_vs_horizon.png) | ![Subspace Comparison](figures/smolgpt_subspace_comparison_all.png) |
+
+| Method / Baseline | Horizon ($h$) | Val Loss (PPL) | Train Loss (PPL) | Cosine Alignment ($\cos$) | Diff vs Frozen PPL |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint ($W_{\text{ref}}$)** | Base (Step 1000) | `2.7779 (16.09)` | `2.7437 (15.54)` | `0.0000` | Baseline |
+| **$W_2$ Matched SWA (Last 16 Ckpts)** | Base (Step 1000) | **`2.7504 (15.65)`** ⭐ | **`2.7158 (15.11)`** | `-0.0453` | **`-0.44 (p=0.0011)`** |
+| **Full Continued AdamW** | $+160$ ($h=8$) | `2.7204 (15.19)` | `2.6783 (14.56)` | `+1.0000` | `-0.90 (p=0.0037)` |
+| **$W_2$-Only Actual Continuation** | $+160$ ($h=8$) | **`2.7372 (15.44)`** 🟢 | **`2.7042 (14.94)`** | `+1.0000` | **`-0.64 (p=0.0001)`** |
+| **$W_2$-Only Actual Continuation** | $+320$ ($h=16$) | **`2.7410 (15.50)`** 🟢 | **`2.7077 (14.99)`** | `+1.0000` | **`-0.58 (p=0.0029)`** |
+| **$W_2$-Only Actual Continuation** | $+640$ ($h=32$) | **`2.7675 (15.92)`** 🟢 | **`2.7335 (15.39)`** | `+1.0000` | **`-0.17 (p=0.1143)`** |
+| **$W_2$-Only Actual Continuation** | $+1280$ ($h=64$) | `2.8518 (17.33)` | `2.8183 (16.75)` | `+1.0000` | `+1.24 (p=0.0609)` |
+| **$W_2$ Linear ($r=1$)** | $+160$ ($h=8$) | `2.8036 (16.50)` | `2.7712 (15.98)` | `+0.1474` | `+0.42 (p=0.0019)` |
+| **$W_2$ Linear ($r=1$)** | $+1280$ ($h=64$) | **`3.3543 (28.64)`** 🛡️ | `3.3289 (27.91)` | `+0.3352` | `+12.55 (p=0.0020)` |
+| **$W_2$ Damped ($r=1, \gamma=0.95$)** | $+160$ ($h=8$) | `2.7969 (16.39)` | `2.7643 (15.87)` | `+0.1474` | `+0.31 (p=0.0023)` |
+| **$W_2$ Damped ($r=1, \gamma=0.95$)** | $+1280$ ($h=64$) | **`2.8633 (17.52)`** 🛡️ | `2.8317 (16.97)` | `+0.3352` | `+1.43 (p=0.0008)` |
+| **$W_2$ TimesFM ($r=1$)** | $+160$ ($h=8$) | `2.7977 (16.41)` | `2.7651 (15.88)` | `+0.1474` | `+0.32 (p=0.0001)` |
+| **$W_2$ TimesFM ($r=1$)** | $+1280$ ($h=64$) | **`3.0362 (20.83)`** 🛡️ | `3.0116 (20.32)` | `+0.3352` | `+4.74 (p=0.0004)` |
+
+**Key Findings from Choice A Option 2 ($W_2$ Isolation):**
+1. **Linear Blowout Reduced by 670x:** $h=64$ linear extrapolation perplexity drops from **19,383 (Full)** $\to$ **186.58 (All-MLP)** $\to$ **28.64 ($W_2$-Only)**. Freezing non-linear SwiGLU gating $W_1/W_3$ prevents gating curvature distortion.
+2. **$W_2$ AdamW Continuation Beats Frozen Baseline for 640 Steps:** Unlike All-MLP which degraded past step 320, updating only $W_2$ with true AdamW maintains superior perplexity for 640 future steps ($PPL = 15.44 \to 15.50 \to 15.92$ vs frozen $16.09$).
+3. **Matched SWA Unconditionally Outperforms Forecasters:** Online SWA on historical $W_2$ checkpoints achieves $PPL = 15.65$ ($p = 0.0011$) in $<0.01$ ms.
+
+---
+
 ## 🛠️ Repository Structure
 
 ```

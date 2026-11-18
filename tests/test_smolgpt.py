@@ -86,6 +86,30 @@ class TestSmolGPTComponents:
         assert torch.allclose(model.wte.weight, wte_before)
         assert torch.allclose(model.h[0].attn.c_q.weight, attn_before)
 
+    def test_smolgpt_mlp_w2_parameters_isolation(self, config):
+        from src.models_transformer import get_mlp_w2_params, set_mlp_w2_params
+        model = SmolGPT(config)
+        w2_orig = get_mlp_w2_params(model)
+        assert w2_orig.dim() == 1
+        expected_w2_numel = config.n_layer * int(2 * (4 * config.n_embed) / 3) * config.n_embed
+        assert w2_orig.numel() == expected_w2_numel
+
+        w1_before = model.h[0].mlp.w1.weight.clone()
+        w3_before = model.h[0].mlp.w3.weight.clone()
+        attn_before = model.h[0].attn.c_q.weight.clone()
+        wte_before = model.wte.weight.clone()
+
+        perturbed_w2 = w2_orig + 0.55
+        set_mlp_w2_params(model, perturbed_w2)
+
+        w2_check = get_mlp_w2_params(model)
+        assert torch.allclose(w2_check, perturbed_w2, atol=1e-6)
+        # Verify w1, w3, attention, embeddings are untouched
+        assert torch.allclose(model.h[0].mlp.w1.weight, w1_before)
+        assert torch.allclose(model.h[0].mlp.w3.weight, w3_before)
+        assert torch.allclose(model.h[0].attn.c_q.weight, attn_before)
+        assert torch.allclose(model.wte.weight, wte_before)
+
     def test_tinystories_batch_loader(self):
         # Create synthetic token sequence
         seq_len = 1000

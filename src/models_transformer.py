@@ -238,6 +238,23 @@ def set_mlp_params(model: nn.Module, flat_mlp: torch.Tensor) -> None:
             offset += numel
 
 
+def get_mlp_w2_params(model: nn.Module) -> torch.Tensor:
+    """Returns a 1D tensor concatenating only MLP down-projection parameters (w2 across all layers = 174,592 params)."""
+    return torch.cat([p.detach().flatten() for name, p in model.named_parameters() if "w2" in name])
+
+
+def set_mlp_w2_params(model: nn.Module, flat_w2: torch.Tensor) -> None:
+    """Loads a 1D tensor strictly into MLP w2 down-projection parameters, leaving everything else untouched."""
+    offset = 0
+    device = next(model.parameters()).device
+    flat_w2 = flat_w2.to(device)
+    for name, p in model.named_parameters():
+        if "w2" in name:
+            numel = p.numel()
+            p.data.copy_(flat_w2[offset:offset + numel].view_as(p))
+            offset += numel
+
+
 def evaluate_transformer_loss_and_ppl(
     model: nn.Module,
     val_batches: List[Tuple[torch.Tensor, torch.Tensor]]
