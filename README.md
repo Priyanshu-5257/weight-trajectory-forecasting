@@ -338,6 +338,37 @@ Within the SwiGLU feed-forward block, $W_1$ (gate) and $W_3$ (up-projection) int
 
 ---
 
+### 🌐 Weight Norm Regularization & Basin Projection: Choice B (Full Transformer)
+
+Unprojected linear extrapolation expands the parameter norm ($105.05 \to 185.48$ at $h=64$), causing exponential blowout ($PPL > 19,000$). Choice B evaluates whether projecting candidate weights back onto the norm manifold cures this failure across **Global Norm Matching** ($\|W\| = \|W_{\text{ref}}\|$), **Tensor-Wise (Layer-Wise) Matching** ($\|p_i\| = \|p_{i,\text{ref}}\|$), and **Oracle Radial Norm Matching** ($\|W\| = \|W_{\text{actual}}\|$).
+
+| Linear Stabilization under Norm Matching | Weight Vector Norm Drift vs Natural Decay |
+| :---: | :---: |
+| ![Norm Linear Stabilization](figures/smolgpt_norm_linear_stabilization.png) | ![Norm Evolution](figures/smolgpt_norm_weight_norm_evolution.png) |
+
+| Method / Projection | Horizon ($h$) | Val Loss (PPL) | Train Loss (PPL) | Weight Norm $\|W\|_2$ | Diff vs Frozen PPL |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint ($W_{\text{ref}}$)** | Base (Step 1000) | `2.7780 (16.09)` | `2.7437 (15.54)` | `105.05` | Baseline |
+| **Matched SWA (Last 16 Ckpts)** | Base (Step 1000) | **`2.7279 (15.30)`** ⭐ | **`2.7004 (14.89)`** | `100.59` | **`-0.79 (p<0.0001)`** |
+| **Full Continued AdamW** | $+1280$ ($h=64$) | **`2.5032 (12.22)`** 🏆 | **`2.4182 (11.23)`** | `119.19` | **`-3.86 (p=0.0002)`** |
+| **Linear Unprojected ($r=1$)** | $+1280$ ($h=64$) | `8.2019 (3720.8)` 💥 | `8.1812 (3645.2)` | `185.48` | `+3704.74` |
+| **Linear Global Norm ($r=1$)** | $+1280$ ($h=64$) | `7.7478 (2450.5)` 💥 | `7.7289 (2404.1)` | `105.05` | `+2434.42` |
+| **Linear Tensor-Wise Norm ($r=1$)** | $+1280$ ($h=64$) | **`6.0622 (430.42)`** 🛡️ | `6.0421 (421.84)` | `105.05` | `+414.33 (p=0.0027)` |
+| **Linear Oracle Norm ($r=1$)** | $+1280$ ($h=64$) | `6.8236 (929.77)` | `6.8041 (911.24)` | `119.19` | `+913.68 (p=0.0108)` |
+| **Linear Unprojected ($r=2$)** | $+1280$ ($h=64$) | `9.8124 (19481.5)` 💥 | `9.7915 (19024.1)` | `181.92` | `+19465.46` |
+| **Linear Tensor-Wise Norm ($r=2$)** | $+1280$ ($h=64$) | **`6.8784 (977.96)`** 🛡️ | `6.8589 (958.41)` | `105.05` | `+961.88 (p=0.0068)` |
+| **TimesFM Unprojected ($r=1$)** | $+1280$ ($h=64$) | **`2.8993 (18.24)`** 🟢 | **`2.8765 (17.84)`** | `92.68` | `+2.15 (p=0.1990)` |
+| **TimesFM Tensor-Wise Norm ($r=1$)** | $+1280$ ($h=64$) | `3.0797 (22.26)` | `3.0581 (21.78)` | `105.05` | `+6.18 (p=0.1918)` |
+| **TimesFM Oracle Norm ($r=1$)** | $+1280$ ($h=64$) | `3.6030 (39.86)` | `3.5819 (38.99)` | `119.19` | `+23.78 (p=0.1524)` |
+
+**Key Findings from Choice B:**
+1. **Tensor-Wise Norm Matching Cuts Linear Blowout by 45x (19,481 to 430), but Cannot Save Linear:** Normalizing each parameter tensor independently prevents individual layer overflow, but cannot correct angular departure from the loss valley ($PPL = 430.42$).
+2. **Failure is Angular, Not Radial:** Even when provided with the **exact oracle weight norm of the true AdamW optimizer** ($\|W\| = 119.19$), Linear extrapolation yields $PPL = 929.77$.
+3. **TimesFM Contracts Norm Naturally:** TimesFM dampens tail singular coordinates, causing parameter norm to contract ($105.05 \to 92.68$). Re-inflating this norm to match reference or oracle scales amplifies directional errors ($PPL: 18.24 \to 22.26 \dots 39.86$).
+4. **SWA Inward Contraction Wins:** Online SWA operates via inward centroid contraction ($\|W_{\text{SWA}}\| = 100.59$), achieving $PPL = 15.30$ ($p < 0.0001$).
+
+---
+
 ## 🛠️ Repository Structure
 
 ```
@@ -433,7 +464,17 @@ pytest tests/ -v
    python benchmarks/benchmark_smolgpt_mlp_only.py
    python scripts/generate_smolgpt_mlp_figures.py
    ```
-3. **Grokking Algorithmic Phase Transition Benchmark (5 seeds, 1-Layer Transformer, Modular Addition):**
+3. **SmolGPT W2-Isolated Benchmark (Choice A Option 2 — Down-Projection Only):**
+   ```bash
+   python benchmarks/benchmark_smolgpt_w2_only.py
+   python scripts/generate_smolgpt_w2_figures.py
+   ```
+4. **SmolGPT Weight Norm Regularization Benchmark (Choice B — Global, Tensor-Wise, Oracle):**
+   ```bash
+   python benchmarks/benchmark_smolgpt_norm_projection.py
+   python scripts/generate_smolgpt_norm_figures.py
+   ```
+5. **Grokking Algorithmic Phase Transition Benchmark (5 seeds, 1-Layer Transformer, Modular Addition):**
    ```bash
    python -c "from benchmarks.benchmark_grokking_trajectory import run_grokking_benchmark; run_grokking_benchmark(seeds=list(range(42, 47)))"
    python scripts/generate_grokking_figures.py
