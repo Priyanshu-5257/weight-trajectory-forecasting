@@ -26,7 +26,8 @@ from .data import (
 from .data_transformer import (
     load_tinystories_dataset,
     get_random_batch,
-    get_deterministic_val_batches
+    get_deterministic_val_batches,
+    get_deterministic_train_batches
 )
 from .low_rank import LowRankTrajectoryEngine
 

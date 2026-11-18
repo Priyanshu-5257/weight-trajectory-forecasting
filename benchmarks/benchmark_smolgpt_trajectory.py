@@ -1,8 +1,8 @@
 """
-Rigorous Weight Trajectory Forecasting Benchmark on SmolGPT Language Model.
-Evaluates Google TimesFM 2.0 500M and Low-Rank Extrapolation against
-Optimization Baselines (Continued AdamW, SWA, EMA, Weight Decay)
-on a 1.25M-parameter causal language model trained on TinyStories.
+Rigorous Weight Trajectory Forecasting Benchmark on SmolGPT Language Model (v2.0).
+Evaluates Google TimesFM 2.0 500M and Low-Rank Extrapolations across extended ranks
+(Rank 1, 2, 4, 8, 16, 24, 32) and reports BOTH Train and Validation Loss/Perplexity
+alongside generalization gaps, cosine similarity, and compute efficiency.
 """
 
 import os
@@ -32,7 +32,8 @@ from src.models_transformer import (
 from src.data_transformer import (
     load_tinystories_dataset,
     get_random_batch,
-    get_deterministic_val_batches
+    get_deterministic_val_batches,
+    get_deterministic_train_batches
 )
 from src.low_rank import LowRankTrajectoryEngine
 
@@ -99,7 +100,7 @@ def run_smolgpt_benchmark(
     cutoff_step=1000,
     context_checkpoints=32,
     checkpoint_interval=20,
-    ranks=[1, 2, 4, 8, 16],
+    ranks=[1, 2, 4, 8, 16, 24, 32],
     horizons=[8, 16, 32, 64],  # +160, +320, +640, +1280 steps
     batch_size=16,
     block_size=128,
@@ -109,10 +110,11 @@ def run_smolgpt_benchmark(
 ):
     device = torch.device(device_str)
     print("=" * 80)
-    print(" RIGOROUS SMOLGPT WEIGHT TRAJECTORY FORECASTING BENCHMARK")
+    print(" RIGOROUS SMOLGPT WEIGHT TRAJECTORY FORECASTING BENCHMARK (v2.0)")
     print(f" Cutoff Step: {cutoff_step} | Checkpoint Interval: {checkpoint_interval} steps")
     print(f" Context: {context_checkpoints} checkpoints (Steps {cutoff_step - context_checkpoints * checkpoint_interval} -> {cutoff_step})")
-    print(f" Seeds: {seeds} | Ranks: {ranks} | Horizons: {horizons} (Delta steps: {[h * checkpoint_interval for h in horizons]})")
+    print(f" Seeds: {seeds} | Extended Ranks: {ranks} | Horizons: {horizons}")
+    print(f" Metrics: Train & Val Loss, Perplexity, Generalization Gap, Cosine Alignment")
     print(f" Device: {device}")
     print("=" * 80, flush=True)
 
@@ -121,11 +123,25 @@ def run_smolgpt_benchmark(
     train_tokens, val_tokens = load_tinystories_dataset("data/tinystories/tinystories_sub.npz")
     print(f"Train tokens: {len(train_tokens):,}, Val tokens: {len(val_tokens):,}", flush=True)
 
-    # Pre-generate deterministic validation batches
+    # Pre-generate deterministic validation and training batches (40,960 tokens each)
     val_batches = get_deterministic_val_batches(
         val_tokens, num_batches=20, batch_size=batch_size, block_size=block_size, device=device
     )
-    print(f"Materialized {len(val_batches)} validation batches ({len(val_batches) * batch_size * block_size:,} tokens)", flush=True)
+    train_batches = get_deterministic_train_batches(
+        train_tokens, num_batches=20, batch_size=batch_size, block_size=block_size, device=device
+    )
+    print(f"Materialized 20 val batches ({len(val_batches) * batch_size * block_size:,} tokens) and 20 train batches ({len(train_batches) * batch_size * block_size:,} tokens)", flush=True)
+
+    def eval_both(m):
+        t_loss, t_ppl = evaluate_transformer_loss_and_ppl(m, train_batches)
+        v_loss, v_ppl = evaluate_transformer_loss_and_ppl(m, val_batches)
+        return {
+            "train_loss": t_loss,
+            "train_ppl": t_ppl,
+            "val_loss": v_loss,
+            "val_ppl": v_ppl,
+            "gen_gap": v_loss - t_loss
+        }
 
     # 2. Load TimesFM Model
     t_load_start = time.perf_counter()
@@ -166,8 +182,8 @@ def run_smolgpt_benchmark(
         future_checkpoints = {}   # h -> (flat_params, step_time)
 
         # Initial evaluation
-        initial_val_loss, initial_val_ppl = evaluate_transformer_loss_and_ppl(model, val_batches)
-        print(f"Initial (random init): Val Loss = {initial_val_loss:.4f}, PPL = {initial_val_ppl:.2f}", flush=True)
+        init_metrics = eval_both(model)
+        print(f"Initial: Train Loss = {init_metrics['train_loss']:.4f} (PPL: {init_metrics['train_ppl']:.1f}) | Val Loss = {init_metrics['val_loss']:.4f} (PPL: {init_metrics['val_ppl']:.1f})", flush=True)
 
         print(f"Phase 1: Training to Cutoff Step {cutoff_step}...", flush=True)
         t_train_start = time.perf_counter()
@@ -208,7 +224,7 @@ def run_smolgpt_benchmark(
 
             if step % 200 == 0:
                 v_loss, v_ppl = evaluate_transformer_loss_and_ppl(model, val_batches)
-                print(f"  Step {step:4d}/{total_steps} | Train Loss: {loss.item():.4f} | Val Loss: {v_loss:.4f} | PPL: {v_ppl:.2f}", flush=True)
+                print(f"  Step {step:4d}/{total_steps} | Batch Loss: {loss.item():.4f} | Val Loss: {v_loss:.4f} | PPL: {v_ppl:.2f}", flush=True)
 
         train_elapsed = time.perf_counter() - t_train_start
         print(f"Training completed in {train_elapsed:.2f} s ({total_steps / train_elapsed:.1f} steps/s)", flush=True)
@@ -222,12 +238,12 @@ def run_smolgpt_benchmark(
 
         # Evaluate Frozen Checkpoint
         set_flat_params(model, torch.from_numpy(w_ref).float())
-        v_loss_ref, v_ppl_ref = evaluate_transformer_loss_and_ppl(model, val_batches)
+        frozen_metrics = eval_both(model)
 
         # Evaluate Matched SWA (over last 16 checkpoints)
         w_swa = np.mean(weight_window[:, -16:], axis=1)
         set_flat_params(model, torch.from_numpy(w_swa).float())
-        v_loss_swa, v_ppl_swa = evaluate_transformer_loss_and_ppl(model, val_batches)
+        swa_metrics = eval_both(model)
 
         # Evaluate Matched EMA (beta=0.9)
         w_ema = weight_window[:, 0].copy()
@@ -235,23 +251,20 @@ def run_smolgpt_benchmark(
         for col in range(1, weight_window.shape[1]):
             w_ema = beta * w_ema + (1.0 - beta) * weight_window[:, col]
         set_flat_params(model, torch.from_numpy(w_ema).float())
-        v_loss_ema, v_ppl_ema = evaluate_transformer_loss_and_ppl(model, val_batches)
+        ema_metrics = eval_both(model)
 
         # SVD Rank Diagnostics
         rank_diagnostics = {}
-        for r in [1, 2, 4, 8, 16, 32]:
+        for r in ranks:
             diag = engine.get_rank_diagnostics(r)
             rank_diagnostics[f"rank_{r}"] = diag
 
         seed_data = {
             "seed": seed,
             "cutoff_step": cutoff_step,
-            "frozen_val_loss": v_loss_ref,
-            "frozen_val_ppl": v_ppl_ref,
-            "swa_val_loss": v_loss_swa,
-            "swa_val_ppl": v_ppl_swa,
-            "ema_val_loss": v_loss_ema,
-            "ema_val_ppl": v_ppl_ema,
+            "frozen": frozen_metrics,
+            "swa": swa_metrics,
+            "ema": ema_metrics,
             "rank_diagnostics": rank_diagnostics,
             "singular_values": [float(s) for s in engine.S],
             "explained_variance_ratio": [float(v) for v in engine.explained_variance_ratio],
@@ -270,11 +283,10 @@ def run_smolgpt_benchmark(
             w_actual = future_checkpoints[h]["w"]
             adamw_time = future_checkpoints[h]["cum_step_time"]
             set_flat_params(model, torch.from_numpy(w_actual).float())
-            act_loss, act_ppl = evaluate_transformer_loss_and_ppl(model, val_batches)
+            act_metrics = eval_both(model)
 
             h_data["methods"]["continued_adamw"] = {
-                "val_loss": act_loss,
-                "val_ppl": act_ppl,
+                **act_metrics,
                 "cos_sim": 1.0,
                 "rel_l2_error": 0.0,
                 "time_ms": adamw_time * 1000.0,
@@ -283,8 +295,7 @@ def run_smolgpt_benchmark(
 
             # Frozen baseline
             h_data["methods"]["frozen_checkpoint"] = {
-                "val_loss": v_loss_ref,
-                "val_ppl": v_ppl_ref,
+                **frozen_metrics,
                 "cos_sim": 0.0,
                 "rel_l2_error": float(np.linalg.norm(w_ref - w_actual) / (np.linalg.norm(w_actual - w_ref) + 1e-8)),
                 "time_ms": 0.0,
@@ -293,8 +304,7 @@ def run_smolgpt_benchmark(
 
             # SWA baseline
             h_data["methods"]["matched_swa"] = {
-                "val_loss": v_loss_swa,
-                "val_ppl": v_ppl_swa,
+                **swa_metrics,
                 "cos_sim": float(np.dot(w_swa - w_ref, w_actual - w_ref) / (np.linalg.norm(w_swa - w_ref) * np.linalg.norm(w_actual - w_ref) + 1e-8)),
                 "rel_l2_error": float(np.linalg.norm(w_swa - w_actual) / (np.linalg.norm(w_actual - w_ref) + 1e-8)),
                 "time_ms": 0.0,
@@ -303,8 +313,7 @@ def run_smolgpt_benchmark(
 
             # EMA baseline
             h_data["methods"]["matched_ema"] = {
-                "val_loss": v_loss_ema,
-                "val_ppl": v_ppl_ema,
+                **ema_metrics,
                 "cos_sim": float(np.dot(w_ema - w_ref, w_actual - w_ref) / (np.linalg.norm(w_ema - w_ref) * np.linalg.norm(w_actual - w_ref) + 1e-8)),
                 "rel_l2_error": float(np.linalg.norm(w_ema - w_actual) / (np.linalg.norm(w_actual - w_ref) + 1e-8)),
                 "time_ms": 0.0,
@@ -315,13 +324,12 @@ def run_smolgpt_benchmark(
             w_wd, _, t_wd = engine.forecast_weight_decay(h, eta=lr, weight_decay=weight_decay, interval=checkpoint_interval)
             w_wd_np = w_wd.numpy()
             set_flat_params(model, w_wd)
-            v_loss_wd, v_ppl_wd = evaluate_transformer_loss_and_ppl(model, val_batches)
+            wd_metrics = eval_both(model)
             norm_wd = np.linalg.norm(w_wd_np - w_ref)
             norm_act = np.linalg.norm(w_actual - w_ref)
             cos_wd = float(np.dot(w_wd_np - w_ref, w_actual - w_ref) / (norm_wd * norm_act + 1e-8)) if norm_wd > 1e-8 else 0.0
             h_data["methods"]["weight_decay_only"] = {
-                "val_loss": v_loss_wd,
-                "val_ppl": v_ppl_wd,
+                **wd_metrics,
                 "cos_sim": cos_wd,
                 "rel_l2_error": float(np.linalg.norm(w_wd_np - w_actual) / (norm_act + 1e-8)),
                 "time_ms": t_wd * 1000.0,
@@ -334,14 +342,13 @@ def run_smolgpt_benchmark(
                 w_lin, c_lin, t_lin = engine.forecast_linear(r, h)
                 w_lin_np = w_lin.numpy()
                 set_flat_params(model, w_lin)
-                v_loss_lin, v_ppl_lin = evaluate_transformer_loss_and_ppl(model, val_batches)
+                lin_metrics = eval_both(model)
                 norm_lin = np.linalg.norm(w_lin_np - w_ref)
                 cos_lin = float(np.dot(w_lin_np - w_ref, w_actual - w_ref) / (norm_lin * norm_act + 1e-8)) if norm_lin > 1e-8 else 0.0
                 layer_cos_lin = calc_layer_cos_sim(w_lin_np, w_actual, w_ref, layer_slices)
 
                 h_data["methods"][f"low_rank_linear_r{r}"] = {
-                    "val_loss": v_loss_lin,
-                    "val_ppl": v_ppl_lin,
+                    **lin_metrics,
                     "cos_sim": cos_lin,
                     "rel_l2_error": float(np.linalg.norm(w_lin_np - w_actual) / (norm_act + 1e-8)),
                     "layer_cos_sim": layer_cos_lin,
@@ -353,14 +360,13 @@ def run_smolgpt_benchmark(
                 w_damp, c_damp, t_damp = engine.forecast_damped(r, h, gamma=0.95)
                 w_damp_np = w_damp.numpy()
                 set_flat_params(model, w_damp)
-                v_loss_damp, v_ppl_damp = evaluate_transformer_loss_and_ppl(model, val_batches)
+                damp_metrics = eval_both(model)
                 norm_damp = np.linalg.norm(w_damp_np - w_ref)
                 cos_damp = float(np.dot(w_damp_np - w_ref, w_actual - w_ref) / (norm_damp * norm_act + 1e-8)) if norm_damp > 1e-8 else 0.0
                 layer_cos_damp = calc_layer_cos_sim(w_damp_np, w_actual, w_ref, layer_slices)
 
                 h_data["methods"][f"low_rank_damped_r{r}"] = {
-                    "val_loss": v_loss_damp,
-                    "val_ppl": v_ppl_damp,
+                    **damp_metrics,
                     "cos_sim": cos_damp,
                     "rel_l2_error": float(np.linalg.norm(w_damp_np - w_actual) / (norm_act + 1e-8)),
                     "layer_cos_sim": layer_cos_damp,
@@ -372,15 +378,14 @@ def run_smolgpt_benchmark(
                 w_tfm, c_tfm, t_tfm_f, t_tfm_r = engine.forecast_timesfm(r, h, tfm_model, device)
                 w_tfm_np = w_tfm.numpy()
                 set_flat_params(model, w_tfm)
-                v_loss_tfm, v_ppl_tfm = evaluate_transformer_loss_and_ppl(model, val_batches)
+                tfm_metrics = eval_both(model)
                 norm_tfm = np.linalg.norm(w_tfm_np - w_ref)
                 cos_tfm = float(np.dot(w_tfm_np - w_ref, w_actual - w_ref) / (norm_tfm * norm_act + 1e-8)) if norm_tfm > 1e-8 else 0.0
                 layer_cos_tfm = calc_layer_cos_sim(w_tfm_np, w_actual, w_ref, layer_slices)
                 total_t_tfm = t_tfm_f + t_tfm_r
 
                 h_data["methods"][f"low_rank_timesfm_r{r}"] = {
-                    "val_loss": v_loss_tfm,
-                    "val_ppl": v_ppl_tfm,
+                    **tfm_metrics,
                     "cos_sim": cos_tfm,
                     "rel_l2_error": float(np.linalg.norm(w_tfm_np - w_actual) / (norm_act + 1e-8)),
                     "layer_cos_sim": layer_cos_tfm,
@@ -388,23 +393,21 @@ def run_smolgpt_benchmark(
                     "speedup": float(adamw_time / max(total_t_tfm, 1e-6))
                 }
 
-                # 4. Shuffled TimesFM (control on rank 2 and 4)
-                if r in [2, 4]:
-                    w_shuf, c_shuf, t_shuf_f, t_shuf_r = engine.forecast_timesfm(r, h, tfm_model, device, shuffle=True, seed=seed)
-                    w_shuf_np = w_shuf.numpy()
-                    set_flat_params(model, w_shuf)
-                    v_loss_shuf, v_ppl_shuf = evaluate_transformer_loss_and_ppl(model, val_batches)
-                    norm_shuf = np.linalg.norm(w_shuf_np - w_ref)
-                    cos_shuf = float(np.dot(w_shuf_np - w_ref, w_actual - w_ref) / (norm_shuf * norm_act + 1e-8)) if norm_shuf > 1e-8 else 0.0
+                # 4. Shuffled TimesFM (control across all ranks)
+                w_shuf, c_shuf, t_shuf_f, t_shuf_r = engine.forecast_timesfm(r, h, tfm_model, device, shuffle=True, seed=seed)
+                w_shuf_np = w_shuf.numpy()
+                set_flat_params(model, w_shuf)
+                shuf_metrics = eval_both(model)
+                norm_shuf = np.linalg.norm(w_shuf_np - w_ref)
+                cos_shuf = float(np.dot(w_shuf_np - w_ref, w_actual - w_ref) / (norm_shuf * norm_act + 1e-8)) if norm_shuf > 1e-8 else 0.0
 
-                    h_data["methods"][f"shuffled_timesfm_r{r}"] = {
-                        "val_loss": v_loss_shuf,
-                        "val_ppl": v_ppl_shuf,
-                        "cos_sim": cos_shuf,
-                        "rel_l2_error": float(np.linalg.norm(w_shuf_np - w_actual) / (norm_act + 1e-8)),
-                        "time_ms": (t_shuf_f + t_shuf_r) * 1000.0,
-                        "speedup": float(adamw_time / max(t_shuf_f + t_shuf_r, 1e-6))
-                    }
+                h_data["methods"][f"shuffled_timesfm_r{r}"] = {
+                    **shuf_metrics,
+                    "cos_sim": cos_shuf,
+                    "rel_l2_error": float(np.linalg.norm(w_shuf_np - w_actual) / (norm_act + 1e-8)),
+                    "time_ms": (t_shuf_f + t_shuf_r) * 1000.0,
+                    "speedup": float(adamw_time / max(t_shuf_f + t_shuf_r, 1e-6))
+                }
 
             seed_data["horizons"][f"h_{h}"] = h_data
 
@@ -419,23 +422,32 @@ def run_smolgpt_benchmark(
         "ranks": ranks,
         "horizons": horizons,
         "frozen": {
-            "val_loss": calc_stats([s["frozen_val_loss"] for s in all_seed_results]),
-            "val_ppl": calc_stats([s["frozen_val_ppl"] for s in all_seed_results]),
+            "train_loss": calc_stats([s["frozen"]["train_loss"] for s in all_seed_results]),
+            "train_ppl": calc_stats([s["frozen"]["train_ppl"] for s in all_seed_results]),
+            "val_loss": calc_stats([s["frozen"]["val_loss"] for s in all_seed_results]),
+            "val_ppl": calc_stats([s["frozen"]["val_ppl"] for s in all_seed_results]),
+            "gen_gap": calc_stats([s["frozen"]["gen_gap"] for s in all_seed_results]),
         },
         "swa": {
-            "val_loss": calc_stats([s["swa_val_loss"] for s in all_seed_results]),
-            "val_ppl": calc_stats([s["swa_val_ppl"] for s in all_seed_results]),
+            "train_loss": calc_stats([s["swa"]["train_loss"] for s in all_seed_results]),
+            "train_ppl": calc_stats([s["swa"]["train_ppl"] for s in all_seed_results]),
+            "val_loss": calc_stats([s["swa"]["val_loss"] for s in all_seed_results]),
+            "val_ppl": calc_stats([s["swa"]["val_ppl"] for s in all_seed_results]),
+            "gen_gap": calc_stats([s["swa"]["gen_gap"] for s in all_seed_results]),
         },
         "ema": {
-            "val_loss": calc_stats([s["ema_val_loss"] for s in all_seed_results]),
-            "val_ppl": calc_stats([s["ema_val_ppl"] for s in all_seed_results]),
+            "train_loss": calc_stats([s["ema"]["train_loss"] for s in all_seed_results]),
+            "train_ppl": calc_stats([s["ema"]["train_ppl"] for s in all_seed_results]),
+            "val_loss": calc_stats([s["ema"]["val_loss"] for s in all_seed_results]),
+            "val_ppl": calc_stats([s["ema"]["val_ppl"] for s in all_seed_results]),
+            "gen_gap": calc_stats([s["ema"]["gen_gap"] for s in all_seed_results]),
         },
         "explained_variance_cum": {},
         "horizons": {}
     }
 
     # Explained variance aggregation
-    for r in [1, 2, 4, 8, 16, 32]:
+    for r in ranks:
         ev_vals = [s["rank_diagnostics"][f"rank_{r}"]["explained_variance"] for s in all_seed_results]
         summary["explained_variance_cum"][f"rank_{r}"] = calc_stats(ev_vals)
 
@@ -450,19 +462,26 @@ def run_smolgpt_benchmark(
         frozen_ppl_vals = [s["horizons"][h_key]["methods"]["frozen_checkpoint"]["val_ppl"] for s in all_seed_results]
 
         for method in all_method_keys:
-            loss_vals = [s["horizons"][h_key]["methods"][method]["val_loss"] for s in all_seed_results]
-            ppl_vals = [s["horizons"][h_key]["methods"][method]["val_ppl"] for s in all_seed_results]
+            t_loss_vals = [s["horizons"][h_key]["methods"][method]["train_loss"] for s in all_seed_results]
+            t_ppl_vals = [s["horizons"][h_key]["methods"][method]["train_ppl"] for s in all_seed_results]
+            v_loss_vals = [s["horizons"][h_key]["methods"][method]["val_loss"] for s in all_seed_results]
+            v_ppl_vals = [s["horizons"][h_key]["methods"][method]["val_ppl"] for s in all_seed_results]
+            gap_vals = [s["horizons"][h_key]["methods"][method]["gen_gap"] for s in all_seed_results]
+
             cos_vals = [s["horizons"][h_key]["methods"][method]["cos_sim"] for s in all_seed_results]
             l2_vals = [s["horizons"][h_key]["methods"][method]["rel_l2_error"] for s in all_seed_results]
             time_vals = [s["horizons"][h_key]["methods"][method]["time_ms"] for s in all_seed_results]
             speedup_vals = [s["horizons"][h_key]["methods"][method]["speedup"] for s in all_seed_results]
 
-            paired_vs_adamw = calc_paired_diff_stats(ppl_vals, adamw_ppl_vals)
-            paired_vs_frozen = calc_paired_diff_stats(ppl_vals, frozen_ppl_vals)
+            paired_vs_adamw = calc_paired_diff_stats(v_ppl_vals, adamw_ppl_vals)
+            paired_vs_frozen = calc_paired_diff_stats(v_ppl_vals, frozen_ppl_vals)
 
             method_summary = {
-                "val_loss": calc_stats(loss_vals),
-                "val_ppl": calc_stats(ppl_vals),
+                "train_loss": calc_stats(t_loss_vals),
+                "train_ppl": calc_stats(t_ppl_vals),
+                "val_loss": calc_stats(v_loss_vals),
+                "val_ppl": calc_stats(v_ppl_vals),
+                "gen_gap": calc_stats(gap_vals),
                 "cos_sim": calc_stats(cos_vals),
                 "rel_l2_error": calc_stats(l2_vals),
                 "time_ms": calc_stats(time_vals),
@@ -490,7 +509,7 @@ def run_smolgpt_benchmark(
     # Save CSV per-seed results
     with open("results/smolgpt_benchmark_per_seed.csv", "w", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["seed", "horizon", "equivalent_steps", "method", "val_loss", "val_ppl", "cos_sim", "rel_l2_error", "time_ms", "speedup"])
+        writer.writerow(["seed", "horizon", "equivalent_steps", "method", "train_loss", "train_ppl", "val_loss", "val_ppl", "gen_gap", "cos_sim", "rel_l2_error", "time_ms", "speedup"])
         for s in all_seed_results:
             seed_id = s["seed"]
             for h in horizons:
@@ -499,8 +518,11 @@ def run_smolgpt_benchmark(
                 for method, m_data in s["horizons"][h_key]["methods"].items():
                     writer.writerow([
                         seed_id, h, eq_steps, method,
+                        f"{m_data['train_loss']:.4f}",
+                        f"{m_data['train_ppl']:.2f}",
                         f"{m_data['val_loss']:.4f}",
                         f"{m_data['val_ppl']:.2f}",
+                        f"{m_data['gen_gap']:.4f}",
                         f"{m_data['cos_sim']:.4f}",
                         f"{m_data['rel_l2_error']:.4f}",
                         f"{m_data['time_ms']:.2f}",

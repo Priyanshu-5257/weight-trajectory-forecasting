@@ -237,39 +237,42 @@ To determine whether weight trajectory forecasting fails due to forecasting algo
 
 > **Detailed Report:** See [SMOLGPT_REPORT.md](docs/SMOLGPT_REPORT.md) for full architecture specifications, layer breakdown metrics, and statistical significance derivations.
 
-To test whether weight trajectory forecasting scales to real autoregressive Transformer language models, we evaluated low-rank extrapolations and **Google TimesFM 2.0 500M** on a 1.25M-parameter causal language model (`SmolGPT`: 4 layers, GQA, RoPE, SwiGLU, RMSNorm, tied embeddings; vocabulary 4,096) trained on the **TinyStories** corpus across 3 paired seeds with 95% confidence intervals.
+To test whether weight trajectory forecasting scales to real autoregressive Transformer language models, we evaluated low-rank extrapolations and **Google TimesFM 2.0 500M** on a 1.25M-parameter causal language model (`SmolGPT`: 4 layers, GQA, RoPE, SwiGLU, RMSNorm, tied embeddings; vocabulary 4,096) trained on the **TinyStories** corpus across 3 paired seeds with 95% confidence intervals. We evaluated extended truncation ranks ($r \in [1, 2, 4, 8, 16, 24, 32]$) and tested **both Train Loss and Validation Loss** across $40,960$ tokens each.
 
 ### Key Visualizations
 
-| SmolGPT Perplexity vs Horizon | Subspace Variance Concentration (P=1.25M) |
+| Train Loss vs. Validation Loss (40,960 tokens each) | Validation Perplexity vs Truncation Rank ($r=1..32$) |
 | :---: | :---: |
-| ![SmolGPT PPL](figures/smolgpt_ppl_vs_horizon.png) | ![SmolGPT Spectrum](figures/smolgpt_explained_variance_and_spectrum.png) |
+| ![Train vs Val Loss](figures/smolgpt_train_vs_val_loss.png) | ![PPL vs Rank](figures/smolgpt_performance_vs_rank.png) |
 
-| Directional Cosine Alignment & Layer Breakdown | Compute Overhead & Speedup Tradeoff |
+| SmolGPT Perplexity vs Horizon | Directional Cosine Alignment & Layer Breakdown |
 | :---: | :---: |
-| ![SmolGPT Alignment](figures/smolgpt_cosine_alignment_and_layer_breakdown.png) | ![SmolGPT Tradeoff](figures/smolgpt_compute_quality_tradeoff.png) |
+| ![SmolGPT PPL](figures/smolgpt_ppl_vs_horizon.png) | ![SmolGPT Alignment](figures/smolgpt_cosine_alignment_and_layer_breakdown.png) |
 
-### 3-Seed SmolGPT Benchmark Results (P=1,246,080, Cutoff Step 1000, 95% CI)
+### 3-Seed SmolGPT Benchmark Results: Train Loss, Val Loss, and Perplexity (P=1,246,080, Step 1000, 95% CI)
 
-| Method / Baseline | $+160$ Steps ($h=8$) | $+320$ Steps ($h=16$) | $+640$ Steps ($h=32$) | $+1280$ Steps ($h=64$) | Compute Latency |
-| :--- | :---: | :---: | :---: | :---: | :---: |
-| **Continued AdamW (Ground Truth)** | **`15.19 ± 0.12`** 🟢 | **`14.49 ± 0.08`** 🟢 | **`13.41 ± 0.03`** 🟢 | **`12.23 ± 0.23`** 🏆 | $1.8\text{ s} - 14.5\text{ s}$ |
-| **Frozen Checkpoint ($W_{\text{ref}}$)** | `16.09 ± 0.13` | `16.09 ± 0.13` | `16.09 ± 0.13` | `16.09 ± 0.13` | $0.0\text{ ms}$ |
-| **Matched SWA (Last 16 Ckpts)** | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | `15.30 ± 0.12` ⭐ | $< 0.01\text{ ms}$ |
-| **Matched EMA ($\beta=0.9$)** | `15.50 ± 0.14` | `15.50 ± 0.14` | `15.50 ± 0.14` | `15.50 ± 0.14` | $< 0.01\text{ ms}$ |
-| **Weight Decay Only** | `16.09 ± 0.13` | `16.10 ± 0.14` | `16.12 ± 0.15` | `16.16 ± 0.17` | $9.3\text{ ms}$ |
-| **Low-Rank Linear (Rank 2)** | `20.36 ± 0.39` | `33.53 ± 1.04` | `191.67 ± 27.28` | `19383.52 ± 20137` 💥 | $9.0\text{ ms}$ |
-| **Low-Rank Damped (Rank 2, $\gamma=0.95$)** | `19.05 ± 0.31` | `23.27 ± 0.55` | `31.78 ± 0.96` | `40.70 ± 1.31` | $8.2\text{ ms}$ |
-| **Low-Rank TimesFM (Rank 2)** | `21.31 ± 2.12` | `27.43 ± 9.93` | `19.55 ± 9.43` | `19.22 ± 2.97` | $46.5\text{ ms}$ |
-| **Shuffled TimesFM (Rank 2 Control)** | `16.85 ± 0.90` | `17.00 ± 1.59` | `16.79 ± 0.20` | `17.08 ± 1.57` | $47.2\text{ ms}$ |
-| **Low-Rank TimesFM (Rank 4)** | `25.51 ± 3.39` | `23.44 ± 8.47` | `21.04 ± 11.56` | `19.39 ± 2.45` | $62.8\text{ ms}$ |
+| Method / Baseline | Horizon ($h$) | Train Loss (PPL) | Val Loss (PPL) | Gen Gap ($\Delta$) | Cosine to Continuation | Wall-Clock Latency |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Frozen Checkpoint ($W_{\text{ref}}$)** | Base (Step 1000) | `2.7447 (15.56)` | `2.7783 (16.09)` | `+0.0336` | `0.0000` | $0.0\text{ ms}$ |
+| **Matched SWA (Last 16 Ckpts)** | Base (Step 1000) | **`2.7004 (14.89)`** ⭐ | **`2.7280 (15.30)`** ⭐ | **`+0.0276`** | `-0.4311` | **$< 0.01\text{ ms}$** |
+| **Matched EMA ($\beta=0.9$)** | Base (Step 1000) | `2.7147 (15.10)` | `2.7412 (15.51)` | `+0.0265` | `-0.4502` | $< 0.01\text{ ms}$ |
+| **Continued AdamW** | $+160$ ($h=8$) | `2.6792 (14.57)` | `2.7205 (15.19)` | `+0.0413` | `1.0000` | $1.8\text{ s}$ |
+| **Continued AdamW** | $+640$ ($h=32$) | `2.5425 (12.71)` | `2.5961 (13.41)` | `+0.0536` | `1.0000` | $7.2\text{ s}$ |
+| **Continued AdamW** | $+1280$ ($h=64$) | **`2.4179 (11.22)`** 🏆 | **`2.5026 (12.21)`** 🏆 | `+0.0847` | `1.0000` | $14.5\text{ s}$ |
+| **TimesFM-2.0 ($r=1$)** | $+160$ ($h=8$) | `2.7966 (16.39)` | `2.8341 (17.02)` | `+0.0375` | `0.4395` | $35.1\text{ ms}$ |
+| **TimesFM-2.0 ($r=1$)** | $+1280$ ($h=64$) | `2.8650 (17.62)` | `2.8872 (18.01)` | `+0.0223` | `-0.3581` | $35.1\text{ ms}$ |
+| **TimesFM-2.0 ($r=2$)** | $+160$ ($h=8$) | `3.0178 (20.46)` | `3.0508 (21.15)` | `+0.0330` | `0.4016` | $46.5\text{ ms}$ |
+| **TimesFM-2.0 ($r=2$)** | $+1280$ ($h=64$) | `2.9257 (18.67)` | `2.9469 (19.07)` | `+0.0212` | `-0.1439` | $46.8\text{ ms}$ |
+| **TimesFM-2.0 ($r=32$, Full)**| $+1280$ ($h=64$) | `2.9424 (18.99)` | `2.9634 (19.39)` | `+0.0210` | `-0.1550` | $379.5\text{ ms}$ |
+| **Shuffled TimesFM ($r=2$)** | $+1280$ ($h=64$) | `2.8173 (16.74)` | `2.8373 (17.08)` | `+0.0200` | `-0.3974` | $48.2\text{ ms}$ |
+| **Low-Rank Damped ($r=2$)** | $+1280$ ($h=64$) | `3.6824 (39.75)` | `3.7181 (41.20)` | `+0.0357` | `0.4533` | $7.7\text{ ms}$ |
+| **Low-Rank Linear ($r=2$)** | $+1280$ ($h=64$) | `9.8625 (19843)` 💥 | `9.8797 (20300)` 💥 | `+0.0172` | `0.4533` | $8.8\text{ ms}$ |
 
 ### Core Takeaways on Transformer Language Models:
-1. **AdamW Checkpoint Concentration is Overwhelmingly Low-Rank:** Rank 1 captures **$92.61\%$** and Rank 2 captures **$97.10\%$** of total displacement variance ($D \in \mathbb{R}^{1,246,080 \times 32}$).
-2. **Linear Extrapolation Suffers Manifold Blowout:** In autoregressive models, cross-entropy is extremely sensitive to logit scale. Extrapolating along linear tangents punches out of the basin, causing catastrophic divergence ($PPL \to 19,383.52$).
-3. **TimesFM Cannot Beat the Frozen Checkpoint:** TimesFM's forecasts underperform the frozen checkpoint ($PPL = 19.22$ vs $16.09$, paired $p = 0.0430$) and are far inferior to continued AdamW ($PPL = 12.23$, $p = 0.0107$).
-4. **Matched SWA Strictly Dominates Every Forecaster:** Computing the centroid of the last 16 checkpoints reduces perplexity from $16.09$ to **$15.30$** ($p < 0.0001$) in $<0.01\text{ ms}$, outperforming TimesFM ($19.22$) without any forward forecasting risk.
-5. **Decisive Shuffled Control:** Scrambling the temporal order yields *better* perplexity ($16.79 – 17.08$) than ordered TimesFM ($19.22 – 27.43$), confirming that TimesFM does not model the true non-convex trajectory dynamics of neural language models.
+1. **Rank 1 is the Optimal Forecast; Higher Ranks Degrade Performance:** Across all horizons, **Rank 1 yields the best TimesFM performance** ($PPL = 17.02$ at $h=8$). As truncation rank increases to $r=2, 4, 8, 16, 24, 32$, validation loss monotonically increases ($PPL \to 23.40$ at $h=8$). Tail singular values ($\sigma_3 \dots \sigma_{32} < 0.48$) reflect stochastic mini-batch noise, and extrapolating them injects destructive jitter into weights.
+2. **Train and Validation Loss Degrade Identically (Zero Overfitting):** The generalization gap ($\text{Val Loss} - \text{Train Loss}$) remains virtually constant between the frozen baseline ($\Delta = +0.0336$) and TimesFM ($\Delta = +0.0210 \dots +0.0330$). The degradation is an **optimization / curvature failure**, not an overfitting failure: forecasted weights land on an elevated loss contour across all tokens.
+3. **Linear Extrapolation Diverges on Both Splits:** Extrapolating along linear tangents causes equal catastrophic failure on train and validation sets ($PPL > 19,000$).
+4. **Matched SWA Strictly Dominates Every Forecaster:** Computing the centroid of the last 16 checkpoints reduces both Train Loss ($2.74 \to 2.70$) and Val Loss ($2.78 \to 2.73$), achieving **$PPL = 15.30$ ($p < 0.0001$)** in $<0.01\text{ ms}$ with zero forecasting risk.
 
 ---
 
